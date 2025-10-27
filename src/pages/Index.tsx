@@ -4,8 +4,8 @@ import { RightSidebar } from "@/components/RightSidebar";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background flex justify-center">
-      <div className="flex w-full max-w-7xl">
+    <div className="min-h-screen bg-background">
+      <div className="flex mx-auto max-w-[1280px]">
         <Sidebar />
         <Feed />
         <RightSidebar />

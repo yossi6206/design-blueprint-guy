@@ -4,7 +4,7 @@ import { RightSidebar } from "@/components/RightSidebar";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background justify-center">
       <Sidebar />
       <Feed />
       <RightSidebar />

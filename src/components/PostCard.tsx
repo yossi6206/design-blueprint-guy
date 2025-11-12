@@ -1,98 +1,242 @@
-import { MessageCircle, Repeat2, Heart, BarChart3, Share, MoreHorizontal } from "lucide-react";
+import { MessageCircle, Repeat2, Heart, BarChart3, Share } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Comments } from "./Comments";
 
 interface PostCardProps {
+  postId: string;
   author: string;
   handle: string;
   time: string;
   content: string;
   image?: string;
   verified?: boolean;
-  comments?: number;
-  retweets?: number;
-  likes?: number;
-  views?: number;
+  userId: string;
+  currentUserId?: string;
 }
 
 export const PostCard = ({
+  postId,
   author,
   handle,
   time,
   content,
   image,
   verified = false,
-  comments = 0,
-  retweets = 0,
-  likes = 0,
-  views = 0,
+  userId,
+  currentUserId,
 }: PostCardProps) => {
+  const { toast } = useToast();
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [commentsCount, setCommentsCount] = useState(0);
+  const [showComments, setShowComments] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  useEffect(() => {
+    fetchLikesAndComments();
+    if (currentUserId && userId !== currentUserId) {
+      checkIfFollowing();
+    }
+  }, [postId, currentUserId]);
+
+  const fetchLikesAndComments = async () => {
+    const { count: likesCount } = await supabase
+      .from("likes")
+      .select("*", { count: "exact", head: true })
+      .eq("post_id", postId);
+    
+    setLikesCount(likesCount || 0);
+
+    if (currentUserId) {
+      const { data: userLike } = await supabase
+        .from("likes")
+        .select("id")
+        .eq("post_id", postId)
+        .eq("user_id", currentUserId)
+        .maybeSingle();
+      
+      setIsLiked(!!userLike);
+    }
+
+    const { count: commentsCount } = await supabase
+      .from("comments")
+      .select("*", { count: "exact", head: true })
+      .eq("post_id", postId);
+    
+    setCommentsCount(commentsCount || 0);
+  };
+
+  const checkIfFollowing = async () => {
+    if (!currentUserId) return;
+    
+    const { data } = await supabase
+      .from("follows")
+      .select("id")
+      .eq("follower_id", currentUserId)
+      .eq("following_id", userId)
+      .maybeSingle();
+    
+    setIsFollowing(!!data);
+  };
+
+  const handleLike = async () => {
+    if (!currentUserId) {
+      toast({
+        title: "התחבר כדי לתת לייק",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isLiked) {
+      const { error } = await supabase
+        .from("likes")
+        .delete()
+        .eq("post_id", postId)
+        .eq("user_id", currentUserId);
+
+      if (!error) {
+        setIsLiked(false);
+        setLikesCount((prev) => prev - 1);
+      }
+    } else {
+      const { error } = await supabase
+        .from("likes")
+        .insert({ post_id: postId, user_id: currentUserId });
+
+      if (!error) {
+        setIsLiked(true);
+        setLikesCount((prev) => prev + 1);
+      }
+    }
+  };
+
+  const handleFollow = async () => {
+    if (!currentUserId) {
+      toast({
+        title: "התחבר כדי לעקוב",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isFollowing) {
+      const { error } = await supabase
+        .from("follows")
+        .delete()
+        .eq("follower_id", currentUserId)
+        .eq("following_id", userId);
+
+      if (!error) {
+        setIsFollowing(false);
+        toast({ title: "הפסקת לעקוב" });
+      }
+    } else {
+      const { error } = await supabase
+        .from("follows")
+        .insert({ follower_id: currentUserId, following_id: userId });
+
+      if (!error) {
+        setIsFollowing(true);
+        toast({ title: "עוקב!" });
+      }
+    }
+  };
+
+  const handleShare = () => {
+    const url = window.location.origin;
+    navigator.clipboard.writeText(url);
+    toast({
+      title: "הקישור הועתק!",
+    });
+  };
+
   return (
-    <div className="border-b border-border px-4 py-3 hover:bg-hover-bg transition-colors cursor-pointer">
+    <div className="border-b border-border p-4 hover:bg-accent/5 transition-colors">
       <div className="flex gap-3">
-        {/* Avatar */}
-        <div className="w-10 h-10 rounded-full bg-muted flex-shrink-0" />
-
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          {/* Header */}
-          <div className="flex items-center gap-1 mb-1">
-            <span className="font-bold hover:underline">{author}</span>
-            {verified && (
-              <svg viewBox="0 0 24 24" className="w-5 h-5 text-primary fill-current">
-                <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z" />
-              </svg>
+        <Avatar>
+          <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${handle}`} />
+          <AvatarFallback>{author[0]}</AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <div className="flex items-center gap-1 flex-wrap">
+            <span className="font-bold hover:underline cursor-pointer">{author}</span>
+            {verified && <Badge variant="secondary" className="h-4 w-4 p-0">✓</Badge>}
+            <span className="text-muted-foreground">@{handle}</span>
+            <span className="text-muted-foreground">·</span>
+            <span className="text-muted-foreground">{time}</span>
+            {currentUserId && userId !== currentUserId && (
+              <>
+                <span className="text-muted-foreground">·</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleFollow}
+                  className="h-auto p-0 text-primary hover:text-primary/80"
+                >
+                  {isFollowing ? "עוקב" : "עקוב"}
+                </Button>
+              </>
             )}
-            <span className="text-muted-foreground">@{handle} · {time}</span>
-            <div className="ml-auto">
-              <MoreHorizontal className="w-5 h-5 text-muted-foreground hover:text-primary" />
-            </div>
           </div>
-
-          {/* Content */}
-          <p className="mb-3 whitespace-pre-wrap">{content}</p>
-
-          {/* Image */}
+          <p className="mt-1 whitespace-pre-wrap break-words">{content}</p>
           {image && (
-            <div className="mb-3 rounded-2xl overflow-hidden border border-border">
-              <img src={image} alt="" className="w-full" />
-            </div>
+            <img
+              src={image}
+              alt="Post content"
+              className="mt-3 rounded-2xl max-w-full border border-border"
+            />
           )}
-
-          {/* Actions */}
-          <div className="flex items-center justify-between max-w-md text-muted-foreground">
-            <button className="flex items-center gap-2 hover:text-primary group">
-              <div className="rounded-full p-2 group-hover:bg-primary/10 transition-colors">
-                <MessageCircle className="w-4 h-4" />
-              </div>
-              {comments > 0 && <span className="text-sm">{comments}</span>}
-            </button>
-
-            <button className="flex items-center gap-2 hover:text-green-500 group">
-              <div className="rounded-full p-2 group-hover:bg-green-500/10 transition-colors">
-                <Repeat2 className="w-4 h-4" />
-              </div>
-              {retweets > 0 && <span className="text-sm">{retweets}</span>}
-            </button>
-
-            <button className="flex items-center gap-2 hover:text-pink-600 group">
-              <div className="rounded-full p-2 group-hover:bg-pink-600/10 transition-colors">
-                <Heart className="w-4 h-4" />
-              </div>
-              {likes > 0 && <span className="text-sm">{likes.toLocaleString()}</span>}
-            </button>
-
-            <button className="flex items-center gap-2 hover:text-primary group">
-              <div className="rounded-full p-2 group-hover:bg-primary/10 transition-colors">
-                <BarChart3 className="w-4 h-4" />
-              </div>
-              {views > 0 && <span className="text-sm">{views.toLocaleString()}</span>}
-            </button>
-
-            <button className="hover:text-primary group">
-              <div className="rounded-full p-2 group-hover:bg-primary/10 transition-colors">
-                <Share className="w-4 h-4" />
-              </div>
-            </button>
+          <div className="flex justify-between mt-3 max-w-md text-muted-foreground">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hover:text-blue-500 hover:bg-blue-500/10"
+              onClick={() => setShowComments(!showComments)}
+            >
+              <MessageCircle className="w-5 h-5" />
+              <span className="mr-2">{commentsCount}</span>
+            </Button>
+            <Button variant="ghost" size="sm" className="hover:text-green-500 hover:bg-green-500/10">
+              <Repeat2 className="w-5 h-5" />
+              <span className="mr-2">0</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`hover:text-pink-500 hover:bg-pink-500/10 ${
+                isLiked ? "text-pink-500" : ""
+              }`}
+              onClick={handleLike}
+            >
+              <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
+              <span className="mr-2">{likesCount}</span>
+            </Button>
+            <Button variant="ghost" size="sm" className="hover:text-blue-500 hover:bg-blue-500/10">
+              <BarChart3 className="w-5 h-5" />
+              <span className="mr-2">0</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hover:text-blue-500 hover:bg-blue-500/10"
+              onClick={handleShare}
+            >
+              <Share className="w-5 h-5" />
+            </Button>
           </div>
+          {showComments && (
+            <Comments
+              postId={postId}
+              currentUserId={currentUserId}
+              onCommentAdded={() => setCommentsCount((prev) => prev + 1)}
+            />
+          )}
         </div>
       </div>
     </div>

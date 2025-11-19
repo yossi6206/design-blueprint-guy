@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import Search from "./pages/Search";
 import Bookmarks from "./pages/Bookmarks";
 import Hashtag from "./pages/Hashtag";
+import Test from "./Test";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/test" element={<Test />} />
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile/:handle" element={<Profile />} />

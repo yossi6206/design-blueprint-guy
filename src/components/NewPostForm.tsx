@@ -63,10 +63,11 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
         value={content}
         onChange={(e) => setContent(e.target.value)}
         className="min-h-[100px] resize-none border-0 focus-visible:ring-0 text-lg"
+        maxLength={280}
       />
       
       {showImageInput && (
-        <div className="mt-2 flex gap-2">
+        <div className="mt-2 flex gap-2 animate-fade-in">
           <Input
             type="url"
             placeholder="הכנס קישור לתמונה"
@@ -89,15 +90,20 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
       )}
 
       <div className="flex justify-between items-center mt-2">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={() => setShowImageInput(!showImageInput)}
-        >
-          <Image className="h-5 w-5 text-primary" />
-        </Button>
-        <Button type="submit" disabled={loading || !content.trim()}>
+        <div className="flex gap-2 items-center">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowImageInput(!showImageInput)}
+          >
+            <Image className="h-5 w-5 text-primary" />
+          </Button>
+          <span className={`text-sm ${content.length > 260 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+            {content.length}/280
+          </span>
+        </div>
+        <Button type="submit" disabled={loading || !content.trim() || content.length > 280}>
           {loading ? "שולח..." : "פרסם"}
         </Button>
       </div>

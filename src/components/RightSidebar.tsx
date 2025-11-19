@@ -123,22 +123,22 @@ export const RightSidebar = () => {
     <div className="w-[350px] h-screen sticky top-0 px-6 py-2">
       <div className="mb-4">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search"
-            className="w-full pl-14 pr-4 py-3 bg-muted rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="חיפוש"
+            className="w-full pr-14 pl-4 py-3 bg-muted rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
       </div>
 
       <div className="bg-muted rounded-2xl p-4 mb-4">
-        <h2 className="text-xl font-bold mb-2">Subscribe to Premium</h2>
+        <h2 className="text-xl font-bold mb-2">הירשם לפרימיום</h2>
         <p className="text-sm mb-3">
-          Subscribe to unlock new features and if eligible, receive a share of ads revenue.
+          הירשם כדי לפתוח תכונות חדשות ואם כשיר, לקבל חלק מהכנסות הפרסום.
         </p>
         <Button className="rounded-full font-bold bg-primary hover:bg-hover-primary">
-          Subscribe
+          הירשם
         </Button>
       </div>
 
@@ -175,7 +175,7 @@ export const RightSidebar = () => {
 
       <div className="bg-muted rounded-2xl p-4 mb-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Today's News</h2>
+          <h2 className="text-xl font-bold">חדשות היום</h2>
           <button>
             <MoreHorizontal className="w-5 h-5" />
           </button>
@@ -198,7 +198,7 @@ export const RightSidebar = () => {
       </div>
 
       <div className="bg-muted rounded-2xl p-4">
-        <h2 className="text-xl font-bold mb-4">What's happening</h2>
+        <h2 className="text-xl font-bold mb-4">מה קורה</h2>
         <div className="space-y-4">
           <div className="text-right mb-2">
             <span className="text-lg font-bold">תרמיל קליין</span>
@@ -219,7 +219,7 @@ export const RightSidebar = () => {
               </div>
             </div>
           ))}
-          <button className="text-primary hover:underline text-sm">Show more</button>
+          <button className="text-primary hover:underline text-sm">הצג עוד</button>
         </div>
       </div>
     </div>

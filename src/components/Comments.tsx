@@ -145,16 +145,22 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
             placeholder="כתוב תגובה..."
             className="min-h-[80px] resize-none"
             disabled={loading}
+            maxLength={280}
           />
-          <Button type="submit" disabled={loading || !newComment.trim()}>
-            {loading ? "שולח..." : "הגב"}
-          </Button>
+          <div className="flex justify-between items-center">
+            <span className={`text-sm ${newComment.length > 260 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+              {newComment.length}/280
+            </span>
+            <Button type="submit" disabled={loading || !newComment.trim() || newComment.length > 280}>
+              {loading ? "שולח..." : "הגב"}
+            </Button>
+          </div>
         </form>
       )}
 
       <div className="space-y-3">
         {comments.map((comment) => (
-          <div key={comment.id} className="flex gap-2 p-3 rounded-lg bg-accent/20">
+          <div key={comment.id} className="flex gap-2 p-3 rounded-lg bg-accent/20 animate-fade-in">
             <Avatar className="w-8 h-8">
               <AvatarImage
                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.author_handle}`}

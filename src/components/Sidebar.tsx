@@ -1,26 +1,56 @@
-import { Home, Search, Bell, Mail, Hash, Bookmark, Users, CreditCard, User, MoreHorizontal } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Home, Bell, MessageSquare, User, LogOut, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-const navItems = [
-  { icon: Home, label: "בית", active: true },
-  { icon: Search, label: "חקור" },
-  { icon: Bell, label: "התראות" },
-  { icon: Mail, label: "הודעות" },
-  { icon: Hash, label: "Grok" },
-  { icon: Bookmark, label: "רשימות" },
-  { icon: Bookmark, label: "סימניות" },
-  { icon: Users, label: "קהילות" },
-  { icon: CreditCard, label: "פרימיום" },
-  { icon: User, label: "פרופיל" },
-  { icon: MoreHorizontal, label: "עוד" },
-];
+interface Profile {
+  user_name: string;
+  user_handle: string;
+  avatar_url: string | null;
+}
 
 export const Sidebar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (profile) {
+      setUserProfile(profile);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  };
+
+  const navItems = [
+    { icon: Home, label: "בית", path: "/" },
+    { icon: Bell, label: "התראות", path: "/notifications" },
+    { icon: MessageSquare, label: "הודעות", path: "/messages" },
+    { icon: User, label: "פרופיל", path: userProfile ? `/profile/${userProfile.user_handle}` : "/profile" },
+  ];
   return (
-    <div className="w-[275px] h-screen sticky top-0 flex flex-col px-3 py-2 border-r border-border">
+    <div className="w-[275px] h-screen sticky top-0 flex flex-col px-3 py-2 border-l border-border hidden md:flex">
       <div className="flex-1">
         {/* Logo */}
-        <div className="mb-2 px-3 py-2">
+        <div className="mb-2 px-3 py-2 cursor-pointer" onClick={() => navigate("/")}>
           <svg viewBox="0 0 24 24" className="w-8 h-8" fill="currentColor">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
           </svg>
@@ -31,35 +61,44 @@ export const Sidebar = () => {
           {navItems.map((item) => (
             <button
               key={item.label}
+              onClick={() => navigate(item.path)}
               className={`w-full flex items-center gap-5 px-3 py-3 rounded-full transition-colors ${
-                item.active
+                location.pathname === item.path
                   ? "font-bold"
-                  : "hover:bg-hover-bg"
+                  : "hover:bg-accent"
               }`}
             >
               <item.icon className="w-6 h-6" />
               <span className="text-xl">{item.label}</span>
             </button>
           ))}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-5 px-3 py-3 rounded-full transition-colors hover:bg-accent text-destructive"
+          >
+            <LogOut className="w-6 h-6" />
+            <span className="text-xl">יציאה</span>
+          </button>
         </nav>
-
-        {/* Post Button */}
-        <Button className="w-[90%] mt-4 py-6 text-lg font-bold rounded-full bg-primary hover:bg-hover-primary">
-          פרסם
-        </Button>
       </div>
 
       {/* Profile Button */}
-      <button className="flex items-center gap-3 p-3 rounded-full hover:bg-hover-bg transition-colors w-full mt-auto">
-        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-          <User className="w-5 h-5" />
-        </div>
-        <div className="flex-1 text-left">
-          <div className="font-bold text-sm">Yossi Cohen</div>
-          <div className="text-muted-foreground text-sm">@Yossi6206Cohen</div>
-        </div>
-        <MoreHorizontal className="w-5 h-5" />
-      </button>
+      {userProfile && (
+        <button
+          onClick={() => navigate(`/profile/${userProfile.user_handle}`)}
+          className="flex items-center gap-3 p-3 rounded-full hover:bg-accent transition-colors w-full mt-auto"
+        >
+          <Avatar className="w-10 h-10">
+            <AvatarImage src={userProfile.avatar_url || ""} />
+            <AvatarFallback>{userProfile.user_name[0]}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 text-right">
+            <div className="font-bold text-sm">{userProfile.user_name}</div>
+            <div className="text-muted-foreground text-sm">@{userProfile.user_handle}</div>
+          </div>
+          <MoreHorizontal className="w-5 h-5" />
+        </button>
+      )}
     </div>
   );
 };

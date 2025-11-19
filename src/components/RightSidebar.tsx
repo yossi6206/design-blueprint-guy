@@ -1,43 +1,10 @@
-import { Search, MoreHorizontal } from "lucide-react";
+import { Search, MoreHorizontal, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-const newsItems = [
-  {
-    category: "Politics · Trending",
-    title: "Mossad",
-    posts: "24.9K posts",
-  },
-  {
-    category: "Trending in Israel",
-    title: "של נגיד",
-    posts: "",
-  },
-];
-
-const trending = [
-  {
-    title: "Mamdani Rallies 10,000 in Queens with Sanders, AOC, and Hochul Endorsements",
-    category: "News",
-    time: "11 hours ago",
-    posts: "176.2K posts",
-  },
-  {
-    title: "Austin Reaves Drops Career-High 51 Points in Lakers' Victory Over Kings",
-    category: "Sports",
-    time: "8 hours ago",
-    posts: "75.6K posts",
-  },
-  {
-    title: "Lando Norris Wins Mexico GP, Leads F1 Drivers' Championship by One Point Over...",
-    category: "Sports",
-    time: "2 days ago",
-    posts: "274.3K posts",
-  },
-];
+import { Link } from "react-router-dom";
 
 interface SuggestedUser {
   id: string;
@@ -46,11 +13,17 @@ interface SuggestedUser {
   user_id: string;
 }
 
+interface TrendingHashtag {
+  tag: string;
+  count: number;
+}
+
 export const RightSidebar = () => {
   const { toast } = useToast();
   const [currentUserId, setCurrentUserId] = useState<string>();
   const [suggestedUsers, setSuggestedUsers] = useState<SuggestedUser[]>([]);
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
+  const [trendingHashtags, setTrendingHashtags] = useState<TrendingHashtag[]>([]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -60,6 +33,7 @@ export const RightSidebar = () => {
         fetchFollowing(user.id);
       }
     });
+    fetchTrendingHashtags();
   }, []);
 
   const fetchFollowing = async (userId: string) => {
@@ -70,6 +44,36 @@ export const RightSidebar = () => {
 
     if (data) {
       setFollowingIds(new Set(data.map((f) => f.following_id)));
+    }
+  };
+
+  const fetchTrendingHashtags = async () => {
+    // Get all hashtags with their post counts
+    const { data: hashtagsData } = await supabase
+      .from("post_hashtags")
+      .select(`
+        hashtag_id,
+        hashtags (tag)
+      `);
+
+    if (hashtagsData) {
+      // Count occurrences of each hashtag
+      const hashtagCounts = new Map<string, number>();
+      
+      hashtagsData.forEach((item: any) => {
+        const tag = item.hashtags?.tag;
+        if (tag) {
+          hashtagCounts.set(tag, (hashtagCounts.get(tag) || 0) + 1);
+        }
+      });
+
+      // Convert to array and sort by count
+      const trending = Array.from(hashtagCounts.entries())
+        .map(([tag, count]) => ({ tag, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+
+      setTrendingHashtags(trending);
     }
   };
 
@@ -173,55 +177,35 @@ export const RightSidebar = () => {
         </div>
       )}
 
-      <div className="bg-muted rounded-2xl p-4 mb-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">חדשות היום</h2>
-          <button>
-            <MoreHorizontal className="w-5 h-5" />
-          </button>
-        </div>
-        <div className="space-y-4">
-          {trending.map((item, i) => (
-            <div key={i} className="hover:bg-hover-bg -mx-4 px-4 py-2 rounded-lg transition-colors cursor-pointer">
-              <div className="flex gap-2 mb-1">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>{item.category}</span>
-                  <span>·</span>
-                  <span>{item.time}</span>
+      {trendingHashtags.length > 0 && (
+        <div className="bg-muted rounded-2xl p-4 mb-4">
+          <h2 className="text-xl font-bold mb-4">Trending Hashtags</h2>
+          <div className="space-y-3">
+            {trendingHashtags.map((hashtag, i) => (
+              <Link
+                key={hashtag.tag}
+                to={`/hashtag/${hashtag.tag}`}
+                className="block hover:bg-accent -mx-4 px-4 py-2 rounded-lg transition-colors"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Hash className="h-4 w-4 text-primary" />
+                      <h3 className="font-bold">#{hashtag.tag}</h3>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {hashtag.count} {hashtag.count === 1 ? "פוסט" : "פוסטים"}
+                    </p>
+                  </div>
+                  <span className="text-2xl font-bold text-primary/20">
+                    {i + 1}
+                  </span>
                 </div>
-              </div>
-              <h3 className="font-bold text-sm mb-1">{item.title}</h3>
-              <p className="text-xs text-muted-foreground">{item.posts}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-muted rounded-2xl p-4">
-        <h2 className="text-xl font-bold mb-4">מה קורה</h2>
-        <div className="space-y-4">
-          <div className="text-right mb-2">
-            <span className="text-lg font-bold">תרמיל קליין</span>
+              </Link>
+            ))}
           </div>
-          {newsItems.map((item, i) => (
-            <div key={i} className="hover:bg-hover-bg -mx-4 px-4 py-2 rounded-lg transition-colors cursor-pointer">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">{item.category}</p>
-                  <h3 className="font-bold">{item.title}</h3>
-                  {item.posts && (
-                    <p className="text-xs text-muted-foreground mt-1">{item.posts}</p>
-                  )}
-                </div>
-                <button>
-                  <MoreHorizontal className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          ))}
-          <button className="text-primary hover:underline text-sm">הצג עוד</button>
         </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { PostCard } from "./PostCard";
 import { NewPostForm } from "./NewPostForm";
+import { Notifications } from "./Notifications";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
@@ -153,11 +154,14 @@ export const Feed = () => {
   return (
     <div className="flex-1 border-r border-border max-w-[600px]">
       <div className="sticky top-0 bg-background/80 backdrop-blur-md z-10 border-b border-border">
-        <div className="flex justify-between items-center p-4">
+        <div className="flex justify-between items-center p-4 gap-2">
           <h1 className="text-xl font-bold">הבית</h1>
-          <Button variant="ghost" size="icon" onClick={handleLogout}>
-            <LogOut className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Notifications />
+            <Button variant="ghost" size="icon" onClick={handleLogout}>
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
 

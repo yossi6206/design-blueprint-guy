@@ -48,32 +48,58 @@ export const RightSidebar = () => {
   };
 
   const fetchTrendingHashtags = async () => {
-    // Get all hashtags with their post counts
-    const { data: hashtagsData } = await supabase
-      .from("post_hashtags")
-      .select(`
-        hashtag_id,
-        hashtags (tag)
-      `);
+    try {
+      // Get all hashtag IDs with their post counts
+      const { data: postHashtagsData, error: postError } = await supabase
+        .from("post_hashtags")
+        .select("hashtag_id");
 
-    if (hashtagsData) {
+      if (postError) {
+        console.error("Error fetching post hashtags:", postError);
+        return;
+      }
+
+      if (!postHashtagsData || postHashtagsData.length === 0) {
+        return;
+      }
+
       // Count occurrences of each hashtag
       const hashtagCounts = new Map<string, number>();
-      
-      hashtagsData.forEach((item: any) => {
-        const tag = item.hashtags?.tag;
-        if (tag) {
-          hashtagCounts.set(tag, (hashtagCounts.get(tag) || 0) + 1);
-        }
+      postHashtagsData.forEach((item) => {
+        const id = item.hashtag_id;
+        hashtagCounts.set(id, (hashtagCounts.get(id) || 0) + 1);
       });
 
-      // Convert to array and sort by count
-      const trending = Array.from(hashtagCounts.entries())
-        .map(([tag, count]) => ({ tag, count }))
+      // Get unique hashtag IDs
+      const uniqueHashtagIds = Array.from(hashtagCounts.keys());
+
+      // Fetch hashtag details
+      const { data: hashtagsData, error: hashtagError } = await supabase
+        .from("hashtags")
+        .select("id, tag")
+        .in("id", uniqueHashtagIds);
+
+      if (hashtagError) {
+        console.error("Error fetching hashtags:", hashtagError);
+        return;
+      }
+
+      if (!hashtagsData) {
+        return;
+      }
+
+      // Combine counts with hashtag data
+      const trending = hashtagsData
+        .map((hashtag) => ({
+          tag: hashtag.tag,
+          count: hashtagCounts.get(hashtag.id) || 0,
+        }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 10);
 
       setTrendingHashtags(trending);
+    } catch (error) {
+      console.error("Error in fetchTrendingHashtags:", error);
     }
   };
 

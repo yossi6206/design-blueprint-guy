@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Comments } from "./Comments";
@@ -159,13 +160,17 @@ export const PostCard = ({
   return (
     <div className="border-b border-border p-4 hover:bg-accent/5 transition-colors">
       <div className="flex gap-3">
-        <Avatar>
-          <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${handle}`} />
-          <AvatarFallback>{author[0]}</AvatarFallback>
-        </Avatar>
+        <Link to={`/profile/${handle}`}>
+          <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
+            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${handle}`} />
+            <AvatarFallback>{author[0]}</AvatarFallback>
+          </Avatar>
+        </Link>
         <div className="flex-1">
           <div className="flex items-center gap-1 flex-wrap">
-            <span className="font-bold hover:underline cursor-pointer">{author}</span>
+            <Link to={`/profile/${handle}`}>
+              <span className="font-bold hover:underline cursor-pointer">{author}</span>
+            </Link>
             {verified && <Badge variant="secondary" className="h-4 w-4 p-0">✓</Badge>}
             <span className="text-muted-foreground">@{handle}</span>
             <span className="text-muted-foreground">·</span>

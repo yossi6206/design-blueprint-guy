@@ -22,6 +22,8 @@ export const Feed = () => {
   const [followingPosts, setFollowingPosts] = useState<Post[]>([]);
   const [user, setUser] = useState<any>(null);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
+  const [userName, setUserName] = useState<string>("משתמש");
+  const [userHandle, setUserHandle] = useState<string>("user");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,6 +35,34 @@ export const Feed = () => {
       }
       setUser(user);
       setCurrentUserId(user.id);
+      
+      // Fetch user profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+      
+      // If no profile exists, create one
+      if (!profile) {
+        const { data: newProfile } = await supabase
+          .from("profiles")
+          .insert({
+            id: user.id,
+            user_name: user.email?.split("@")[0] || "משתמש",
+            user_handle: `user_${user.id.substring(0, 8)}`,
+          })
+          .select()
+          .single();
+        
+        if (newProfile) {
+          setUserName(newProfile.user_name);
+          setUserHandle(newProfile.user_handle);
+        }
+      } else {
+        setUserName(profile.user_name);
+        setUserHandle(profile.user_handle);
+      }
     };
     checkAuth();
   }, [navigate]);
@@ -136,8 +166,8 @@ export const Feed = () => {
           fetchPosts();
           fetchFollowingPosts();
         }}
-        userName={user?.user_metadata?.name || "משתמש"}
-        userHandle={user?.user_metadata?.handle || user?.email?.split("@")[0] || "user"}
+        userName={userName}
+        userHandle={userHandle}
       />
 
       <Tabs defaultValue="for-you" className="w-full">

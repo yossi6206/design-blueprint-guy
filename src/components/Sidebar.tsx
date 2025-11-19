@@ -2,17 +2,17 @@ import { Home, Search, Bell, Mail, Hash, Bookmark, Users, CreditCard, User, More
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { icon: Home, label: "Home", active: true },
-  { icon: Search, label: "Explore" },
-  { icon: Bell, label: "Notifications" },
-  { icon: Mail, label: "Messages" },
+  { icon: Home, label: "בית", active: true },
+  { icon: Search, label: "חקור" },
+  { icon: Bell, label: "התראות" },
+  { icon: Mail, label: "הודעות" },
   { icon: Hash, label: "Grok" },
-  { icon: Bookmark, label: "Lists" },
-  { icon: Bookmark, label: "Bookmarks" },
-  { icon: Users, label: "Communities" },
-  { icon: CreditCard, label: "Premium" },
-  { icon: User, label: "Profile" },
-  { icon: MoreHorizontal, label: "More" },
+  { icon: Bookmark, label: "רשימות" },
+  { icon: Bookmark, label: "סימניות" },
+  { icon: Users, label: "קהילות" },
+  { icon: CreditCard, label: "פרימיום" },
+  { icon: User, label: "פרופיל" },
+  { icon: MoreHorizontal, label: "עוד" },
 ];
 
 export const Sidebar = () => {
@@ -45,7 +45,7 @@ export const Sidebar = () => {
 
         {/* Post Button */}
         <Button className="w-[90%] mt-4 py-6 text-lg font-bold rounded-full bg-primary hover:bg-hover-primary">
-          Post
+          פרסם
         </Button>
       </div>
 

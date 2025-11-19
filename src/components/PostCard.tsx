@@ -205,11 +205,11 @@ export const PostCard = ({
               onClick={() => setShowComments(!showComments)}
             >
               <MessageCircle className="w-5 h-5" />
-              <span className="mr-2">{commentsCount}</span>
+              <span className="ml-2">{commentsCount}</span>
             </Button>
             <Button variant="ghost" size="sm" className="hover:text-green-500 hover:bg-green-500/10">
               <Repeat2 className="w-5 h-5" />
-              <span className="mr-2">0</span>
+              <span className="ml-2">0</span>
             </Button>
             <Button
               variant="ghost"
@@ -220,11 +220,11 @@ export const PostCard = ({
               onClick={handleLike}
             >
               <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
-              <span className="mr-2">{likesCount}</span>
+              <span className="ml-2">{likesCount}</span>
             </Button>
             <Button variant="ghost" size="sm" className="hover:text-blue-500 hover:bg-blue-500/10">
               <BarChart3 className="w-5 h-5" />
-              <span className="mr-2">0</span>
+              <span className="ml-2">0</span>
             </Button>
             <Button
               variant="ghost"

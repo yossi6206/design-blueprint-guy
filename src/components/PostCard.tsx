@@ -1,4 +1,4 @@
-import { MessageCircle, Repeat2, Heart, BarChart3, Share } from "lucide-react";
+import { MessageCircle, Repeat2, Heart, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,11 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Comments } from "./Comments";
+import { BookmarkButton } from "./BookmarkButton";
+import { RetweetDialog } from "./RetweetDialog";
+import { EditPostDialog } from "./EditPostDialog";
+import { DeletePostDialog } from "./DeletePostDialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 
 interface PostCardProps {
   postId: string;
@@ -38,10 +43,17 @@ export const PostCard = ({
   const [showComments, setShowComments] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [retweetsCount, setRetweetsCount] = useState(0);
+  const [isRetweeted, setIsRetweeted] = useState(false);
+  const [showRetweetDialog, setShowRetweetDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const isOwnPost = currentUserId === userId;
 
   useEffect(() => {
     fetchLikesAndComments();
     fetchUserAvatar();
+    fetchRetweets();
     if (currentUserId && userId !== currentUserId) {
       checkIfFollowing();
     }
@@ -86,6 +98,26 @@ export const PostCard = ({
     setCommentsCount(commentsCount || 0);
   };
 
+  const fetchRetweets = async () => {
+    const { count: retweetsCount } = await supabase
+      .from("retweets")
+      .select("*", { count: "exact", head: true })
+      .eq("original_post_id", postId);
+    
+    setRetweetsCount(retweetsCount || 0);
+
+    if (currentUserId) {
+      const { data: userRetweet } = await supabase
+        .from("retweets")
+        .select("id")
+        .eq("original_post_id", postId)
+        .eq("user_id", currentUserId)
+        .maybeSingle();
+      
+      setIsRetweeted(!!userRetweet);
+    }
+  };
+
   const checkIfFollowing = async () => {
     if (!currentUserId) return;
     
@@ -101,29 +133,18 @@ export const PostCard = ({
 
   const handleLike = async () => {
     if (!currentUserId) {
-      toast({
-        title: "התחבר כדי לתת לייק",
-        variant: "destructive",
-      });
+      toast({ title: "התחבר כדי לתת לייק", variant: "destructive" });
       return;
     }
 
     if (isLiked) {
-      const { error } = await supabase
-        .from("likes")
-        .delete()
-        .eq("post_id", postId)
-        .eq("user_id", currentUserId);
-
+      const { error } = await supabase.from("likes").delete().eq("post_id", postId).eq("user_id", currentUserId);
       if (!error) {
         setIsLiked(false);
         setLikesCount((prev) => prev - 1);
       }
     } else {
-      const { error } = await supabase
-        .from("likes")
-        .insert({ post_id: postId, user_id: currentUserId });
-
+      const { error } = await supabase.from("likes").insert({ post_id: postId, user_id: currentUserId });
       if (!error) {
         setIsLiked(true);
         setLikesCount((prev) => prev + 1);
@@ -133,41 +154,28 @@ export const PostCard = ({
 
   const handleFollow = async () => {
     if (!currentUserId) {
-      toast({
-        title: "התחבר כדי לעקוב",
-        variant: "destructive",
-      });
+      toast({ title: "התחבר כדי לעקוב", variant: "destructive" });
       return;
     }
 
     if (isFollowing) {
-      const { error } = await supabase
-        .from("follows")
-        .delete()
-        .eq("follower_id", currentUserId)
-        .eq("following_id", userId);
-
-      if (!error) {
-        setIsFollowing(false);
-        toast({ title: "הפסקת לעקוב" });
-      }
+      await supabase.from("follows").delete().eq("follower_id", currentUserId).eq("following_id", userId);
+      setIsFollowing(false);
     } else {
-      const { error } = await supabase
-        .from("follows")
-        .insert({ follower_id: currentUserId, following_id: userId });
-
-      if (!error) {
-        setIsFollowing(true);
-        toast({ title: "עוקב!" });
-      }
+      await supabase.from("follows").insert({ follower_id: currentUserId, following_id: userId });
+      setIsFollowing(true);
     }
   };
 
-  const handleShare = () => {
-    const url = window.location.origin;
-    navigator.clipboard.writeText(url);
-    toast({
-      title: "הקישור הועתק!",
+  const renderContent = (text: string) => {
+    const parts = text.split(/(\s+)/);
+    return parts.map((part, index) => {
+      if (part.startsWith('#')) {
+        return <Link key={index} to={`/hashtag/${part.substring(1)}`} className="text-primary hover:underline">{part}</Link>;
+      } else if (part.startsWith('@')) {
+        return <Link key={index} to={`/profile/${part.substring(1)}`} className="text-primary hover:underline">{part}</Link>;
+      }
+      return part;
     });
   };
 
@@ -175,89 +183,47 @@ export const PostCard = ({
     <div className="border-b border-border p-4 hover:bg-accent/5 transition-colors">
       <div className="flex gap-3">
         <Link to={`/profile/${handle}`}>
-          <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
+          <Avatar>
             <AvatarImage src={avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${handle}`} />
             <AvatarFallback>{author[0]}</AvatarFallback>
           </Avatar>
         </Link>
         <div className="flex-1">
-          <div className="flex items-center gap-1 flex-wrap">
-            <Link to={`/profile/${handle}`}>
-              <span className="font-bold hover:underline cursor-pointer">{author}</span>
-            </Link>
-            {verified && <Badge variant="secondary" className="h-4 w-4 p-0">✓</Badge>}
-            <span className="text-muted-foreground">@{handle}</span>
-            <span className="text-muted-foreground">·</span>
-            <span className="text-muted-foreground">{time}</span>
-            {currentUserId && userId !== currentUserId && (
-              <>
-                <span className="text-muted-foreground">·</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleFollow}
-                  className="h-auto p-0 text-primary hover:text-primary/80"
-                >
-                  {isFollowing ? "עוקב" : "עקוב"}
-                </Button>
-              </>
+          <div className="flex items-center gap-1 justify-between">
+            <div className="flex items-center gap-1 flex-wrap">
+              <Link to={`/profile/${handle}`}><span className="font-bold hover:underline">{author}</span></Link>
+              {verified && <Badge variant="secondary" className="h-4 w-4 p-0">✓</Badge>}
+              <span className="text-muted-foreground">@{handle} · {time}</span>
+            </div>
+            {userId !== currentUserId && currentUserId && (
+              <Button variant={isFollowing ? "outline" : "default"} size="sm" onClick={handleFollow} className="rounded-full">
+                {isFollowing ? "עוקב" : "עקוב"}
+              </Button>
+            )}
+            {isOwnPost && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setShowEditDialog(true)}><Pencil className="h-4 w-4 ml-2" />ערוך</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive"><Trash2 className="h-4 w-4 ml-2" />מחק</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
-          <p className="mt-1 whitespace-pre-wrap break-words">{content}</p>
-          {image && (
-            <img
-              src={image}
-              alt="Post content"
-              className="mt-3 rounded-2xl max-w-full border border-border"
-            />
-          )}
-          <div className="flex justify-between mt-3 max-w-md text-muted-foreground">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:text-blue-500 hover:bg-blue-500/10"
-              onClick={() => setShowComments(!showComments)}
-            >
-              <MessageCircle className="w-5 h-5" />
-              <span className="ml-2">{commentsCount}</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="hover:text-green-500 hover:bg-green-500/10">
-              <Repeat2 className="w-5 h-5" />
-              <span className="ml-2">0</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`hover:text-pink-500 hover:bg-pink-500/10 ${
-                isLiked ? "text-pink-500" : ""
-              }`}
-              onClick={handleLike}
-            >
-              <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
-              <span className="ml-2">{likesCount}</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="hover:text-blue-500 hover:bg-blue-500/10">
-              <BarChart3 className="w-5 h-5" />
-              <span className="ml-2">0</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:text-blue-500 hover:bg-blue-500/10"
-              onClick={handleShare}
-            >
-              <Share className="w-5 h-5" />
-            </Button>
+          <p className="mt-1 whitespace-pre-wrap">{renderContent(content)}</p>
+          {image && <img src={image} alt="Post" className="mt-3 rounded-2xl max-w-full border border-border" />}
+          <div className="flex justify-between mt-3 text-muted-foreground">
+            <Button variant="ghost" size="sm" onClick={() => setShowComments(!showComments)}><MessageCircle className="h-5 w-5 ml-2" /><span>{commentsCount}</span></Button>
+            <Button variant="ghost" size="sm" onClick={() => setShowRetweetDialog(true)} className={isRetweeted ? "text-green-500" : ""}><Repeat2 className="h-5 w-5 ml-2" /><span>{retweetsCount}</span></Button>
+            <Button variant="ghost" size="sm" onClick={handleLike} className={isLiked ? "text-pink-500" : ""}><Heart className={`h-5 w-5 ml-2 ${isLiked ? "fill-current" : ""}`} /><span>{likesCount}</span></Button>
+            <BookmarkButton postId={postId} currentUserId={currentUserId} />
           </div>
-          {showComments && (
-            <Comments
-              postId={postId}
-              currentUserId={currentUserId}
-              onCommentAdded={() => setCommentsCount((prev) => prev + 1)}
-            />
-          )}
+          {showComments && <Comments postId={postId} currentUserId={currentUserId} onCommentAdded={() => setCommentsCount((prev) => prev + 1)} />}
         </div>
       </div>
+      <RetweetDialog open={showRetweetDialog} onOpenChange={setShowRetweetDialog} postId={postId} originalAuthor={author} originalContent={content} onSuccess={() => fetchRetweets()} />
+      <EditPostDialog open={showEditDialog} onOpenChange={setShowEditDialog} postId={postId} currentContent={content} currentImage={image} onSuccess={() => window.location.reload()} />
+      <DeletePostDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog} postId={postId} onSuccess={() => window.location.reload()} />
     </div>
   );
 };

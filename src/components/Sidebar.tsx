@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Bell, MessageSquare, User, LogOut, MoreHorizontal } from "lucide-react";
+import { Home, Bell, MessageSquare, User, LogOut, MoreHorizontal, Search, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -42,8 +42,10 @@ export const Sidebar = () => {
 
   const navItems = [
     { icon: Home, label: "בית", path: "/" },
+    { icon: Search, label: "חיפוש", path: "/search" },
     { icon: Bell, label: "התראות", path: "/notifications" },
     { icon: MessageSquare, label: "הודעות", path: "/messages" },
+    { icon: Bookmark, label: "מועדפים", path: "/bookmarks" },
     { icon: User, label: "פרופיל", path: userProfile ? `/profile/${userProfile.user_handle}` : "/profile" },
   ];
   return (

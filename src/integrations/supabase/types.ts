@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           author_handle: string
@@ -129,6 +158,24 @@ export type Database = {
         }
         Relationships: []
       }
+      hashtags: {
+        Row: {
+          created_at: string
+          id: string
+          tag: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          tag: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          tag?: string
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           created_at: string
@@ -151,6 +198,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentions: {
+        Row: {
+          created_at: string
+          id: string
+          mentioned_handle: string
+          mentioned_user_id: string
+          post_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentioned_handle: string
+          mentioned_user_id: string
+          post_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentioned_handle?: string
+          mentioned_user_id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentions_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
@@ -241,6 +320,42 @@ export type Database = {
         }
         Relationships: []
       }
+      post_hashtags: {
+        Row: {
+          created_at: string
+          hashtag_id: string
+          id: string
+          post_id: string
+        }
+        Insert: {
+          created_at?: string
+          hashtag_id: string
+          id?: string
+          post_id: string
+        }
+        Update: {
+          created_at?: string
+          hashtag_id?: string
+          id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_hashtags_hashtag_id_fkey"
+            columns: ["hashtag_id"]
+            isOneToOne: false
+            referencedRelation: "hashtags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_hashtags_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           author_handle: string
@@ -249,6 +364,8 @@ export type Database = {
           created_at: string
           id: string
           image: string | null
+          is_retweet: boolean | null
+          original_post_id: string | null
           updated_at: string
           user_id: string
         }
@@ -259,6 +376,8 @@ export type Database = {
           created_at?: string
           id?: string
           image?: string | null
+          is_retweet?: boolean | null
+          original_post_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -269,10 +388,20 @@ export type Database = {
           created_at?: string
           id?: string
           image?: string | null
+          is_retweet?: boolean | null
+          original_post_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "posts_original_post_id_fkey"
+            columns: ["original_post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -313,12 +442,47 @@ export type Database = {
         }
         Relationships: []
       }
+      retweets: {
+        Row: {
+          created_at: string
+          id: string
+          original_post_id: string
+          quote_text: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          original_post_id: string
+          quote_text?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          original_post_id?: string
+          quote_text?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retweets_original_post_id_fkey"
+            columns: ["original_post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      user_can_access_conversation: {
+        Args: { conversation_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

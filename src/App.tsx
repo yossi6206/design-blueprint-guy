@@ -8,6 +8,9 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
+import Search from "./pages/Search";
+import Bookmarks from "./pages/Bookmarks";
+import Hashtag from "./pages/Hashtag";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +25,9 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile/:handle" element={<Profile />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
+          <Route path="/hashtag/:tag" element={<Hashtag />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

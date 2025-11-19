@@ -12,6 +12,7 @@ interface Comment {
   author_handle: string;
   created_at: string;
   user_id: string;
+  avatar_url?: string;
 }
 
 interface CommentsProps {
@@ -64,7 +65,21 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      setComments(data);
+      // שליפת אווטארים לכל המשתמשים
+      const userIds = [...new Set(data.map(c => c.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, avatar_url")
+        .in("id", userIds);
+
+      const avatarMap = new Map(profiles?.map(p => [p.id, p.avatar_url]) || []);
+      
+      const commentsWithAvatars = data.map(comment => ({
+        ...comment,
+        avatar_url: avatarMap.get(comment.user_id) || null
+      }));
+      
+      setComments(commentsWithAvatars);
     }
   };
 
@@ -163,7 +178,7 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
           <div key={comment.id} className="flex gap-2 p-3 rounded-lg bg-accent/20 animate-fade-in">
             <Avatar className="w-8 h-8">
               <AvatarImage
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.author_handle}`}
+                src={comment.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.author_handle}`}
               />
               <AvatarFallback>{comment.author_name[0]}</AvatarFallback>
             </Avatar>

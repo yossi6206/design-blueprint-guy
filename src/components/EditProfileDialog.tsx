@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { ImageUpload } from "@/components/profile/ImageUpload";
+import { Separator } from "@/components/ui/separator";
 
 interface Profile {
   id: string;
@@ -40,6 +42,8 @@ export function EditProfileDialog({ profile, onProfileUpdate }: EditProfileDialo
     location: profile.location || "",
     website: profile.website || "",
   });
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url || "");
+  const [coverImageUrl, setCoverImageUrl] = useState(profile.cover_image || "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +57,8 @@ export function EditProfileDialog({ profile, onProfileUpdate }: EditProfileDialo
           bio: formData.bio || null,
           location: formData.location || null,
           website: formData.website || null,
+          avatar_url: avatarUrl || null,
+          cover_image: coverImageUrl || null,
         })
         .eq("id", profile.id)
         .select()
@@ -78,22 +84,53 @@ export function EditProfileDialog({ profile, onProfileUpdate }: EditProfileDialo
           ערוך פרופיל
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>ערוך פרופיל</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">שם</Label>
-            <Input
-              id="name"
-              value={formData.user_name}
-              onChange={(e) =>
-                setFormData({ ...formData, user_name: e.target.value })
-              }
-              required
-            />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* תמונות */}
+          <div className="space-y-4">
+            <div>
+              <Label className="text-base mb-2 block">תמונת כיסוי</Label>
+              <ImageUpload
+                currentImageUrl={coverImageUrl}
+                userId={profile.id}
+                bucket="covers"
+                onUploadComplete={setCoverImageUrl}
+                className="w-full h-48"
+              />
+            </div>
+
+            <div>
+              <Label className="text-base mb-2 block">תמונת פרופיל</Label>
+              <ImageUpload
+                currentImageUrl={avatarUrl}
+                userId={profile.id}
+                bucket="avatars"
+                onUploadComplete={setAvatarUrl}
+                className="w-32 h-32"
+                isAvatar={true}
+              />
+            </div>
           </div>
+
+          <Separator />
+
+          {/* פרטים אישיים */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">שם</Label>
+              <Input
+                id="name"
+                value={formData.user_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, user_name: e.target.value })
+                }
+                required
+                maxLength={50}
+              />
+            </div>
 
           <div className="space-y-2">
             <Label htmlFor="bio">ביוגרפיה</Label>
@@ -111,31 +148,34 @@ export function EditProfileDialog({ profile, onProfileUpdate }: EditProfileDialo
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="location">מיקום</Label>
-            <Input
-              id="location"
-              value={formData.location}
-              onChange={(e) =>
-                setFormData({ ...formData, location: e.target.value })
-              }
-            />
+            <div className="space-y-2">
+              <Label htmlFor="location">מיקום</Label>
+              <Input
+                id="location"
+                value={formData.location}
+                onChange={(e) =>
+                  setFormData({ ...formData, location: e.target.value })
+                }
+                maxLength={50}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="website">אתר אינטרנט</Label>
+              <Input
+                id="website"
+                type="url"
+                value={formData.website}
+                onChange={(e) =>
+                  setFormData({ ...formData, website: e.target.value })
+                }
+                placeholder="https://example.com"
+                maxLength={100}
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="website">אתר אינטרנט</Label>
-            <Input
-              id="website"
-              type="url"
-              value={formData.website}
-              onChange={(e) =>
-                setFormData({ ...formData, website: e.target.value })
-              }
-              placeholder="https://example.com"
-            />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
+          <div className="flex justify-end gap-2 pt-4 border-t">
             <Button
               type="button"
               variant="outline"

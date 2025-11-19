@@ -37,13 +37,27 @@ export const PostCard = ({
   const [commentsCount, setCommentsCount] = useState(0);
   const [showComments, setShowComments] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLikesAndComments();
+    fetchUserAvatar();
     if (currentUserId && userId !== currentUserId) {
       checkIfFollowing();
     }
   }, [postId, currentUserId]);
+
+  const fetchUserAvatar = async () => {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("avatar_url")
+      .eq("id", userId)
+      .maybeSingle();
+    
+    if (profile) {
+      setAvatarUrl(profile.avatar_url);
+    }
+  };
 
   const fetchLikesAndComments = async () => {
     const { count: likesCount } = await supabase
@@ -162,7 +176,7 @@ export const PostCard = ({
       <div className="flex gap-3">
         <Link to={`/profile/${handle}`}>
           <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
-            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${handle}`} />
+            <AvatarImage src={avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${handle}`} />
             <AvatarFallback>{author[0]}</AvatarFallback>
           </Avatar>
         </Link>

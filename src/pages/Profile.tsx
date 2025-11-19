@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Link2, MapPin, Calendar, MoreHorizontal } from "lucide-react";
 import { PostCard } from "@/components/PostCard";
@@ -205,6 +205,7 @@ export default function Profile() {
         <div className="px-4 pb-4">
           <div className="flex justify-between items-start -mt-16 mb-4">
             <Avatar className="h-32 w-32 border-4 border-background">
+              <AvatarImage src={profile.avatar_url || ""} />
               <AvatarFallback className="text-4xl">
                 {profile.user_name[0]?.toUpperCase()}
               </AvatarFallback>

@@ -61,9 +61,15 @@ export default function Profile() {
           .from("profiles")
           .select("*")
           .eq("user_handle", handle)
-          .single();
+          .maybeSingle();
 
         if (profileError) throw profileError;
+        
+        if (!profileData) {
+          toast.error("פרופיל לא נמצא");
+          navigate("/");
+          return;
+        }
         setProfile(profileData);
 
         // Fetch user posts

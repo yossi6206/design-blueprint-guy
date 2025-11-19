@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Image, X } from "lucide-react";
+import { EmojiPicker } from "./EmojiPicker";
 
 interface NewPostFormProps {
   onPostCreated: () => void;
@@ -19,6 +20,18 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  const extractHashtags = (text: string): string[] => {
+    const hashtagRegex = /#(\w+)/g;
+    const matches = text.match(hashtagRegex);
+    return matches ? matches.map(tag => tag.substring(1)) : [];
+  };
+
+  const extractMentions = (text: string): string[] => {
+    const mentionRegex = /@(\w+)/g;
+    const matches = text.match(mentionRegex);
+    return matches ? matches.map(mention => mention.substring(1)) : [];
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
@@ -28,15 +41,62 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { error } = await supabase.from("posts").insert({
+      const { data: post, error } = await supabase.from("posts").insert({
         user_id: user.id,
         author_name: userName,
         author_handle: userHandle,
         content: content.trim(),
         image: imageUrl || null,
-      });
+      }).select().single();
 
       if (error) throw error;
+
+      // Process hashtags
+      const hashtags = extractHashtags(content);
+      for (const tag of hashtags) {
+        const { data: existingTag } = await supabase
+          .from("hashtags")
+          .select("id")
+          .eq("tag", tag)
+          .maybeSingle();
+
+        let hashtagId;
+        if (existingTag) {
+          hashtagId = existingTag.id;
+        } else {
+          const { data: newTag } = await supabase
+            .from("hashtags")
+            .insert({ tag })
+            .select()
+            .single();
+          hashtagId = newTag?.id;
+        }
+
+        if (hashtagId) {
+          await supabase.from("post_hashtags").insert({
+            post_id: post.id,
+            hashtag_id: hashtagId,
+          });
+        }
+      }
+
+      // Process mentions
+      const mentions = extractMentions(content);
+      for (const handle of mentions) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("user_handle", handle)
+          .maybeSingle();
+
+        if (profile) {
+          await supabase.from("mentions").insert({
+            post_id: post.id,
+            mentioned_user_id: profile.id,
+            mentioned_handle: handle,
+          });
+        }
+      }
 
       setContent("");
       setImageUrl("");
@@ -90,7 +150,7 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
       )}
 
       <div className="flex justify-between items-center mt-2">
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-1 items-center">
           <Button
             type="button"
             variant="ghost"
@@ -99,6 +159,7 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
           >
             <Image className="h-5 w-5 text-primary" />
           </Button>
+          <EmojiPicker onEmojiSelect={(emoji) => setContent(content + emoji)} />
           <span className={`text-sm ${content.length > 260 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
             {content.length}/280
           </span>

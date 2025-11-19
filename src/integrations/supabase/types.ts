@@ -105,6 +105,48 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_handle: string
+          actor_id: string
+          actor_name: string
+          comment_id: string | null
+          content: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          post_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_handle: string
+          actor_id: string
+          actor_name: string
+          comment_id?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          post_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_handle?: string
+          actor_id?: string
+          actor_name?: string
+          comment_id?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          post_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           author_handle: string

@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, TrendingUp, Users, ThumbsUp, X } from "lucide-react";
+import { ArrowLeft, TrendingUp, Users, ThumbsUp, X, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { useAdminRole } from "@/hooks/useAdminRole";
 
 interface ExperimentMetrics {
   variantName: string;
@@ -18,6 +19,7 @@ interface ExperimentMetrics {
 
 export default function ExperimentDashboard() {
   const navigate = useNavigate();
+  const { isAdmin } = useAdminRole();
   const [metrics, setMetrics] = useState<ExperimentMetrics[]>([]);
   const [loading, setLoading] = useState(true);
   const [experimentName, setExperimentName] = useState("");
@@ -101,14 +103,21 @@ export default function ExperimentDashboard() {
       <div className="w-full max-w-6xl border-x border-border p-6">
         {/* Header */}
         <div className="mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/")}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <div className="flex justify-between items-center mb-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            {isAdmin && (
+              <Button onClick={() => navigate("/admin")}>
+                <Plus className="ml-2 h-4 w-4" />
+                צור ניסוי חדש
+              </Button>
+            )}
+          </div>
           <h1 className="text-3xl font-bold mb-2">דאשבורד A/B Testing</h1>
           <p className="text-muted-foreground">{experimentName}</p>
         </div>

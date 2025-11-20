@@ -29,6 +29,68 @@ serve(async (req) => {
 
     const { limit = 10 } = await req.json().catch(() => ({}));
 
+    // === A/B Testing: Get or assign experiment variant ===
+    let variantConfig = { use_ml_boost: true, max_score_multiplier: 1.5 }; // Default
+    let experimentId: string | null = null;
+    let variantId: string | null = null;
+
+    // Get active experiment
+    const { data: activeExperiment } = await supabase
+      .from('experiments')
+      .select('id')
+      .eq('status', 'active')
+      .eq('name', 'Recommendations Algorithm V1 vs V2')
+      .single();
+
+    if (activeExperiment) {
+      experimentId = activeExperiment.id;
+
+      // Check if user already assigned to a variant
+      const { data: existingAssignment } = await supabase
+        .from('experiment_assignments')
+        .select('variant_id, experiment_variants(algorithm_config)')
+        .eq('user_id', user.id)
+        .eq('experiment_id', experimentId)
+        .single();
+
+      if (existingAssignment) {
+        variantId = existingAssignment.variant_id;
+        variantConfig = (existingAssignment.experiment_variants as any)?.algorithm_config || variantConfig;
+      } else {
+        // Assign user to a variant based on traffic allocation
+        const { data: variants } = await supabase
+          .from('experiment_variants')
+          .select('id, algorithm_config, traffic_allocation')
+          .eq('experiment_id', experimentId)
+          .order('created_at');
+
+        if (variants && variants.length > 0) {
+          // Simple random assignment based on traffic allocation
+          const random = Math.random() * 100;
+          let cumulative = 0;
+          
+          for (const variant of variants) {
+            cumulative += Number(variant.traffic_allocation);
+            if (random <= cumulative) {
+              variantId = variant.id;
+              variantConfig = variant.algorithm_config;
+              
+              // Create assignment
+              await supabase
+                .from('experiment_assignments')
+                .insert({
+                  user_id: user.id,
+                  experiment_id: experimentId,
+                  variant_id: variantId
+                });
+              
+              break;
+            }
+          }
+        }
+      }
+    }
+
     // Get user's current following list
     const { data: currentFollowing } = await supabase
       .from('follows')
@@ -192,8 +254,8 @@ serve(async (req) => {
         score += Math.min(recentPostsCount * 2, 10);
 
         // 9. Machine Learning: Learn from past behavior (30 points max)
-        // Check if similar users were followed from suggestions
-        if (followedFromSuggestions.length > 0) {
+        // Only apply ML boost if variant config enables it
+        if (variantConfig.use_ml_boost && followedFromSuggestions.length > 0) {
           // Get profiles of users followed from suggestions
           const { data: followedProfiles } = await supabase
             .from('profiles')
@@ -208,7 +270,8 @@ serve(async (req) => {
             ).length;
             
             if (sameLocationCount > 0) {
-              score += Math.min(sameLocationCount * 10, 30); // Up to 30 points
+              const mlBoost = Math.min(sameLocationCount * 10, 30);
+              score += mlBoost * (variantConfig.max_score_multiplier || 1.0);
             }
           }
           
@@ -220,7 +283,8 @@ serve(async (req) => {
             .in('following_id', followedFromSuggestions);
 
           if (mutualWithFollowed && mutualWithFollowed.length > 0) {
-            score += Math.min(mutualWithFollowed.length * 15, 30); // Strong signal
+            const mlBoost = Math.min(mutualWithFollowed.length * 15, 30);
+            score += mlBoost * (variantConfig.max_score_multiplier || 1.0);
           }
         }
 
@@ -238,9 +302,31 @@ serve(async (req) => {
       .sort((a, b) => b.score - a.score)
       .slice(0, limit);
 
-    console.log('Generated suggestions:', suggestions.length);
+    console.log('Generated suggestions:', suggestions.length, 'Variant:', variantConfig);
 
-    return new Response(JSON.stringify({ suggestions }), {
+    // Track suggestion_shown metrics for A/B testing
+    if (experimentId && variantId && suggestions.length > 0) {
+      const metricsToInsert = suggestions.map(s => ({
+        experiment_id: experimentId!,
+        variant_id: variantId!,
+        user_id: user.id,
+        metric_type: 'suggestion_shown',
+        suggested_user_id: s.id
+      }));
+
+      await supabase
+        .from('experiment_metrics')
+        .insert(metricsToInsert);
+    }
+
+    return new Response(JSON.stringify({ 
+      suggestions,
+      experimentInfo: experimentId ? {
+        experimentId,
+        variantId,
+        variantConfig
+      } : null
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 

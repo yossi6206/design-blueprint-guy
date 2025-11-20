@@ -80,9 +80,26 @@ export default function SuggestedUsers({
           user_id: user.id, 
           suggested_user_id: userId, 
           interaction_type: 'followed' 
-        })
-        .select()
+        });
+
+      // Track A/B testing metric
+      const { data: assignment } = await supabase
+        .from('experiment_assignments')
+        .select('experiment_id, variant_id')
+        .eq('user_id', user.id)
         .single();
+
+      if (assignment) {
+        await supabase
+          .from('experiment_metrics')
+          .insert({
+            experiment_id: assignment.experiment_id,
+            variant_id: assignment.variant_id,
+            user_id: user.id,
+            metric_type: 'suggestion_followed',
+            suggested_user_id: userId
+          });
+      }
 
       setFollowingStatus(prev => ({ ...prev, [userId]: true }));
       toast.success("עוקב");
@@ -108,6 +125,25 @@ export default function SuggestedUsers({
           suggested_user_id: userId, 
           interaction_type: 'dismissed' 
         });
+
+      // Track A/B testing metric
+      const { data: assignment } = await supabase
+        .from('experiment_assignments')
+        .select('experiment_id, variant_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (assignment) {
+        await supabase
+          .from('experiment_metrics')
+          .insert({
+            experiment_id: assignment.experiment_id,
+            variant_id: assignment.variant_id,
+            user_id: user.id,
+            metric_type: 'suggestion_dismissed',
+            suggested_user_id: userId
+          });
+      }
 
       // Remove from current suggestions
       setSuggestions(prev => prev.filter(s => s.id !== userId));

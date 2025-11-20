@@ -87,14 +87,21 @@ const Auth = () => {
   ]);
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex relative overflow-hidden">
+      {/* Animated Background Gradients */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 -left-4 w-96 h-96 bg-gradient-primary opacity-20 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-0 -right-4 w-96 h-96 bg-gradient-secondary opacity-20 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-accent opacity-10 rounded-full blur-3xl animate-pulse-glow" />
+      </div>
+
       {/* Left Side - Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative z-10">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center space-y-6">
             <div className="flex flex-col items-center gap-4">
-              <div className="text-5xl font-bold">
-                <span className="text-primary">X.</span>
+              <div className="text-7xl font-bold relative">
+                <span className="bg-gradient-primary bg-clip-text text-transparent animate-gradient-shift bg-[length:200%_200%] drop-shadow-glow-primary">X.</span>
               </div>
               <div className="space-y-2">
                 <h1 className="text-4xl md:text-5xl font-bold text-foreground">
@@ -147,7 +154,7 @@ const Auth = () => {
 
             <Button 
               type="submit" 
-              className="w-full h-14 text-lg font-semibold" 
+              className="w-full h-14 text-lg font-semibold bg-gradient-primary hover:opacity-90 transition-all duration-300 shadow-glow-primary hover:shadow-glow-secondary border-0" 
               disabled={loading}
               size="lg"
             >
@@ -179,10 +186,15 @@ const Auth = () => {
       </div>
 
       {/* Right Side - Preview Content */}
-      <div className="hidden lg:flex lg:w-1/2 bg-muted/30 p-8 items-center justify-center overflow-hidden">
-        <div className="w-full max-w-xl space-y-4">
-          {samplePosts.map((post) => (
-            <Card key={post.id} className="p-6 bg-card hover:bg-accent/50 transition-colors">
+      <div className="hidden lg:flex lg:w-1/2 bg-muted/30 p-8 items-center justify-center overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-primary opacity-5 animate-gradient-shift bg-[length:200%_200%]" />
+        <div className="w-full max-w-xl space-y-4 relative z-10">
+          {samplePosts.map((post, index) => (
+            <Card 
+              key={post.id} 
+              className="p-6 bg-card/80 backdrop-blur-sm hover:bg-accent/50 transition-all duration-300 hover:scale-105 hover:shadow-glow-primary border border-border/50"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
               <div className="flex gap-4">
                 <Avatar className="h-12 w-12">
                   <AvatarImage src={post.avatar || undefined} />

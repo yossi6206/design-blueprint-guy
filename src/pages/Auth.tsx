@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -59,51 +59,72 @@ const Auth = () => {
     }
   };
 
-  const [samplePosts] = useState([
+  const samplePosts = [
     {
       id: 1,
-      author: "יוסי כהן",
-      handle: "yosicohen",
-      content: "הרשת החברתית האמיתית של ישראל!!! מקום בו הקול של כולם נשמע.",
+      author: "ספורט ישראל",
+      handle: "TruthSports",
+      content: "רפאל נדאל ישחק עבור ספרד באולימפיאדה, יצטרף לקרלוס אלקראז בזוגות",
       verified: true,
       avatar: null,
-      image: "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=800&h=600&fit=crop",
+      image: "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=400&h=300&fit=crop",
+      link: "bleacherreport.com/articles/10...",
     },
     {
       id: 2,
-      author: "חדשות ישראל",
-      handle: "NewsMax",
-      content: "טראמפ לקח את הבמה שלו לאפליקציה החדשה ואמר שהוא ילחם על חופש הביטוי של האמריקאים. עוד על: bit.ly/3xFcVMz",
+      author: "Catturd",
+      handle: "catturd2",
+      content: "קייטלין קלארק נדחתה מנבחרת האולימפית של ארה\"ב. הירייה הכי טובה בכל הזמנים. כמו להשאיר את מייקל ג'ורדן מחוץ לנבחרת החלום! למה???",
       verified: true,
       avatar: null,
-      image: "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=800&h=600&fit=crop",
+      image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&h=300&fit=crop",
+      link: "thegatewaypundit.com/2024/06/c...",
     },
     {
       id: 3,
-      author: "אבי חמדה",
-      handle: "abrahamHamadeh",
-      content: "הרשת החברתית הזו הרבה יותר כיפית מאשר X. אני ממש אוהב להגיב לאנשים אמיתיים!",
+      author: "דונלד ג'יי טראמפ",
+      handle: "realDonaldTrump",
+      content: "TRUTH SOCIAL הוא הקול האמיתי של אמריקה!!!",
       verified: true,
       avatar: null,
     },
     {
       id: 4,
-      author: "ספורט ישראל",
-      handle: "TruthSports",
-      content: "חדש - מיליוני בוחרים הולכים לקלפיות לבחירות האיחוד האירופי ביום ראשון העל.",
+      author: "חדשות ישראל",
+      handle: "NewsMax",
+      content: "טראמפ לקח את הבמה שלו לפלטפורמת Truth Social להגיב לפני תחילת המשפט הפלילי בניו יורק ואמר שהוא ילחם על חופש הביטוי של האמריקאים. עוד על: bit.ly/3xFcVMz",
       verified: true,
       avatar: null,
-      image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&h=600&fit=crop",
+      image: "https://images.unsplash.com/photo-1569098644584-210bcd375b59?w=400&h=400&fit=crop",
     },
     {
       id: 5,
-      author: "בבילון בי",
-      handle: "BabylonBee",
-      content: "אלק בולדווין אמור להנחות תוכנית חדשה ומרגשת 'זה טעון?'",
-      verified: true,
+      author: "עסקים קטנים",
+      handle: "SmallBiz",
+      content: "יום של אריזה ותיאוריה על שדרוגי סקלה avsoapco.com | #havingasoap #shavesoap #smallbusiness #madeinusa",
+      verified: false,
       avatar: null,
+      image: "https://images.unsplash.com/photo-1556740758-90de374c12ad?w=400&h=300&fit=crop",
     },
-  ]);
+    {
+      id: 6,
+      author: "צילומים",
+      handle: "Photographs",
+      content: "Devil's Head Lookout in Sedalia, Colorado",
+      verified: false,
+      avatar: null,
+      image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+    },
+    {
+      id: 7,
+      author: "יין עם דוין",
+      handle: "sake_wine_trading",
+      content: "This Sparkling Sake is a full-fledged sparkling sake that uses secondary fermentation in the bottle into the traditional sake brewing method...",
+      verified: false,
+      avatar: null,
+      image: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&h=300&fit=crop",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-white flex overflow-hidden">
@@ -215,40 +236,45 @@ const Auth = () => {
       </div>
 
       {/* Right Side - Preview Content */}
-      <div className="hidden lg:flex lg:w-[58%] relative overflow-hidden">
-        {/* Background with gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100"></div>
+      <div className="hidden lg:block lg:w-[60%] relative overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-pink-100/80 via-purple-100/60 to-blue-100/70"></div>
         
-        {/* Content */}
-        <div className="relative w-full p-6 overflow-y-auto">
-          <div className="max-w-2xl mx-auto space-y-4">
-            {samplePosts.map((post, index) => (
+        {/* Scrollable content */}
+        <div className="relative h-full overflow-y-auto px-6 py-6">
+          <div className="max-w-3xl mx-auto space-y-4">
+            {samplePosts.map((post) => (
               <Card 
                 key={post.id} 
-                className="p-5 bg-white shadow-md hover:shadow-lg transition-shadow duration-200 border-0"
+                className="p-5 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 border-0 rounded-2xl"
               >
                 <div className="flex gap-3">
-                  <Avatar className="h-12 w-12">
+                  <Avatar className="h-12 w-12 shrink-0">
                     <AvatarImage src={post.avatar || undefined} />
-                    <AvatarFallback className="bg-blue-500 text-white font-semibold text-sm">
+                    <AvatarFallback className="bg-blue-600 text-white font-semibold text-sm">
                       {post.author[0]}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1 mb-1">
-                      <span className="font-bold text-sm text-black">{post.author}</span>
+                      <span className="font-bold text-[15px] text-black">{post.author}</span>
                       {post.verified && (
-                        <BadgeCheck className="h-4 w-4 text-red-500 fill-red-500 shrink-0" />
+                        <BadgeCheck className="h-[18px] w-[18px] text-red-500 fill-red-500 shrink-0" />
                       )}
-                      <span className="text-gray-500 text-sm">@{post.handle}</span>
                     </div>
-                    <p className="text-sm text-gray-900 leading-relaxed mb-2">{post.content}</p>
+                    <div className="text-gray-500 text-sm mb-2">@{post.handle}</div>
+                    <p className="text-[15px] text-black leading-relaxed mb-3">{post.content}</p>
+                    {post.link && (
+                      <a href="#" className="text-blue-600 text-sm hover:underline block mb-2">
+                        {post.link}
+                      </a>
+                    )}
                     {post.image && (
-                      <div className="rounded-xl overflow-hidden">
+                      <div className="rounded-xl overflow-hidden mt-3">
                         <img 
                           src={post.image} 
                           alt="Post content" 
-                          className="w-full h-48 object-cover"
+                          className="w-full object-cover"
                         />
                       </div>
                     )}

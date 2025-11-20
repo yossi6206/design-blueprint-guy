@@ -268,14 +268,20 @@ export default function Profile() {
             </div>
 
             <div className="flex gap-4 text-sm">
-              <button className="hover:underline">
+              <Link 
+                to={`/profile/${handle}/followers?tab=following`}
+                className="hover:underline"
+              >
                 <span className="font-bold">{followingCount}</span>{" "}
                 <span className="text-muted-foreground">עוקב</span>
-              </button>
-              <button className="hover:underline">
+              </Link>
+              <Link 
+                to={`/profile/${handle}/followers?tab=followers`}
+                className="hover:underline"
+              >
                 <span className="font-bold">{followersCount}</span>{" "}
                 <span className="text-muted-foreground">עוקבים</span>
-              </button>
+              </Link>
             </div>
           </div>
         </div>

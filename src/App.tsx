@@ -13,6 +13,7 @@ import Bookmarks from "./pages/Bookmarks";
 import Hashtag from "./pages/Hashtag";
 import Followers from "./pages/Followers";
 import Suggestions from "./pages/Suggestions";
+import ExperimentDashboard from "./pages/ExperimentDashboard";
 import Test from "./Test";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/profile/:handle" element={<Profile />} />
           <Route path="/profile/:handle/followers" element={<Followers />} />
           <Route path="/suggestions" element={<Suggestions />} />
+          <Route path="/experiments" element={<ExperimentDashboard />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/search" element={<Search />} />
           <Route path="/bookmarks" element={<Bookmarks />} />

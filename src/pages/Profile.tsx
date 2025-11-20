@@ -185,7 +185,7 @@ export default function Profile() {
             </Button>
             <div>
               <h1 className="text-xl font-bold">{profile.user_name}</h1>
-              <p className="text-sm text-muted-foreground">{posts.length} פוסטים</p>
+              <p className="text-sm text-muted-foreground">@{profile.user_handle}</p>
             </div>
           </div>
         </div>
@@ -267,15 +267,20 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="flex gap-4 text-sm">
-              <button className="hover:underline">
-                <span className="font-bold">{followingCount}</span>{" "}
-                <span className="text-muted-foreground">עוקב</span>
-              </button>
-              <button className="hover:underline">
-                <span className="font-bold">{followersCount}</span>{" "}
-                <span className="text-muted-foreground">עוקבים</span>
-              </button>
+            {/* Stats Section */}
+            <div className="grid grid-cols-3 gap-3 py-4">
+              <div className="bg-muted/50 rounded-xl p-4 text-center hover:bg-muted transition-colors border border-border/50">
+                <div className="text-2xl font-bold text-primary">{posts.length}</div>
+                <div className="text-xs text-muted-foreground mt-1">פוסטים</div>
+              </div>
+              <div className="bg-muted/50 rounded-xl p-4 text-center hover:bg-muted transition-colors border border-border/50 cursor-pointer">
+                <div className="text-2xl font-bold text-primary">{followersCount}</div>
+                <div className="text-xs text-muted-foreground mt-1">עוקבים</div>
+              </div>
+              <div className="bg-muted/50 rounded-xl p-4 text-center hover:bg-muted transition-colors border border-border/50 cursor-pointer">
+                <div className="text-2xl font-bold text-primary">{followingCount}</div>
+                <div className="text-xs text-muted-foreground mt-1">עוקב אחרי</div>
+              </div>
             </div>
           </div>
         </div>

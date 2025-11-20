@@ -108,11 +108,10 @@ const Auth = () => {
 
   return (
     <div className="h-screen bg-background flex relative overflow-hidden">
-      {/* Animated Background Gradients */}
+      {/* Subtle Background Gradients */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 -left-4 w-96 h-96 bg-gradient-primary opacity-20 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-0 -right-4 w-96 h-96 bg-gradient-secondary opacity-20 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-accent opacity-10 rounded-full blur-3xl animate-pulse-glow" />
+        <div className="absolute top-0 -left-4 w-96 h-96 bg-gradient-primary opacity-5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 -right-4 w-96 h-96 bg-gradient-secondary opacity-5 rounded-full blur-3xl" />
       </div>
 
       {/* Auth Form */}
@@ -121,7 +120,7 @@ const Auth = () => {
           <div className="text-center space-y-6">
             <div className="flex flex-col items-center gap-4">
               <div className="text-7xl font-bold relative">
-                <span className="bg-gradient-primary bg-clip-text text-transparent animate-gradient-shift bg-[length:200%_200%] drop-shadow-glow-primary">X.</span>
+                <span className="bg-gradient-primary bg-clip-text text-transparent">X.</span>
               </div>
               <div className="space-y-2">
                 <h1 className="text-4xl md:text-5xl font-bold text-foreground">
@@ -174,7 +173,7 @@ const Auth = () => {
 
             <Button 
               type="submit" 
-              className="w-full h-14 text-lg font-semibold bg-gradient-primary hover:opacity-90 transition-all duration-300 shadow-glow-primary hover:shadow-glow-secondary border-0" 
+              className="w-full h-14 text-lg font-semibold bg-gradient-primary hover:opacity-90 transition-all duration-300" 
               disabled={loading}
               size="lg"
             >

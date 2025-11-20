@@ -1,17 +1,9 @@
-import { Search, MoreHorizontal, Hash } from "lucide-react";
+import { Search, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
-
-interface SuggestedUser {
-  id: string;
-  author_name: string;
-  author_handle: string;
-  user_id: string;
-}
+import SuggestedUsers from "./SuggestedUsers";
 
 interface TrendingHashtag {
   tag: string;
@@ -19,33 +11,11 @@ interface TrendingHashtag {
 }
 
 export const RightSidebar = () => {
-  const { toast } = useToast();
-  const [currentUserId, setCurrentUserId] = useState<string>();
-  const [suggestedUsers, setSuggestedUsers] = useState<SuggestedUser[]>([]);
-  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [trendingHashtags, setTrendingHashtags] = useState<TrendingHashtag[]>([]);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setCurrentUserId(user.id);
-        fetchSuggestedUsers(user.id);
-        fetchFollowing(user.id);
-      }
-    });
     fetchTrendingHashtags();
   }, []);
-
-  const fetchFollowing = async (userId: string) => {
-    const { data } = await supabase
-      .from("follows")
-      .select("following_id")
-      .eq("follower_id", userId);
-
-    if (data) {
-      setFollowingIds(new Set(data.map((f) => f.following_id)));
-    }
-  };
 
   const fetchTrendingHashtags = async () => {
     try {
@@ -103,52 +73,6 @@ export const RightSidebar = () => {
     }
   };
 
-  const fetchSuggestedUsers = async (userId: string) => {
-    const { data } = await supabase
-      .from("posts")
-      .select("author_name, author_handle, user_id")
-      .neq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(20);
-
-    if (data) {
-      const uniqueUsers = Array.from(
-        new Map(data.map((user) => [user.user_id, user])).values()
-      ).slice(0, 3);
-      setSuggestedUsers(uniqueUsers as SuggestedUser[]);
-    }
-  };
-
-  const handleFollow = async (userId: string) => {
-    if (!currentUserId) return;
-
-    if (followingIds.has(userId)) {
-      const { error } = await supabase
-        .from("follows")
-        .delete()
-        .eq("follower_id", currentUserId)
-        .eq("following_id", userId);
-
-      if (!error) {
-        setFollowingIds((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(userId);
-          return newSet;
-        });
-        toast({ title: "הפסקת לעקוב" });
-      }
-    } else {
-      const { error } = await supabase
-        .from("follows")
-        .insert({ follower_id: currentUserId, following_id: userId });
-
-      if (!error) {
-        setFollowingIds((prev) => new Set(prev).add(userId));
-        toast({ title: "עוקב!" });
-      }
-    }
-  };
-
   return (
     <div className="w-[350px] h-screen sticky top-0 px-6 py-2">
       <div className="mb-4">
@@ -172,36 +96,7 @@ export const RightSidebar = () => {
         </Button>
       </div>
 
-      {suggestedUsers.length > 0 && (
-        <div className="bg-muted rounded-2xl p-4 mb-4">
-          <h2 className="text-xl font-bold mb-4">מי לעקוב</h2>
-          <div className="space-y-4">
-            {suggestedUsers.map((user) => (
-              <div key={user.user_id} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Avatar>
-                    <AvatarImage
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.author_handle}`}
-                    />
-                    <AvatarFallback>{user.author_name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-bold text-sm">{user.author_name}</p>
-                    <p className="text-muted-foreground text-xs">@{user.author_handle}</p>
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  variant={followingIds.has(user.user_id) ? "outline" : "default"}
-                  onClick={() => handleFollow(user.user_id)}
-                >
-                  {followingIds.has(user.user_id) ? "עוקב" : "עקוב"}
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <SuggestedUsers limit={5} />
 
       {trendingHashtags.length > 0 && (
         <div className="bg-muted rounded-2xl p-4 mb-4 border border-primary/10">

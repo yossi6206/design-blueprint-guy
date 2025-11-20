@@ -1,1 +1,4 @@
 project_id = "kwpiinlgptnaazqzemvv"
+
+[functions.suggest-users]
+verify_jwt = true

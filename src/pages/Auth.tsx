@@ -95,8 +95,8 @@ const Auth = () => {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-accent opacity-10 rounded-full blur-3xl animate-pulse-glow" />
       </div>
 
-      {/* Left Side - Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative z-10">
+      {/* Auth Form */}
+      <div className="w-full flex items-center justify-center p-8 relative z-10">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center space-y-6">
             <div className="flex flex-col items-center gap-4">
@@ -182,41 +182,6 @@ const Auth = () => {
               </span>
             </p>
           </form>
-        </div>
-      </div>
-
-      {/* Right Side - Preview Content */}
-      <div className="hidden lg:flex lg:w-1/2 bg-muted/30 p-8 items-center justify-center overflow-hidden relative">
-        <div className="absolute inset-0 bg-gradient-primary opacity-5 animate-gradient-shift bg-[length:200%_200%]" />
-        <div className="w-full max-w-xl space-y-4 relative z-10">
-          {samplePosts.map((post, index) => (
-            <Card 
-              key={post.id} 
-              className="p-6 bg-card/80 backdrop-blur-sm hover:bg-accent/50 transition-all duration-300 hover:scale-105 hover:shadow-glow-primary border border-border/50"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className="flex gap-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={post.avatar || undefined} />
-                  <AvatarFallback>{post.author[0]}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold">{post.author}</span>
-                    {post.verified && (
-                      <BadgeCheck className="h-4 w-4 text-blue-500 fill-blue-500" />
-                    )}
-                    <span className="text-muted-foreground">@{post.handle}</span>
-                  </div>
-                  <p className="text-foreground leading-relaxed">{post.content}</p>
-                </div>
-              </div>
-            </Card>
-          ))}
-          
-          <div className="text-center text-muted-foreground text-sm pt-4">
-            <p>הצטרף לאלפי משתמשים שכבר מתחברים ומשתפים</p>
-          </div>
         </div>
       </div>
     </div>

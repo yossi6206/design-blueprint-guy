@@ -477,6 +477,38 @@ export type Database = {
           },
         ]
       }
+      suggestion_interactions: {
+        Row: {
+          created_at: string
+          id: string
+          interaction_type: string
+          suggested_user_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interaction_type: string
+          suggested_user_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interaction_type?: string
+          suggested_user_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suggestion_interactions_suggested_user_id_fkey"
+            columns: ["suggested_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

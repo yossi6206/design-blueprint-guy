@@ -36,7 +36,20 @@ serve(async (req) => {
       .eq('follower_id', user.id);
 
     const followingIds = currentFollowing?.map(f => f.following_id) || [];
-    const excludeIds = [...followingIds, user.id];
+    
+    // Get users that were dismissed or already followed from suggestions
+    const { data: previousInteractions } = await supabase
+      .from('suggestion_interactions')
+      .select('suggested_user_id, interaction_type')
+      .eq('user_id', user.id)
+      .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()); // Last 30 days
+
+    // Exclude dismissed users and already followed users from suggestions
+    const dismissedIds = previousInteractions?.filter(i => i.interaction_type === 'dismissed').map(i => i.suggested_user_id) || [];
+    const excludeIds = [...followingIds, ...dismissedIds, user.id];
+    
+    // Build learning data: users followed from suggestions get bonus
+    const followedFromSuggestions = previousInteractions?.filter(i => i.interaction_type === 'followed').map(i => i.suggested_user_id) || [];
 
     // Get all potential candidates
     const { data: allProfiles } = await supabase
@@ -177,6 +190,39 @@ serve(async (req) => {
 
         const recentPostsCount = recentPosts?.length || 0;
         score += Math.min(recentPostsCount * 2, 10);
+
+        // 9. Machine Learning: Learn from past behavior (30 points max)
+        // Check if similar users were followed from suggestions
+        if (followedFromSuggestions.length > 0) {
+          // Get profiles of users followed from suggestions
+          const { data: followedProfiles } = await supabase
+            .from('profiles')
+            .select('location')
+            .in('id', followedFromSuggestions);
+
+          if (followedProfiles) {
+            // Boost score if this user shares location with previously followed suggestions
+            const sameLocationCount = followedProfiles.filter(
+              fp => fp.location && profile.location && 
+              fp.location.toLowerCase() === profile.location.toLowerCase()
+            ).length;
+            
+            if (sameLocationCount > 0) {
+              score += Math.min(sameLocationCount * 10, 30); // Up to 30 points
+            }
+          }
+          
+          // Check for mutual follows with users followed from suggestions
+          const { data: mutualWithFollowed } = await supabase
+            .from('follows')
+            .select('following_id')
+            .eq('follower_id', profile.id)
+            .in('following_id', followedFromSuggestions);
+
+          if (mutualWithFollowed && mutualWithFollowed.length > 0) {
+            score += Math.min(mutualWithFollowed.length * 15, 30); // Strong signal
+          }
+        }
 
         return {
           ...profile,

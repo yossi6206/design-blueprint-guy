@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { BadgeCheck, Users, X } from "lucide-react";
+import { BadgeCheck, Users } from "lucide-react";
 import { toast } from "sonner";
 
 interface SuggestedUser {
@@ -112,46 +112,6 @@ export default function SuggestedUsers({
     }
   };
 
-  const handleDismiss = async (userId: string) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Track that user dismissed this suggestion
-      await supabase
-        .from("suggestion_interactions")
-        .insert({ 
-          user_id: user.id, 
-          suggested_user_id: userId, 
-          interaction_type: 'dismissed' 
-        });
-
-      // Track A/B testing metric
-      const { data: assignment } = await supabase
-        .from('experiment_assignments')
-        .select('experiment_id, variant_id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (assignment) {
-        await supabase
-          .from('experiment_metrics')
-          .insert({
-            experiment_id: assignment.experiment_id,
-            variant_id: assignment.variant_id,
-            user_id: user.id,
-            metric_type: 'suggestion_dismissed',
-            suggested_user_id: userId
-          });
-      }
-
-      // Remove from current suggestions
-      setSuggestions(prev => prev.filter(s => s.id !== userId));
-      toast.success("הוסר מההמלצות");
-    } catch (error) {
-      console.error("Error dismissing suggestion:", error);
-    }
-  };
 
   if (loading) {
     return (
@@ -194,25 +154,15 @@ export default function SuggestedUsers({
               </Avatar>
             </Link>
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
-                <Link to={`/profile/${user.user_handle}`} className="hover:underline flex-1 min-w-0">
-                  <div className="flex items-center gap-1">
-                    <p className="font-semibold text-sm truncate">{user.user_name}</p>
-                    {user.is_verified && (
-                      <BadgeCheck className="h-3.5 w-3.5 text-blue-500 fill-blue-500 shrink-0" />
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">@{user.user_handle}</p>
-                </Link>
-                <Button
-                  onClick={() => handleDismiss(user.id)}
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </Button>
-              </div>
+              <Link to={`/profile/${user.user_handle}`} className="hover:underline">
+                <div className="flex items-center gap-1">
+                  <p className="font-semibold text-sm truncate">{user.user_name}</p>
+                  {user.is_verified && (
+                    <BadgeCheck className="h-3.5 w-3.5 text-blue-500 fill-blue-500 shrink-0" />
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">@{user.user_handle}</p>
+              </Link>
               {showMutualConnections && user.mutualConnections > 0 && (
                 <p className="text-xs text-muted-foreground mt-1">
                   {user.mutualConnections} חיבורים משותפים

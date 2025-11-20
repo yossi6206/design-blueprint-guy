@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, BadgeCheck, Users } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Users, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface SuggestedUser {
@@ -65,11 +65,42 @@ export default function Suggestions() {
         .from("follows")
         .insert({ follower_id: user.id, following_id: userId });
 
+      // Track that user followed this suggestion
+      await supabase
+        .from("suggestion_interactions")
+        .insert({ 
+          user_id: user.id, 
+          suggested_user_id: userId, 
+          interaction_type: 'followed' 
+        });
+
       setFollowingStatus(prev => ({ ...prev, [userId]: true }));
       toast.success("עוקב");
     } catch (error) {
       console.error("Error following user:", error);
       toast.error("שגיאה");
+    }
+  };
+
+  const handleDismiss = async (userId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Track that user dismissed this suggestion
+      await supabase
+        .from("suggestion_interactions")
+        .insert({ 
+          user_id: user.id, 
+          suggested_user_id: userId, 
+          interaction_type: 'dismissed' 
+        });
+
+      // Remove from current suggestions
+      setSuggestions(prev => prev.filter(s => s.id !== userId));
+      toast.success("הוסר מההמלצות");
+    } catch (error) {
+      console.error("Error dismissing suggestion:", error);
     }
   };
 
@@ -111,7 +142,7 @@ export default function Suggestions() {
             </div>
           ) : (
             suggestions.map((user) => (
-              <div key={user.id} className="p-4 hover:bg-muted/50 transition-colors">
+              <div key={user.id} className="p-4 hover:bg-muted/50 transition-colors group">
                 <div className="flex items-start gap-3">
                   <Link to={`/profile/${user.user_handle}`}>
                     <Avatar className="h-12 w-12">
@@ -120,15 +151,25 @@ export default function Suggestions() {
                     </Avatar>
                   </Link>
                   <div className="flex-1 min-w-0">
-                    <Link to={`/profile/${user.user_handle}`} className="hover:underline">
-                      <div className="flex items-center gap-1">
-                        <h3 className="font-bold text-sm truncate">{user.user_name}</h3>
-                        {user.is_verified && (
-                          <BadgeCheck className="h-4 w-4 text-blue-500 fill-blue-500 shrink-0" />
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">@{user.user_handle}</p>
-                    </Link>
+                    <div className="flex items-start justify-between gap-2">
+                      <Link to={`/profile/${user.user_handle}`} className="hover:underline flex-1 min-w-0">
+                        <div className="flex items-center gap-1">
+                          <h3 className="font-bold text-sm truncate">{user.user_name}</h3>
+                          {user.is_verified && (
+                            <BadgeCheck className="h-4 w-4 text-blue-500 fill-blue-500 shrink-0" />
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">@{user.user_handle}</p>
+                      </Link>
+                      <Button
+                        onClick={() => handleDismiss(user.id)}
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                     
                     {user.mutualConnections > 0 && (
                       <p className="text-sm text-muted-foreground mt-1">

@@ -87,7 +87,7 @@ const Auth = () => {
   ]);
 
   return (
-    <div className="min-h-screen bg-background flex relative overflow-hidden">
+    <div className="h-screen bg-background flex relative overflow-hidden">
       {/* Animated Background Gradients */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 -left-4 w-96 h-96 bg-gradient-primary opacity-20 rounded-full blur-3xl animate-float" />

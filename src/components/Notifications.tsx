@@ -60,6 +60,7 @@ export function Notifications() {
           filter: `user_id=eq.${currentUserId}`,
         },
         (payload) => {
+          console.log("התראה חדשה התקבלה:", payload);
           const newNotification = payload.new as Notification;
           
           // Show toast for new notification
@@ -80,12 +81,19 @@ export function Notifications() {
           filter: `user_id=eq.${currentUserId}`,
         },
         () => {
+          console.log("התראה עודכנה");
           fetchNotifications();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("סטטוס חיבור realtime:", status);
+        if (status === "SUBSCRIBED") {
+          console.log("מחובר בהצלחה להתראות בזמן אמת");
+        }
+      });
 
     return () => {
+      console.log("מתנתק מערוץ ההתראות");
       supabase.removeChannel(channel);
     };
   }, [currentUserId]);

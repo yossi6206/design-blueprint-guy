@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -79,6 +80,33 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?mode=reset`,
+      });
+      if (error) throw error;
+      
+      toast({
+        title: "מייל נשלח!",
+        description: "בדוק את תיבת הדואר שלך לקישור איפוס הסיסמה",
+      });
+      setIsForgotPassword(false);
+      setEmail("");
+    } catch (error: any) {
+      toast({
+        title: "שגיאה",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [samplePosts] = useState([
     {
       id: 1,
@@ -124,16 +152,52 @@ const Auth = () => {
               </div>
               <div className="space-y-2">
                 <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-                  הקול שלך.
+                  {isForgotPassword ? "שחזור סיסמה" : "הקול שלך."}
                 </h1>
-                <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-                  החופש שלך.
-                </h1>
+                {!isForgotPassword && (
+                  <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+                    החופש שלך.
+                  </h1>
+                )}
               </div>
             </div>
           </div>
 
-          <form onSubmit={handleAuth} className="space-y-4">
+          {isForgotPassword ? (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <Input
+                type="email"
+                placeholder="אימייל"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-12"
+              />
+
+              <Button 
+                type="submit" 
+                className="w-full h-14 text-lg font-semibold bg-gradient-primary hover:opacity-90 transition-all duration-300" 
+                disabled={loading}
+                size="lg"
+              >
+                {loading ? "שולח..." : "שלח קישור לאיפוס"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => {
+                  setIsForgotPassword(false);
+                  setEmail("");
+                }}
+                disabled={loading}
+              >
+                חזור להתחברות
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleAuth} className="space-y-4">
             {isSignUp && (
               <>
                 <Input
@@ -219,6 +283,16 @@ const Auth = () => {
 
             <Button
               type="button"
+              variant="ghost"
+              className="w-full text-sm text-muted-foreground hover:text-foreground"
+              onClick={() => setIsForgotPassword(true)}
+              disabled={loading}
+            >
+              שכחתי סיסמה
+            </Button>
+
+            <Button
+              type="button"
               variant="outline"
               className="w-full h-14 text-lg"
               onClick={() => setIsSignUp(!isSignUp)}
@@ -238,6 +312,7 @@ const Auth = () => {
               </span>
             </p>
           </form>
+          )}
         </div>
       </div>
     </div>

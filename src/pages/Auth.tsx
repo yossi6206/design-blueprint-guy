@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Twitter } from "lucide-react";
+import { Twitter, BadgeCheck } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -57,64 +59,153 @@ const Auth = () => {
     }
   };
 
+  const [samplePosts] = useState([
+    {
+      id: 1,
+      author: "מוחמד עלי",
+      handle: "muhammadali",
+      content: "הקול שלך חשוב! הצטרף לשיחה והיה חלק מהשינוי.",
+      verified: true,
+      avatar: null,
+    },
+    {
+      id: 2,
+      author: "שרה כהן",
+      handle: "sarahcohen",
+      content: "פלטפורמה מדהימה לחיבור אמיתי עם אנשים אמיתיים!",
+      verified: true,
+      avatar: null,
+    },
+    {
+      id: 3,
+      author: "דוד לוי",
+      handle: "davidlevi",
+      content: "סוף סוף מקום שבו אפשר לדבר בחופשיות ולהתחבר לקהילה.",
+      verified: false,
+      avatar: null,
+    },
+  ]);
+
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <Twitter className="mx-auto h-12 w-12 text-primary" />
-          <h2 className="mt-6 text-3xl font-bold">
-            {isSignUp ? "הצטרף עכשיו" : "התחבר"}
-          </h2>
-        </div>
-
-        <form onSubmit={handleAuth} className="mt-8 space-y-6">
-          {isSignUp && (
-            <>
-              <Input
-                type="text"
-                placeholder="שם מלא"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-              <Input
-                type="text"
-                placeholder="שם משתמש"
-                value={handle}
-                onChange={(e) => setHandle(e.target.value)}
-                required
-              />
-            </>
-          )}
-          <Input
-            type="email"
-            placeholder="אימייל"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <Input
-            type="password"
-            placeholder="סיסמה"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "טוען..." : isSignUp ? "הירשם" : "התחבר"}
-          </Button>
-
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary hover:underline"
-            >
-              {isSignUp ? "כבר יש לך חשבון? התחבר" : "אין לך חשבון? הירשם"}
-            </button>
+    <div className="min-h-screen bg-background flex">
+      {/* Left Side - Auth Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center space-y-6">
+            <div className="flex flex-col items-center gap-4">
+              <div className="text-5xl font-bold">
+                <span className="text-primary">X.</span>
+              </div>
+              <div className="space-y-2">
+                <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+                  הקול שלך.
+                </h1>
+                <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+                  החופש שלך.
+                </h1>
+              </div>
+            </div>
           </div>
-        </form>
+
+          <form onSubmit={handleAuth} className="space-y-4">
+            {isSignUp && (
+              <>
+                <Input
+                  type="text"
+                  placeholder="שם מלא"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="h-12"
+                />
+                <Input
+                  type="text"
+                  placeholder="שם משתמש"
+                  value={handle}
+                  onChange={(e) => setHandle(e.target.value)}
+                  required
+                  className="h-12"
+                />
+              </>
+            )}
+            <Input
+              type="email"
+              placeholder="אימייל"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="h-12"
+            />
+            <Input
+              type="password"
+              placeholder="סיסמה"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="h-12"
+            />
+
+            <Button 
+              type="submit" 
+              className="w-full h-14 text-lg font-semibold" 
+              disabled={loading}
+              size="lg"
+            >
+              {loading ? "טוען..." : isSignUp ? "צור חשבון" : "התחבר"}
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-14 text-lg"
+              onClick={() => setIsSignUp(!isSignUp)}
+              disabled={loading}
+            >
+              {isSignUp ? "התחבר" : "צור חשבון"}
+            </Button>
+
+            <p className="text-center text-xs text-muted-foreground px-8">
+              בהמשך, אתה מסכים ל
+              <span className="underline cursor-pointer hover:text-foreground mx-1">
+                תנאי השימוש
+              </span>
+              ול
+              <span className="underline cursor-pointer hover:text-foreground mx-1">
+                מדיניות הפרטיות
+              </span>
+            </p>
+          </form>
+        </div>
+      </div>
+
+      {/* Right Side - Preview Content */}
+      <div className="hidden lg:flex lg:w-1/2 bg-muted/30 p-8 items-center justify-center overflow-hidden">
+        <div className="w-full max-w-xl space-y-4">
+          {samplePosts.map((post) => (
+            <Card key={post.id} className="p-6 bg-card hover:bg-accent/50 transition-colors">
+              <div className="flex gap-4">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={post.avatar || undefined} />
+                  <AvatarFallback>{post.author[0]}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold">{post.author}</span>
+                    {post.verified && (
+                      <BadgeCheck className="h-4 w-4 text-blue-500 fill-blue-500" />
+                    )}
+                    <span className="text-muted-foreground">@{post.handle}</span>
+                  </div>
+                  <p className="text-foreground leading-relaxed">{post.content}</p>
+                </div>
+              </div>
+            </Card>
+          ))}
+          
+          <div className="text-center text-muted-foreground text-sm pt-4">
+            <p>הצטרף לאלפי משתמשים שכבר מתחברים ומשתפים</p>
+          </div>
+        </div>
       </div>
     </div>
   );

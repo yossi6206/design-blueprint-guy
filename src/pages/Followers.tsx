@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
 
 interface Profile {
@@ -13,6 +13,7 @@ interface Profile {
   user_handle: string;
   bio: string | null;
   avatar_url: string | null;
+  is_verified: boolean;
 }
 
 interface UserWithFollowStatus extends Profile {
@@ -203,6 +204,9 @@ export default function Followers() {
         <Link to={`/profile/${user.user_handle}`} className="hover:underline">
           <div className="flex items-center gap-1">
             <h3 className="font-bold text-sm truncate">{user.user_name}</h3>
+            {user.is_verified && (
+              <BadgeCheck className="h-4 w-4 text-blue-500 fill-blue-500 shrink-0" />
+            )}
           </div>
           <p className="text-sm text-muted-foreground">@{user.user_handle}</p>
         </Link>

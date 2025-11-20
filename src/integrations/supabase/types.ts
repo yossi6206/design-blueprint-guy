@@ -410,6 +410,7 @@ export type Database = {
           cover_image: string | null
           created_at: string
           id: string
+          is_verified: boolean
           location: string | null
           updated_at: string
           user_handle: string
@@ -422,6 +423,7 @@ export type Database = {
           cover_image?: string | null
           created_at?: string
           id: string
+          is_verified?: boolean
           location?: string | null
           updated_at?: string
           user_handle: string
@@ -434,6 +436,7 @@ export type Database = {
           cover_image?: string | null
           created_at?: string
           id?: string
+          is_verified?: boolean
           location?: string | null
           updated_at?: string
           user_handle?: string

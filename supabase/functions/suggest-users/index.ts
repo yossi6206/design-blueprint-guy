@@ -253,7 +253,17 @@ serve(async (req) => {
         const recentPostsCount = recentPosts?.length || 0;
         score += Math.min(recentPostsCount * 2, 10);
 
-        // 9. Machine Learning: Learn from past behavior (30 points max)
+        // 9. Base score for popular users (20 points) - helps new users discover active accounts
+        const { count: followersCount } = await supabase
+          .from('follows')
+          .select('id', { count: 'exact', head: true })
+          .eq('following_id', profile.id);
+
+        if (followersCount && followersCount > 0) {
+          score += Math.min(followersCount * 2, 20);
+        }
+
+        // 10. Machine Learning: Learn from past behavior (30 points max)
         // Only apply ML boost if variant config enables it
         if (variantConfig.use_ml_boost && followedFromSuggestions.length > 0) {
           // Get profiles of users followed from suggestions
@@ -296,9 +306,8 @@ serve(async (req) => {
       })
     );
 
-    // Sort by score and get top suggestions
+    // Sort by score and get top suggestions (show all users, even with score 0)
     const suggestions = scoredProfiles
-      .filter(p => p.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, limit);
 

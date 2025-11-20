@@ -48,13 +48,33 @@ export function Notifications() {
 
     fetchNotifications();
 
-    // Subscribe to realtime updates
+    // Subscribe to realtime updates with toast notification
     const channel = supabase
       .channel("notifications-changes")
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${currentUserId}`,
+        },
+        (payload) => {
+          const newNotification = payload.new as Notification;
+          
+          // Show toast for new notification
+          toast.info(`${newNotification.actor_name} ${getNotificationText(newNotification)}`, {
+            duration: 5000,
+          });
+          
+          // Refresh notifications
+          fetchNotifications();
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
           schema: "public",
           table: "notifications",
           filter: `user_id=eq.${currentUserId}`,
@@ -143,10 +163,14 @@ export function Notifications() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative hover:bg-hover-bg transition-all duration-200"
+        >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center animate-pulse">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}

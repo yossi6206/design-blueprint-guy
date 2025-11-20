@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import Search from "./pages/Search";
 import Bookmarks from "./pages/Bookmarks";
 import Hashtag from "./pages/Hashtag";
+import Followers from "./pages/Followers";
 import Test from "./Test";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile/:handle" element={<Profile />} />
+          <Route path="/profile/:handle/followers" element={<Followers />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/search" element={<Search />} />
           <Route path="/bookmarks" element={<Bookmarks />} />

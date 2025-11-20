@@ -204,28 +204,33 @@ export const RightSidebar = () => {
       )}
 
       {trendingHashtags.length > 0 && (
-        <div className="bg-muted rounded-2xl p-4 mb-4">
-          <h2 className="text-xl font-bold mb-4">Trending Hashtags</h2>
-          <div className="space-y-3">
+        <div className="bg-muted rounded-2xl p-4 mb-4 border border-primary/10">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="bg-primary/10 rounded-full p-2">
+              <Hash className="h-5 w-5 text-primary" />
+            </div>
+            <h2 className="text-xl font-bold">נושאים חמים</h2>
+          </div>
+          <div className="space-y-2">
             {trendingHashtags.map((hashtag, i) => (
               <Link
                 key={hashtag.tag}
                 to={`/hashtag/${hashtag.tag}`}
-                className="block hover:bg-accent -mx-4 px-4 py-2 rounded-lg transition-colors"
+                className="block hover:bg-accent/50 -mx-4 px-4 py-3 rounded-xl transition-all hover:scale-[1.02]"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Hash className="h-4 w-4 text-primary" />
-                      <h3 className="font-bold">#{hashtag.tag}</h3>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-sm font-bold text-primary">{i + 1}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {hashtag.count} {hashtag.count === 1 ? "פוסט" : "פוסטים"}
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-sm truncate">#{hashtag.tag}</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {hashtag.count} {hashtag.count === 1 ? "פוסט" : "פוסטים"}
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-2xl font-bold text-primary/20">
-                    {i + 1}
-                  </span>
+                  <Hash className="h-4 w-4 text-primary/40 flex-shrink-0" />
                 </div>
               </Link>
             ))}

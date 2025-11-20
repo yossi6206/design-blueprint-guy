@@ -116,7 +116,7 @@ const Auth = () => {
 
       {/* Auth Form */}
       <div className="w-full flex items-center justify-center p-8 relative z-10">
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full max-w-md space-y-8 animate-fade-in">
           <div className="text-center space-y-6">
             <div className="flex flex-col items-center gap-4">
               <div className="text-7xl font-bold relative">

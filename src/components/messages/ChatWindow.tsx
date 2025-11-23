@@ -58,6 +58,11 @@ export const ChatWindow = ({
     fetchMessages();
     markAsRead();
 
+    // בקשת הרשאה להתראות
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
     // הקשבה להודעות חדשות בזמן אמת
     const messagesChannel = supabase
       .channel(`messages-${conversationId}`)
@@ -70,9 +75,25 @@ export const ChatWindow = ({
           filter: `conversation_id=eq.${conversationId}`,
         },
         (payload) => {
-          setMessages((current) => [...current, payload.new as Message]);
-          if (payload.new.sender_id !== currentUserId) {
+          const newMessage = payload.new as Message;
+          setMessages((current) => [...current, newMessage]);
+          
+          if (newMessage.sender_id !== currentUserId) {
             markAsRead();
+            
+            // שלח התראה רק אם הטאב לא פעיל
+            if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+              const notification = new Notification(`הודעה חדשה מ-${otherUser.user_name}`, {
+                body: newMessage.content,
+                icon: otherUser.avatar_url || '/placeholder.svg',
+                tag: conversationId,
+              });
+              
+              notification.onclick = () => {
+                window.focus();
+                notification.close();
+              };
+            }
           }
         }
       )

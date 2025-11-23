@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,15 +9,28 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Auth = () => {
+  const [searchParams] = useSearchParams();
+  const isResetMode = searchParams.get("mode") === "reset";
+  
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [isResetPassword, setIsResetPassword] = useState(isResetMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [handle, setHandle] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (isResetMode) {
+      setIsResetPassword(true);
+      setIsForgotPassword(false);
+      setIsSignUp(false);
+    }
+  }, [isResetMode]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,9 +98,28 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      const resetLink = `${window.location.origin}/auth?mode=reset`;
+      
+      // Call edge function to send custom email
+      const { error: functionError } = await supabase.functions.invoke(
+        'send-reset-password-email',
+        {
+          body: {
+            email,
+            resetLink,
+          },
+        }
+      );
+
+      if (functionError) {
+        console.error("Edge function error:", functionError);
+      }
+
+      // Still call the Supabase reset to generate the token
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth?mode=reset`,
+        redirectTo: resetLink,
       });
+      
       if (error) throw error;
       
       toast({
@@ -96,6 +128,53 @@ const Auth = () => {
       });
       setIsForgotPassword(false);
       setEmail("");
+    } catch (error: any) {
+      toast({
+        title: "שגיאה",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast({
+        title: "שגיאה",
+        description: "הסיסמאות אינן תואמות",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "שגיאה",
+        description: "הסיסמה חייבת להכיל לפחות 6 תווים",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: password,
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "הסיסמה עודכנה!",
+        description: "הסיסמה שלך שונתה בהצלחה",
+      });
+      
+      navigate("/");
     } catch (error: any) {
       toast({
         title: "שגיאה",
@@ -152,9 +231,9 @@ const Auth = () => {
               </div>
               <div className="space-y-2">
                 <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-                  {isForgotPassword ? "שחזור סיסמה" : "הקול שלך."}
+                  {isForgotPassword ? "שחזור סיסמה" : isResetPassword ? "סיסמה חדשה" : "הקול שלך."}
                 </h1>
-                {!isForgotPassword && (
+                {!isForgotPassword && !isResetPassword && (
                   <h1 className="text-4xl md:text-5xl font-bold text-foreground">
                     החופש שלך.
                   </h1>
@@ -163,7 +242,35 @@ const Auth = () => {
             </div>
           </div>
 
-          {isForgotPassword ? (
+          {isResetPassword ? (
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <Input
+                type="password"
+                placeholder="סיסמה חדשה"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="h-12"
+              />
+              <Input
+                type="password"
+                placeholder="אשר סיסמה"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="h-12"
+              />
+
+              <Button 
+                type="submit" 
+                className="w-full h-14 text-lg font-semibold bg-gradient-primary hover:opacity-90 transition-all duration-300" 
+                disabled={loading}
+                size="lg"
+              >
+                {loading ? "מעדכן..." : "עדכן סיסמה"}
+              </Button>
+            </form>
+          ) : isForgotPassword ? (
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <Input
                 type="email"

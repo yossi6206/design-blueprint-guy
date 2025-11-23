@@ -43,14 +43,16 @@ export const ChatWindow = ({
 }: ChatWindowProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     fetchMessages();
     markAsRead();
 
     // הקשבה להודעות חדשות בזמן אמת
-    const channel = supabase
+    const messagesChannel = supabase
       .channel(`messages-${conversationId}`)
       .on(
         "postgres_changes",
@@ -69,10 +71,25 @@ export const ChatWindow = ({
       )
       .subscribe();
 
+    // ערוץ נפרד עבור typing indicators
+    const typingChannel = supabase.channel(`typing-${conversationId}`)
+      .on('presence', { event: 'sync' }, () => {
+        const state = typingChannel.presenceState();
+        const typingUsers = Object.values(state).flat();
+        const otherUserTyping = typingUsers.some(
+          (user: any) => user.user_id === otherUser.id && user.typing === true
+        );
+        setIsOtherUserTyping(otherUserTyping);
+      })
+      .subscribe();
+
+    typingChannelRef.current = typingChannel;
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(typingChannel);
     };
-  }, [conversationId, currentUserId]);
+  }, [conversationId, currentUserId, otherUser.id]);
 
   useEffect(() => {
     // גלילה אוטומטית להודעה האחרונה
@@ -206,11 +223,33 @@ export const ChatWindow = ({
               </div>
             );
           })}
+          
+          {/* אינדיקטור הקלדה */}
+          {isOtherUserTyping && (
+            <div className="flex gap-3 animate-fade-in">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={otherUser.avatar_url || ""} />
+                <AvatarFallback>{otherUser.user_name[0]}</AvatarFallback>
+              </Avatar>
+              <div className="bg-secondary text-secondary-foreground rounded-2xl px-4 py-2">
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </ScrollArea>
 
       {/* קלט הודעה */}
-      <MessageInput onSend={handleSendMessage} />
+      <MessageInput 
+        onSend={handleSendMessage}
+        conversationId={conversationId}
+        currentUserId={currentUserId}
+        typingChannel={typingChannelRef.current}
+      />
     </div>
   );
 };

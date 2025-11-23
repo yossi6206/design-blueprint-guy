@@ -99,7 +99,23 @@ const Auth = () => {
 
     try {
       const resetLink = `${window.location.origin}/auth?mode=reset`;
+      
+      // Call edge function to send custom email
+      const { error: functionError } = await supabase.functions.invoke(
+        'send-reset-password-email',
+        {
+          body: {
+            email,
+            resetLink,
+          },
+        }
+      );
 
+      if (functionError) {
+        console.error("Edge function error:", functionError);
+      }
+
+      // Still call the Supabase reset to generate the token
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: resetLink,
       });
@@ -107,8 +123,8 @@ const Auth = () => {
       if (error) throw error;
       
       toast({
-        title: "✅ מייל נשלח בהצלחה!",
-        description: "בדוק את תיבת הדואר שלך (כולל תיקיית הספאם) וללחץ על הקישור לאיפוס הסיסמה",
+        title: "מייל נשלח!",
+        description: "בדוק את תיבת הדואר שלך לקישור איפוס הסיסמה",
       });
       setIsForgotPassword(false);
       setEmail("");
@@ -123,32 +139,13 @@ const Auth = () => {
     }
   };
 
-  const getPasswordStrength = (pass: string) => {
-    if (pass.length === 0) return { strength: 0, text: "", color: "" };
-    if (pass.length < 6) return { strength: 1, text: "חלשה", color: "bg-red-500" };
-    if (pass.length < 8) return { strength: 2, text: "בינונית", color: "bg-yellow-500" };
-    
-    const hasUpperCase = /[A-Z]/.test(pass);
-    const hasLowerCase = /[a-z]/.test(pass);
-    const hasNumbers = /\d/.test(pass);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
-    
-    const strengthLevel = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChar].filter(Boolean).length;
-    
-    if (strengthLevel >= 3 && pass.length >= 10) return { strength: 4, text: "חזקה מאוד", color: "bg-green-600" };
-    if (strengthLevel >= 2 && pass.length >= 8) return { strength: 3, text: "חזקה", color: "bg-green-500" };
-    return { strength: 2, text: "בינונית", color: "bg-yellow-500" };
-  };
-
-  const passwordStrength = getPasswordStrength(password);
-
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
       toast({
-        title: "❌ שגיאה",
-        description: "הסיסמאות אינן תואמות. נסה שוב.",
+        title: "שגיאה",
+        description: "הסיסמאות אינן תואמות",
         variant: "destructive",
       });
       return;
@@ -156,7 +153,7 @@ const Auth = () => {
 
     if (password.length < 6) {
       toast({
-        title: "❌ סיסמה חלשה",
+        title: "שגיאה",
         description: "הסיסמה חייבת להכיל לפחות 6 תווים",
         variant: "destructive",
       });
@@ -173,15 +170,15 @@ const Auth = () => {
       if (error) throw error;
       
       toast({
-        title: "✅ הסיסמה עודכנה בהצלחה!",
-        description: "אתה מועבר כעת לדף הבית",
+        title: "הסיסמה עודכנה!",
+        description: "הסיסמה שלך שונתה בהצלחה",
       });
       
-      setTimeout(() => navigate("/"), 1500);
+      navigate("/");
     } catch (error: any) {
       toast({
-        title: "❌ שגיאה",
-        description: error.message || "לא הצלחנו לעדכן את הסיסמה. נסה שוב.",
+        title: "שגיאה",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -247,38 +244,14 @@ const Auth = () => {
 
           {isResetPassword ? (
             <form onSubmit={handleResetPassword} className="space-y-4">
-              <div className="space-y-2">
-                <Input
-                  type="password"
-                  placeholder="סיסמה חדשה"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="h-12"
-                />
-                {password && (
-                  <div className="space-y-1">
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4].map((level) => (
-                        <div
-                          key={level}
-                          className={`h-1 flex-1 rounded-full transition-all ${
-                            level <= passwordStrength.strength
-                              ? passwordStrength.color
-                              : "bg-muted"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    {passwordStrength.text && (
-                      <p className="text-xs text-muted-foreground text-center">
-                        חוזק הסיסמה: <span className={passwordStrength.strength >= 3 ? "text-green-500" : "text-yellow-500"}>{passwordStrength.text}</span>
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-              
+              <Input
+                type="password"
+                placeholder="סיסמה חדשה"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="h-12"
+              />
               <Input
                 type="password"
                 placeholder="אשר סיסמה"
@@ -288,38 +261,17 @@ const Auth = () => {
                 className="h-12"
               />
 
-              {confirmPassword && password !== confirmPassword && (
-                <p className="text-xs text-red-500 text-center">
-                  ⚠️ הסיסמאות אינן תואמות
-                </p>
-              )}
-
               <Button 
                 type="submit" 
                 className="w-full h-14 text-lg font-semibold bg-gradient-primary hover:opacity-90 transition-all duration-300" 
-                disabled={loading || password !== confirmPassword || password.length < 6}
+                disabled={loading}
                 size="lg"
               >
-                {loading ? "מעדכן..." : "🔐 עדכן סיסמה"}
+                {loading ? "מעדכן..." : "עדכן סיסמה"}
               </Button>
-
-              <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-2">
-                <p className="text-xs font-semibold text-foreground">💡 טיפים לסיסמה חזקה:</p>
-                <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
-                  <li>לפחות 8 תווים</li>
-                  <li>אותיות גדולות וקטנות</li>
-                  <li>מספרים ותווים מיוחדים (!@#$%)</li>
-                </ul>
-              </div>
             </form>
           ) : isForgotPassword ? (
             <form onSubmit={handleForgotPassword} className="space-y-4">
-              <div className="bg-muted/30 border border-border rounded-lg p-4 mb-4">
-                <p className="text-sm text-muted-foreground text-center">
-                  🔐 נשלח לך מייל עם קישור לאיפוס הסיסמה
-                </p>
-              </div>
-
               <Input
                 type="email"
                 placeholder="אימייל"
@@ -335,7 +287,7 @@ const Auth = () => {
                 disabled={loading}
                 size="lg"
               >
-                {loading ? "📧 שולח..." : "📧 שלח קישור לאיפוס"}
+                {loading ? "שולח..." : "שלח קישור לאיפוס"}
               </Button>
 
               <Button
@@ -348,7 +300,7 @@ const Auth = () => {
                 }}
                 disabled={loading}
               >
-                ← חזור להתחברות
+                חזור להתחברות
               </Button>
             </form>
           ) : (

@@ -41,17 +41,48 @@ export const ConversationsList = ({
   useEffect(() => {
     fetchConversations();
 
+    // בקשת הרשאה להתראות
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
     // הקשבה לעדכונים בזמן אמת
     const channel = supabase
       .channel("conversations-changes")
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
           schema: "public",
           table: "messages",
         },
-        () => {
+        async (payload) => {
+          const newMessage = payload.new as any;
+          
+          // בדוק אם ההודעה היא לא מהמשתמש הנוכחי
+          if (newMessage.sender_id !== currentUserId) {
+            // קבלת פרטי השולח
+            const { data: senderProfile } = await supabase
+              .from("profiles")
+              .select("user_name, avatar_url")
+              .eq("id", newMessage.sender_id)
+              .single();
+
+            // שלח התראה רק אם הטאב לא פעיל
+            if (document.hidden && 'Notification' in window && Notification.permission === 'granted' && senderProfile) {
+              const notification = new Notification(`הודעה חדשה מ-${senderProfile.user_name}`, {
+                body: newMessage.content,
+                icon: senderProfile.avatar_url || '/placeholder.svg',
+                tag: newMessage.conversation_id,
+              });
+              
+              notification.onclick = () => {
+                window.focus();
+                notification.close();
+              };
+            }
+          }
+          
           fetchConversations();
         }
       )
@@ -189,6 +220,8 @@ export const ConversationsList = ({
             className={`w-full text-right p-4 rounded-lg transition-colors hover:bg-accent ${
               selectedConversationId === conv.id
                 ? "bg-accent"
+                : conv.unread_count > 0 
+                ? "bg-accent/50" 
                 : ""
             }`}
           >
@@ -218,8 +251,8 @@ export const ConversationsList = ({
                     </span>
                   )}
                 </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground truncate">
+                <div className="flex items-center justify-between gap-2">
+                  <p className={`text-sm truncate ${conv.unread_count > 0 ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
                     {conv.last_message
                       ? conv.last_message.sender_id === currentUserId
                         ? `את/ה: ${conv.last_message.content}`
@@ -227,7 +260,7 @@ export const ConversationsList = ({
                       : "אין הודעות עדיין"}
                   </p>
                   {conv.unread_count > 0 && (
-                    <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5 mr-2">
+                    <span className="bg-primary text-primary-foreground text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5 shrink-0">
                       {conv.unread_count}
                     </span>
                   )}

@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MessageInput } from "./MessageInput";
 import { formatDistanceToNow } from "date-fns";
 import { he } from "date-fns/locale";
-import { ArrowRight, MoreVertical, Edit, Trash, Check, X, Search } from "lucide-react";
+import { ArrowRight, MoreVertical, Edit, Trash, Check, X, Search, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -97,6 +97,23 @@ export const ChatWindow = ({
           }
         }
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const updatedMessage = payload.new as Message;
+          setMessages((current) =>
+            current.map((msg) =>
+              msg.id === updatedMessage.id ? updatedMessage : msg
+            )
+          );
+        }
+      )
       .subscribe();
 
     // ערוץ נפרד עבור typing indicators
@@ -145,11 +162,27 @@ export const ChatWindow = ({
 
   const markAsRead = async () => {
     try {
+      // עדכון last_read_at של המשתמש
       await supabase
         .from("conversation_participants")
         .update({ last_read_at: new Date().toISOString() })
         .eq("conversation_id", conversationId)
         .eq("user_id", currentUserId);
+
+      // עדכון is_read של כל ההודעות שלא מהמשתמש הנוכחי
+      await supabase
+        .from("messages")
+        .update({ is_read: true })
+        .eq("conversation_id", conversationId)
+        .neq("sender_id", currentUserId)
+        .eq("is_read", false);
+
+      // עדכון המסרים המקומיים
+      setMessages((current) =>
+        current.map((msg) =>
+          msg.sender_id !== currentUserId ? { ...msg, is_read: true } : msg
+        )
+      );
     } catch (error) {
       console.error("Error marking as read:", error);
     }
@@ -363,43 +396,54 @@ export const ChatWindow = ({
                         <p className="text-sm break-words">{message.content}</p>
                       </div>
                       {isOwn && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleStartEdit(message.id, message.content)
-                              }
-                            >
-                              <Edit className="h-4 w-4 ml-2" />
-                              ערוך
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteMessage(message.id)}
-                              className="text-destructive"
-                            >
-                              <Trash className="h-4 w-4 ml-2" />
-                              מחק
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex items-center gap-1">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleStartEdit(message.id, message.content)
+                                }
+                              >
+                                <Edit className="h-4 w-4 ml-2" />
+                                ערוך
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteMessage(message.id)}
+                                className="text-destructive"
+                              >
+                                <Trash className="h-4 w-4 ml-2" />
+                                מחק
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       )}
                     </div>
                   )}
-                  <span className="text-xs text-muted-foreground mt-1">
-                    {formatDistanceToNow(new Date(message.created_at), {
-                      addSuffix: true,
-                      locale: he,
-                    })}
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(message.created_at), {
+                        addSuffix: true,
+                        locale: he,
+                      })}
+                    </span>
+                    {isOwn && (
+                      message.is_read ? (
+                        <CheckCheck className="h-3.5 w-3.5 text-primary" />
+                      ) : (
+                        <Check className="h-3.5 w-3.5 text-muted-foreground" />
+                      )
+                    )}
+                  </div>
                 </div>
               </div>
             );

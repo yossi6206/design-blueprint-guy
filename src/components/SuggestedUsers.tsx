@@ -43,6 +43,7 @@ export default function SuggestedUsers({
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
+        setSuggestions([]);
         setLoading(false);
         return;
       }
@@ -51,11 +52,22 @@ export default function SuggestedUsers({
         body: { limit }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Silently handle 401 errors (user not authenticated)
+        if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+          setSuggestions([]);
+          return;
+        }
+        throw error;
+      }
 
       setSuggestions(data.suggestions || []);
-    } catch (error) {
-      console.error('Error fetching suggestions:', error);
+    } catch (error: any) {
+      // Only log non-authentication errors
+      if (!error?.message?.includes('401') && !error?.message?.includes('Unauthorized')) {
+        console.error('Error fetching suggestions:', error);
+      }
+      setSuggestions([]);
     } finally {
       setLoading(false);
     }

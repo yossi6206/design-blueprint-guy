@@ -1,17 +1,55 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { RealtimeChannel } from "@supabase/supabase-js";
 
 interface MessageInputProps {
   onSend: (content: string) => Promise<void>;
+  conversationId: string;
+  currentUserId: string;
+  typingChannel: RealtimeChannel | null;
 }
 
-export const MessageInput = ({ onSend }: MessageInputProps) => {
+export const MessageInput = ({ onSend, conversationId, currentUserId, typingChannel }: MessageInputProps) => {
   const [content, setContent] = useState("");
   const [sending, setSending] = useState(false);
   const { toast } = useToast();
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const sendTypingIndicator = (isTyping: boolean) => {
+    if (typingChannel) {
+      typingChannel.track({
+        user_id: currentUserId,
+        typing: isTyping,
+      });
+    }
+  };
+
+  const handleContentChange = (value: string) => {
+    setContent(value);
+    
+    // שליחת אינדיקטור שהמשתמש מקליד
+    if (value.trim() && !sending) {
+      sendTypingIndicator(true);
+      
+      // איפוס הטיימר הקודם
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      
+      // הגדרת טיימר חדש שיעצור את האינדיקטור אחרי 3 שניות
+      typingTimeoutRef.current = setTimeout(() => {
+        sendTypingIndicator(false);
+      }, 3000);
+    } else if (!value.trim()) {
+      sendTypingIndicator(false);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +72,12 @@ export const MessageInput = ({ onSend }: MessageInputProps) => {
       return;
     }
 
+    // עצירת אינדיקטור ההקלדה
+    sendTypingIndicator(false);
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
     setSending(true);
     try {
       await onSend(content.trim());
@@ -49,6 +93,16 @@ export const MessageInput = ({ onSend }: MessageInputProps) => {
     }
   };
 
+  useEffect(() => {
+    return () => {
+      // ניקוי האינדיקטור כשהקומפוננטה נסגרת
+      sendTypingIndicator(false);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -61,7 +115,7 @@ export const MessageInput = ({ onSend }: MessageInputProps) => {
       <div className="flex gap-2">
         <Textarea
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => handleContentChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="כתוב הודעה..."
           className="resize-none"

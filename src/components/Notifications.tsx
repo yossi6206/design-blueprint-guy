@@ -43,6 +43,32 @@ export function Notifications() {
     fetchCurrentUser();
   }, []);
 
+  // Play notification sound
+  const playNotificationSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Set sound properties - pleasant notification beep
+      oscillator.frequency.value = 800; // Hz
+      oscillator.type = 'sine';
+      
+      // Volume envelope for smooth sound
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (error) {
+      console.error('Error playing notification sound:', error);
+    }
+  };
+
   useEffect(() => {
     if (!currentUserId) return;
 
@@ -62,6 +88,9 @@ export function Notifications() {
         (payload) => {
           console.log("התראה חדשה התקבלה:", payload);
           const newNotification = payload.new as Notification;
+          
+          // Play notification sound
+          playNotificationSound();
           
           // Show toast for new notification
           toast.info(`${newNotification.actor_name} ${getNotificationText(newNotification)}`, {

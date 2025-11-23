@@ -152,13 +152,13 @@ export const Feed = () => {
   if (!user) return null;
   
   return (
-    <div className="flex-1 border-r border-border max-w-[600px]">
-      <div className="sticky top-0 bg-background/80 backdrop-blur-md z-10 border-b border-border">
-        <div className="flex justify-between items-center p-4 gap-2">
-          <h1 className="text-xl font-bold">הבית</h1>
-          <div className="flex items-center gap-2">
+    <div className="flex-1 border-r border-border w-full max-w-[600px] min-w-[320px]">
+      <div className="sticky top-0 bg-background/80 backdrop-blur-md z-10 border-b border-border min-h-[73px]">
+        <div className="flex justify-between items-center p-4 gap-2 h-full">
+          <h1 className="text-xl font-bold flex-shrink-0">הבית</h1>
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Notifications />
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="flex-shrink-0">
               <LogOut className="h-5 w-5" />
             </Button>
           </div>

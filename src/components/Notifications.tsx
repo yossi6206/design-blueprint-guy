@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 interface Notification {
   id: string;
-  type: "like" | "comment" | "follow" | "new_post" | "retweet" | "mention";
+  type: "like" | "comment" | "follow" | "new_post" | "retweet" | "mention" | "boost";
   actor_id: string;
   actor_name: string;
   actor_handle: string;
@@ -191,6 +191,8 @@ export function Notifications() {
           : "עשה ריטוויט לפוסט שלך";
       case "mention":
         return "תייג אותך בפוסט";
+      case "boost":
+        return "קידם את הפוסט שלך 🚀";
       default:
         return "";
     }

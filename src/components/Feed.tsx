@@ -16,6 +16,12 @@ interface Post {
   image?: string;
   created_at: string;
   user_id: string;
+  engagement_score?: number;
+  is_boosted?: boolean;
+  likes_count?: number;
+  comments_count?: number;
+  retweets_count?: number;
+  boosts_count?: number;
 }
 
 export const Feed = () => {
@@ -25,6 +31,7 @@ export const Feed = () => {
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
   const [userName, setUserName] = useState<string>("משתמש");
   const [userHandle, setUserHandle] = useState<string>("user");
+  const [hasNewPosts, setHasNewPosts] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -74,7 +81,7 @@ export const Feed = () => {
     fetchPosts();
     fetchFollowingPosts();
 
-    const channel = supabase
+    const postsChannel = supabase
       .channel("posts-changes")
       .on(
         "postgres_changes",
@@ -82,6 +89,25 @@ export const Feed = () => {
           event: "*",
           schema: "public",
           table: "posts",
+        },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            setHasNewPosts(true);
+          }
+          fetchPosts();
+          fetchFollowingPosts();
+        }
+      )
+      .subscribe();
+
+    const boostsChannel = supabase
+      .channel("boosts-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "post_boosts",
         },
         () => {
           fetchPosts();
@@ -91,15 +117,16 @@ export const Feed = () => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(postsChannel);
+      supabase.removeChannel(boostsChannel);
     };
   }, [user, currentUserId]);
 
   const fetchPosts = async () => {
     const { data, error } = await supabase
-      .from("posts")
+      .from("post_engagement_view")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("engagement_score", { ascending: false });
 
     if (error) {
       console.error("Error fetching posts:", error);
@@ -120,10 +147,10 @@ export const Feed = () => {
       const followingIds = following.map((f) => f.following_id);
       
       const { data, error } = await supabase
-        .from("posts")
+        .from("post_engagement_view")
         .select("*")
         .in("user_id", followingIds)
-        .order("created_at", { ascending: false });
+        .order("engagement_score", { ascending: false });
 
       if (!error) {
         setFollowingPosts(data || []);
@@ -131,6 +158,12 @@ export const Feed = () => {
     } else {
       setFollowingPosts([]);
     }
+  };
+
+  const handleRefreshFeed = () => {
+    setHasNewPosts(false);
+    fetchPosts();
+    fetchFollowingPosts();
   };
 
   const handleLogout = async () => {
@@ -165,6 +198,15 @@ export const Feed = () => {
         </div>
       </div>
 
+      {hasNewPosts && (
+        <div 
+          className="sticky top-[73px] z-20 bg-primary text-primary-foreground px-4 py-2 text-center cursor-pointer hover:bg-primary/90 transition-colors"
+          onClick={handleRefreshFeed}
+        >
+          <p className="text-sm font-medium">יש פוסטים חדשים - לחץ לרענון</p>
+        </div>
+      )}
+
       <NewPostForm 
         onPostCreated={() => {
           fetchPosts();
@@ -192,6 +234,11 @@ export const Feed = () => {
               image={post.image}
               userId={post.user_id}
               currentUserId={currentUserId}
+              isBoosted={post.is_boosted}
+              initialLikesCount={post.likes_count}
+              initialCommentsCount={post.comments_count}
+              initialRetweetsCount={post.retweets_count}
+              initialBoostsCount={post.boosts_count}
             />
           ))}
         </TabsContent>
@@ -214,6 +261,11 @@ export const Feed = () => {
                 image={post.image}
                 userId={post.user_id}
                 currentUserId={currentUserId}
+                isBoosted={post.is_boosted}
+                initialLikesCount={post.likes_count}
+                initialCommentsCount={post.comments_count}
+                initialRetweetsCount={post.retweets_count}
+                initialBoostsCount={post.boosts_count}
               />
             ))
           )}

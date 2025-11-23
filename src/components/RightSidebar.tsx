@@ -6,8 +6,10 @@ import { Link } from "react-router-dom";
 import SuggestedUsers from "./SuggestedUsers";
 
 interface TrendingHashtag {
+  id: string;
   tag: string;
-  count: number;
+  post_count: number;
+  recent_post_count: number;
 }
 
 export const RightSidebar = () => {
@@ -19,55 +21,16 @@ export const RightSidebar = () => {
 
   const fetchTrendingHashtags = async () => {
     try {
-      // Get all hashtag IDs with their post counts
-      const { data: postHashtagsData, error: postError } = await supabase
-        .from("post_hashtags")
-        .select("hashtag_id");
+      const { data, error } = await supabase
+        .from("trending_hashtags_view")
+        .select("*");
 
-      if (postError) {
-        console.error("Error fetching post hashtags:", postError);
+      if (error) {
+        console.error("Error fetching trending hashtags:", error);
         return;
       }
 
-      if (!postHashtagsData || postHashtagsData.length === 0) {
-        return;
-      }
-
-      // Count occurrences of each hashtag
-      const hashtagCounts = new Map<string, number>();
-      postHashtagsData.forEach((item) => {
-        const id = item.hashtag_id;
-        hashtagCounts.set(id, (hashtagCounts.get(id) || 0) + 1);
-      });
-
-      // Get unique hashtag IDs
-      const uniqueHashtagIds = Array.from(hashtagCounts.keys());
-
-      // Fetch hashtag details
-      const { data: hashtagsData, error: hashtagError } = await supabase
-        .from("hashtags")
-        .select("id, tag")
-        .in("id", uniqueHashtagIds);
-
-      if (hashtagError) {
-        console.error("Error fetching hashtags:", hashtagError);
-        return;
-      }
-
-      if (!hashtagsData) {
-        return;
-      }
-
-      // Combine counts with hashtag data
-      const trending = hashtagsData
-        .map((hashtag) => ({
-          tag: hashtag.tag,
-          count: hashtagCounts.get(hashtag.id) || 0,
-        }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10);
-
-      setTrendingHashtags(trending);
+      setTrendingHashtags(data || []);
     } catch (error) {
       console.error("Error in fetchTrendingHashtags:", error);
     }
@@ -123,7 +86,7 @@ export const RightSidebar = () => {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-sm truncate">#{hashtag.tag}</h3>
                       <p className="text-xs text-muted-foreground">
-                        {hashtag.count} {hashtag.count === 1 ? "פוסט" : "פוסטים"}
+                        {hashtag.recent_post_count} פוסטים היום · {hashtag.post_count} סה"כ
                       </p>
                     </div>
                   </div>

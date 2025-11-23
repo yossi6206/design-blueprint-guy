@@ -182,8 +182,8 @@ export const PostCard = ({
   return (
     <div className="border-b border-border p-4 hover:bg-accent/5 transition-colors">
       <div className="flex gap-3">
-        <Link to={`/profile/${handle}`}>
-          <Avatar>
+        <Link to={`/profile/${handle}`} className="flex-shrink-0">
+          <Avatar className="w-12 h-12">
             <AvatarImage src={avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${handle}`} />
             <AvatarFallback>{author[0]}</AvatarFallback>
           </Avatar>

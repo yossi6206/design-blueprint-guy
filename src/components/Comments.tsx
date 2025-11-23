@@ -175,8 +175,8 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
 
       <div className="space-y-3">
         {comments.map((comment) => (
-          <div key={comment.id} className="flex gap-2 p-3 rounded-lg bg-accent/20 animate-fade-in">
-            <Avatar className="w-8 h-8">
+          <div key={comment.id} className="flex gap-2 p-3 rounded-lg bg-accent/20">
+            <Avatar className="w-8 h-8 flex-shrink-0">
               <AvatarImage
                 src={comment.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.author_handle}`}
               />

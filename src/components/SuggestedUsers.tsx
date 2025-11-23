@@ -147,7 +147,7 @@ export default function SuggestedUsers({
       <div className="space-y-3">
         {suggestions.map((user) => (
           <div key={user.id} className="flex items-start gap-3 pb-3 border-b border-border last:border-0 last:pb-0 group">
-            <Link to={`/profile/${user.user_handle}`}>
+            <Link to={`/profile/${user.user_handle}`} className="flex-shrink-0">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={user.avatar_url || ""} />
                 <AvatarFallback>{user.user_name[0]?.toUpperCase()}</AvatarFallback>

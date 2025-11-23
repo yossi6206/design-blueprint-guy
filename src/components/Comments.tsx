@@ -13,6 +13,8 @@ interface Comment {
   created_at: string;
   user_id: string;
   avatar_url?: string;
+  parent_comment_id?: string | null;
+  replies?: Comment[];
 }
 
 interface CommentsProps {
@@ -28,6 +30,8 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
   const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState("");
   const [userHandle, setUserHandle] = useState("");
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyingToName, setReplyingToName] = useState<string>("");
 
   useEffect(() => {
     fetchComments();
@@ -79,7 +83,29 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
         avatar_url: avatarMap.get(comment.user_id) || null
       }));
       
-      setComments(commentsWithAvatars);
+      // Build threaded structure
+      const topLevelComments = commentsWithAvatars.filter(c => !c.parent_comment_id);
+      const repliesMap = new Map<string, Comment[]>();
+      
+      commentsWithAvatars.forEach(comment => {
+        if (comment.parent_comment_id) {
+          const replies = repliesMap.get(comment.parent_comment_id) || [];
+          replies.push(comment);
+          repliesMap.set(comment.parent_comment_id, replies);
+        }
+      });
+      
+      const attachReplies = (comment: Comment): Comment => {
+        const replies = repliesMap.get(comment.id) || [];
+        return {
+          ...comment,
+          replies: replies.map(attachReplies).sort((a, b) => 
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          )
+        };
+      };
+      
+      setComments(topLevelComments.map(attachReplies));
     }
   };
 
@@ -118,6 +144,7 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
       content: newComment,
       author_name: userName,
       author_handle: userHandle,
+      parent_comment_id: replyingTo,
     });
 
     if (error) {
@@ -128,11 +155,13 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
       });
     } else {
       setNewComment("");
+      setReplyingTo(null);
+      setReplyingToName("");
       if (onCommentAdded) {
         onCommentAdded();
       }
       toast({
-        title: "התגובה נוספה!",
+        title: replyingTo ? "התגובה נוספה לשרשור!" : "התגובה נוספה!",
       });
     }
 
@@ -150,14 +179,76 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
     return `${Math.floor(diffInSeconds / 86400)}י`;
   };
 
+  const renderComment = (comment: Comment, depth: number = 0) => (
+    <div key={comment.id} className={depth > 0 ? "mr-8 relative" : ""}>
+      {depth > 0 && (
+        <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-border" />
+      )}
+      <div className={`flex gap-2 p-3 rounded-lg ${depth > 0 ? 'bg-accent/10' : 'bg-accent/20'}`}>
+        <Avatar className="w-8 h-8 flex-shrink-0">
+          <AvatarImage
+            src={comment.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.author_handle}`}
+          />
+          <AvatarFallback>{comment.author_name[0]}</AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-bold text-sm">{comment.author_name}</span>
+            <span className="text-muted-foreground text-sm">@{comment.author_handle}</span>
+            <span className="text-muted-foreground text-sm">·</span>
+            <span className="text-muted-foreground text-sm">
+              {getTimeAgo(comment.created_at)}
+            </span>
+          </div>
+          <p className="mt-1 text-sm whitespace-pre-wrap break-words">{comment.content}</p>
+          {currentUserId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-1 h-7 px-2 text-xs text-muted-foreground hover:text-primary"
+              onClick={() => {
+                setReplyingTo(comment.id);
+                setReplyingToName(comment.author_name);
+              }}
+            >
+              הגב
+            </Button>
+          )}
+        </div>
+      </div>
+      {comment.replies && comment.replies.length > 0 && (
+        <div className="mt-2 space-y-2">
+          {comment.replies.map(reply => renderComment(reply, depth + 1))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="mt-4 space-y-4">
       {currentUserId && (
         <form onSubmit={handleSubmit} className="space-y-2">
+          {replyingTo && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-accent/20 p-2 rounded">
+              <span>מגיב ל-{replyingToName}</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-5 px-2"
+                onClick={() => {
+                  setReplyingTo(null);
+                  setReplyingToName("");
+                }}
+              >
+                ✕
+              </Button>
+            </div>
+          )}
           <Textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            placeholder="כתוב תגובה..."
+            placeholder={replyingTo ? `תגובה ל-${replyingToName}...` : "כתוב תגובה..."}
             className="min-h-[80px] resize-none"
             disabled={loading}
             maxLength={280}
@@ -174,27 +265,7 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
       )}
 
       <div className="space-y-3">
-        {comments.map((comment) => (
-          <div key={comment.id} className="flex gap-2 p-3 rounded-lg bg-accent/20">
-            <Avatar className="w-8 h-8 flex-shrink-0">
-              <AvatarImage
-                src={comment.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.author_handle}`}
-              />
-              <AvatarFallback>{comment.author_name[0]}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-sm">{comment.author_name}</span>
-                <span className="text-muted-foreground text-sm">@{comment.author_handle}</span>
-                <span className="text-muted-foreground text-sm">·</span>
-                <span className="text-muted-foreground text-sm">
-                  {getTimeAgo(comment.created_at)}
-                </span>
-              </div>
-              <p className="mt-1 text-sm whitespace-pre-wrap break-words">{comment.content}</p>
-            </div>
-          </div>
-        ))}
+        {comments.map((comment) => renderComment(comment, 0))}
       </div>
     </div>
   );

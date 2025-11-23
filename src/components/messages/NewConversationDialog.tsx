@@ -69,56 +69,14 @@ export const NewConversationDialog = ({
   const handleCreateConversation = async (otherUser: Profile) => {
     setCreating(true);
     try {
-      // בדיקה אם קיימת כבר שיחה עם המשתמש
-      const { data: existingParticipants } = await supabase
-        .from("conversation_participants")
-        .select("conversation_id")
-        .eq("user_id", currentUserId);
+      // Use database function to create conversation with participants atomically
+      const { data: conversationId, error } = await supabase
+        .rpc('create_conversation_with_participants', {
+          other_user_id: otherUser.id
+        });
 
-      if (existingParticipants) {
-        for (const participant of existingParticipants) {
-          const { data: otherParticipant } = await supabase
-            .from("conversation_participants")
-            .select("user_id")
-            .eq("conversation_id", participant.conversation_id)
-            .eq("user_id", otherUser.id)
-            .single();
-
-          if (otherParticipant) {
-            // כבר קיימת שיחה
-            onConversationCreated(participant.conversation_id, otherUser);
-            onOpenChange(false);
-            setSearchQuery("");
-            setSearchResults([]);
-            return;
-          }
-        }
-      }
-
-      // יצירת שיחה חדשה - הקוד יחזיר את ה-ID אוטומטית
-      const { data, error: convError } = await supabase
-        .from("conversations")
-        .insert([{}])
-        .select("id");
-
-      if (convError) throw convError;
-      if (!data || data.length === 0) throw new Error("Failed to create conversation");
-      
-      const conversationId = data[0].id;
-
-      // הוספת שני המשתתפים
-      const { error: participantsError } = await supabase
-        .from("conversation_participants")
-        .insert([
-          { conversation_id: conversationId, user_id: currentUserId },
-          { conversation_id: conversationId, user_id: otherUser.id },
-        ]);
-
-      if (participantsError) {
-        // נסה למחוק את השיחה אם הוספת המשתתפים נכשלה
-        await supabase.from("conversations").delete().eq("id", conversationId);
-        throw participantsError;
-      }
+      if (error) throw error;
+      if (!conversationId) throw new Error("Failed to create conversation");
 
       onConversationCreated(conversationId, otherUser);
       onOpenChange(false);

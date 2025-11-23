@@ -884,6 +884,10 @@ export type Database = {
         Args: { admin_user_id: string; note?: string; request_id: string }
         Returns: undefined
       }
+      create_conversation_with_participants: {
+        Args: { other_user_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

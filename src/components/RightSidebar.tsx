@@ -96,7 +96,9 @@ export const RightSidebar = () => {
         </Button>
       </div>
 
-      <SuggestedUsers limit={5} />
+      <div className="mb-4">
+        <SuggestedUsers limit={5} />
+      </div>
 
       {trendingHashtags.length > 0 && (
         <div className="bg-muted rounded-2xl p-4 mb-4 border border-primary/10">

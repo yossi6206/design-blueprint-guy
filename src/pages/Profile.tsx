@@ -189,7 +189,7 @@ export default function Profile() {
               <div className="flex items-center gap-1">
                 <h1 className="text-xl font-bold">{profile.user_name}</h1>
                 {profile.is_verified && (
-                  <BadgeCheck className="h-5 w-5 text-primary fill-primary" />
+                  <BadgeCheck className="h-5 w-5 text-background fill-primary" />
                 )}
               </div>
               <p className="text-sm text-muted-foreground">{posts.length} פוסטים</p>
@@ -245,7 +245,7 @@ export default function Profile() {
               <div className="flex items-center gap-1">
                 <h2 className="text-xl font-bold">{profile.user_name}</h2>
                 {profile.is_verified && (
-                  <BadgeCheck className="h-5 w-5 text-primary fill-primary" />
+                  <BadgeCheck className="h-5 w-5 text-background fill-primary" />
                 )}
               </div>
               <p className="text-muted-foreground">@{profile.user_handle}</p>

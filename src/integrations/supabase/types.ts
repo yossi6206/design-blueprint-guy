@@ -38,6 +38,13 @@ export type Database = {
             foreignKeyName: "bookmarks_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
+            referencedRelation: "post_engagement_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookmarks_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
             referencedRelation: "posts"
             referencedColumns: ["id"]
           },
@@ -75,6 +82,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "post_engagement_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "comments_post_id_fkey"
             columns: ["post_id"]
@@ -365,6 +379,13 @@ export type Database = {
             foreignKeyName: "likes_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
+            referencedRelation: "post_engagement_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
             referencedRelation: "posts"
             referencedColumns: ["id"]
           },
@@ -393,6 +414,13 @@ export type Database = {
           post_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "mentions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "post_engagement_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "mentions_post_id_fkey"
             columns: ["post_id"]
@@ -485,6 +513,42 @@ export type Database = {
         }
         Relationships: []
       }
+      post_boosts: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_boosts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "post_engagement_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_boosts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_hashtags: {
         Row: {
           created_at: string
@@ -510,6 +574,20 @@ export type Database = {
             columns: ["hashtag_id"]
             isOneToOne: false
             referencedRelation: "hashtags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_hashtags_hashtag_id_fkey"
+            columns: ["hashtag_id"]
+            isOneToOne: false
+            referencedRelation: "trending_hashtags_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_hashtags_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "post_engagement_view"
             referencedColumns: ["id"]
           },
           {
@@ -559,6 +637,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "posts_original_post_id_fkey"
+            columns: ["original_post_id"]
+            isOneToOne: false
+            referencedRelation: "post_engagement_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "posts_original_post_id_fkey"
             columns: ["original_post_id"]
@@ -637,6 +722,13 @@ export type Database = {
             foreignKeyName: "retweets_original_post_id_fkey"
             columns: ["original_post_id"]
             isOneToOne: false
+            referencedRelation: "post_engagement_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retweets_original_post_id_fkey"
+            columns: ["original_post_id"]
+            isOneToOne: false
             referencedRelation: "posts"
             referencedColumns: ["id"]
           },
@@ -697,7 +789,50 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      post_engagement_view: {
+        Row: {
+          author_handle: string | null
+          author_name: string | null
+          boosts_count: number | null
+          comments_count: number | null
+          content: string | null
+          created_at: string | null
+          engagement_score: number | null
+          id: string | null
+          image: string | null
+          is_boosted: boolean | null
+          is_retweet: boolean | null
+          likes_count: number | null
+          original_post_id: string | null
+          retweets_count: number | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_original_post_id_fkey"
+            columns: ["original_post_id"]
+            isOneToOne: false
+            referencedRelation: "post_engagement_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_original_post_id_fkey"
+            columns: ["original_post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trending_hashtags_view: {
+        Row: {
+          id: string | null
+          post_count: number | null
+          recent_post_count: number | null
+          tag: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {

@@ -27,8 +27,9 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, ShieldCheck } from "lucide-react";
+import { Loader2, Plus, Trash2, ShieldCheck, BarChart3 } from "lucide-react";
 import { VerificationPanel } from "@/components/VerificationPanel";
+import { StatisticsOverview } from "@/components/admin/StatisticsOverview";
 
 const variantSchema = z.object({
   name: z.string().min(1, "שם הווריאנט נדרש"),
@@ -183,15 +184,23 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-5xl">
-      <Tabs defaultValue="experiments" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="experiments">ניסויי A/B</TabsTrigger>
+    <div className="container mx-auto py-8 px-4 max-w-6xl">
+      <Tabs defaultValue="statistics" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsTrigger value="statistics" className="gap-2">
+            <BarChart3 className="w-4 h-4" />
+            סטטיסטיקות
+          </TabsTrigger>
           <TabsTrigger value="verifications" className="gap-2">
             <ShieldCheck className="w-4 h-4" />
             אימותים
           </TabsTrigger>
+          <TabsTrigger value="experiments">ניסויי A/B</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="statistics">
+          <StatisticsOverview />
+        </TabsContent>
 
         <TabsContent value="experiments">
           <Card>

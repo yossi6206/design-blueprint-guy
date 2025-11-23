@@ -25,8 +25,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2, ShieldCheck } from "lucide-react";
+import { VerificationPanel } from "@/components/VerificationPanel";
 
 const variantSchema = z.object({
   name: z.string().min(1, "שם הווריאנט נדרש"),
@@ -181,15 +183,25 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="container mx-auto py-8 max-w-4xl" dir="rtl">
-      <Card>
-        <CardHeader>
-          <CardTitle>יצירת ניסוי A/B חדש</CardTitle>
-          <CardDescription>
-            הגדר ניסוי חדש עם ווריאנטים שונים של אלגוריתם המלצות
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="container mx-auto py-8 px-4 max-w-5xl">
+      <Tabs defaultValue="experiments" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="experiments">ניסויי A/B</TabsTrigger>
+          <TabsTrigger value="verifications" className="gap-2">
+            <ShieldCheck className="w-4 h-4" />
+            אימותים
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="experiments">
+          <Card>
+            <CardHeader>
+              <CardTitle>יצירת ניסוי A/B חדש</CardTitle>
+              <CardDescription>
+                הגדר ניסוי חדש עם ווריאנטים שונים של אלגוריתם המלצות
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -383,6 +395,12 @@ export default function AdminPanel() {
           </Form>
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="verifications">
+          <VerificationPanel />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -787,6 +787,51 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_requests: {
+        Row: {
+          admin_note: string | null
+          created_at: string
+          full_name: string
+          id: string
+          profession: string
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          social_links: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          profession: string
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          social_links?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          profession?: string
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          social_links?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       post_engagement_view: {
@@ -835,12 +880,20 @@ export type Database = {
       }
     }
     Functions: {
+      approve_verification_request: {
+        Args: { admin_user_id: string; note?: string; request_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      reject_verification_request: {
+        Args: { admin_user_id: string; note: string; request_id: string }
+        Returns: undefined
       }
       user_can_access_conversation: {
         Args: { conversation_uuid: string; user_uuid: string }

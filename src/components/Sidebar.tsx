@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Bell, MessageSquare, User, LogOut, MoreHorizontal, Search, Bookmark } from "lucide-react";
+import { Home, Bell, MessageSquare, User, LogOut, MoreHorizontal, Search, Bookmark, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,6 +9,7 @@ interface Profile {
   user_name: string;
   user_handle: string;
   avatar_url: string | null;
+  is_verified: boolean;
 }
 
 export const Sidebar = () => {
@@ -48,6 +49,10 @@ export const Sidebar = () => {
     { icon: Bookmark, label: "מועדפים", path: "/bookmarks" },
     { icon: User, label: "פרופיל", path: userProfile ? `/profile/${userProfile.user_handle}` : "/profile" },
   ];
+
+  const handleRequestVerification = () => {
+    navigate("/verification");
+  };
   return (
     <div className="w-[275px] h-screen sticky top-0 flex flex-col px-3 py-2 border-l border-border hidden md:flex">
       <div className="flex-1">
@@ -82,6 +87,18 @@ export const Sidebar = () => {
             <span className="text-xl">יציאה</span>
           </button>
         </nav>
+
+        {/* Request Verification Button - only if not verified */}
+        {userProfile && !userProfile.is_verified && (
+          <Button
+            onClick={handleRequestVerification}
+            variant="outline"
+            className="w-full gap-2 border-primary/20 hover:bg-primary/10 mt-4"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            בקש תג מאומת
+          </Button>
+        )}
       </div>
 
       {/* Profile Button */}

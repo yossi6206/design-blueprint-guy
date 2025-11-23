@@ -15,6 +15,7 @@ import Followers from "./pages/Followers";
 import Suggestions from "./pages/Suggestions";
 import ExperimentDashboard from "./pages/ExperimentDashboard";
 import AdminPanel from "./pages/AdminPanel";
+import VerificationRequest from "./pages/VerificationRequest";
 import Test from "./Test";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/suggestions" element={<Suggestions />} />
           <Route path="/experiments" element={<ExperimentDashboard />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/verification" element={<VerificationRequest />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/search" element={<Search />} />
           <Route path="/bookmarks" element={<Bookmarks />} />

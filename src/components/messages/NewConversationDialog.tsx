@@ -11,13 +11,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, BadgeCheck } from "lucide-react";
 
 interface Profile {
   id: string;
   user_name: string;
   user_handle: string;
   avatar_url: string | null;
+  is_verified: boolean;
 }
 
 interface NewConversationDialogProps {
@@ -178,7 +179,12 @@ export const NewConversationDialog = ({
                     <AvatarFallback>{user.user_name[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <p className="font-semibold">{user.user_name}</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-semibold">{user.user_name}</p>
+                      {user.is_verified && (
+                        <BadgeCheck className="h-4 w-4 text-background fill-primary shrink-0" />
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">
                       @{user.user_handle}
                     </p>

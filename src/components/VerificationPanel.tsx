@@ -114,6 +114,24 @@ export function VerificationPanel() {
     setProcessing(true);
 
     try {
+      // Check if user is admin
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", currentUserId)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (!roleData) {
+        toast({
+          title: "שגיאה",
+          description: "אין לך הרשאות אדמין לאשר בקשות",
+          variant: "destructive",
+        });
+        setProcessing(false);
+        return;
+      }
+
       if (actionType === "approve") {
         const { error } = await supabase.rpc("approve_verification_request", {
           request_id: selectedRequest.id,
@@ -134,6 +152,7 @@ export function VerificationPanel() {
             description: "חובה לספק סיבה לדחייה",
             variant: "destructive",
           });
+          setProcessing(false);
           return;
         }
 

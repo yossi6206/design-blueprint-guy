@@ -192,6 +192,30 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
     });
   };
 
+  const handleDeleteComment = async (commentId: string) => {
+    if (!confirm("האם אתה בטוח שברצונך למחוק תגובה זו?")) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from("comments")
+      .delete()
+      .eq("id", commentId);
+
+    if (error) {
+      toast({
+        title: "שגיאה במחיקת התגובה",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "התגובה נמחקה בהצלחה",
+      });
+      fetchComments();
+    }
+  };
+
   const renderComment = (comment: Comment, depth: number = 0) => {
     const isExpanded = expandedComments.has(comment.id);
     const hasReplies = comment.replies && comment.replies.length > 0;
@@ -209,13 +233,25 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
             <AvatarFallback>{comment.author_name[0]}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-bold text-sm">{comment.author_name}</span>
-              <span className="text-muted-foreground text-sm">@{comment.author_handle}</span>
-              <span className="text-muted-foreground text-sm">·</span>
-              <span className="text-muted-foreground text-sm">
-                {getTimeAgo(comment.created_at)}
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-bold text-sm">{comment.author_name}</span>
+                <span className="text-muted-foreground text-sm">@{comment.author_handle}</span>
+                <span className="text-muted-foreground text-sm">·</span>
+                <span className="text-muted-foreground text-sm">
+                  {getTimeAgo(comment.created_at)}
+                </span>
+              </div>
+              {currentUserId === comment.user_id && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                  onClick={() => handleDeleteComment(comment.id)}
+                >
+                  ✕
+                </Button>
+              )}
             </div>
             <p className="mt-1 text-sm whitespace-pre-wrap break-words">{comment.content}</p>
             <div className="flex items-center gap-2 mt-1">

@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MessageInput } from "./MessageInput";
 import { formatDistanceToNow } from "date-fns";
 import { he } from "date-fns/locale";
-import { ArrowRight, MoreVertical, Edit, Trash, Check, X } from "lucide-react";
+import { ArrowRight, MoreVertical, Edit, Trash, Check, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -49,6 +49,7 @@ export const ChatWindow = ({
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const { toast } = useToast();
@@ -211,6 +212,10 @@ export const ChatWindow = ({
     }
   };
 
+  const filteredMessages = messages.filter((message) =>
+    message.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (loading) {
     return (
       <div className="flex flex-col h-full">
@@ -249,10 +254,29 @@ export const ChatWindow = ({
         </div>
       </div>
 
+      {/* חיפוש הודעות */}
+      <div className="border-b p-3">
+        <div className="relative">
+          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="חפש הודעות..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pr-10"
+          />
+        </div>
+      </div>
+
       {/* הודעות */}
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
         <div className="space-y-4">
-          {messages.map((message) => {
+          {filteredMessages.length === 0 && searchQuery ? (
+            <div className="text-center text-muted-foreground py-8">
+              לא נמצאו הודעות התואמות לחיפוש
+            </div>
+          ) : (
+            filteredMessages.map((message) => {
             const isOwn = message.sender_id === currentUserId;
             const isEditing = editingMessageId === message.id;
             return (
@@ -358,7 +382,8 @@ export const ChatWindow = ({
                 </div>
               </div>
             );
-          })}
+          })
+          )}
           
           {/* אינדיקטור הקלדה */}
           {isOtherUserTyping && (

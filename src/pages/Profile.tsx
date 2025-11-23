@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Link2, MapPin, Calendar, MoreHorizontal } from "lucide-react";
+import { ArrowLeft, Link2, MapPin, Calendar, MoreHorizontal, BadgeCheck } from "lucide-react";
 import { PostCard } from "@/components/PostCard";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ interface Profile {
   location: string | null;
   created_at: string;
   updated_at: string;
+  is_verified: boolean;
 }
 
 interface Post {
@@ -184,7 +186,12 @@ export default function Profile() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-xl font-bold">{profile.user_name}</h1>
+              <div className="flex items-center gap-1">
+                <h1 className="text-xl font-bold">{profile.user_name}</h1>
+                {profile.is_verified && (
+                  <BadgeCheck className="h-5 w-5 text-primary fill-primary" />
+                )}
+              </div>
               <p className="text-sm text-muted-foreground">{posts.length} פוסטים</p>
             </div>
           </div>
@@ -235,7 +242,12 @@ export default function Profile() {
 
           <div className="space-y-3">
             <div>
-              <h2 className="text-xl font-bold">{profile.user_name}</h2>
+              <div className="flex items-center gap-1">
+                <h2 className="text-xl font-bold">{profile.user_name}</h2>
+                {profile.is_verified && (
+                  <BadgeCheck className="h-5 w-5 text-primary fill-primary" />
+                )}
+              </div>
               <p className="text-muted-foreground">@{profile.user_handle}</p>
             </div>
 

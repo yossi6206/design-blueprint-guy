@@ -6,8 +6,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MessageInput } from "./MessageInput";
 import { formatDistanceToNow } from "date-fns";
 import { he } from "date-fns/locale";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MoreVertical, Edit, Trash, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: string;
@@ -44,8 +47,11 @@ export const ChatWindow = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchMessages();
@@ -143,6 +149,68 @@ export const ChatWindow = ({
     }
   };
 
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      const { error } = await supabase
+        .from("messages")
+        .delete()
+        .eq("id", messageId);
+
+      if (error) throw error;
+
+      setMessages((current) => current.filter((msg) => msg.id !== messageId));
+      toast({
+        title: "ההודעה נמחקה בהצלחה",
+      });
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      toast({
+        title: "שגיאה במחיקת ההודעה",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleStartEdit = (messageId: string, content: string) => {
+    setEditingMessageId(messageId);
+    setEditContent(content);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessageId(null);
+    setEditContent("");
+  };
+
+  const handleSaveEdit = async (messageId: string) => {
+    if (!editContent.trim()) return;
+
+    try {
+      const { error } = await supabase
+        .from("messages")
+        .update({ content: editContent })
+        .eq("id", messageId);
+
+      if (error) throw error;
+
+      setMessages((current) =>
+        current.map((msg) =>
+          msg.id === messageId ? { ...msg, content: editContent } : msg
+        )
+      );
+      setEditingMessageId(null);
+      setEditContent("");
+      toast({
+        title: "ההודעה עודכנה בהצלחה",
+      });
+    } catch (error) {
+      console.error("Error updating message:", error);
+      toast({
+        title: "שגיאה בעדכון ההודעה",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col h-full">
@@ -186,6 +254,7 @@ export const ChatWindow = ({
         <div className="space-y-4">
           {messages.map((message) => {
             const isOwn = message.sender_id === currentUserId;
+            const isEditing = editingMessageId === message.id;
             return (
               <div
                 key={message.id}
@@ -204,15 +273,82 @@ export const ChatWindow = ({
                     isOwn ? "items-end" : "items-start"
                   }`}
                 >
-                  <div
-                    className={`rounded-2xl px-4 py-2 ${
-                      isOwn
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary text-secondary-foreground"
-                    }`}
-                  >
-                    <p className="text-sm break-words">{message.content}</p>
-                  </div>
+                  {isEditing ? (
+                    <div className="flex gap-2 items-center">
+                      <Input
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="text-sm"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSaveEdit(message.id);
+                          } else if (e.key === "Escape") {
+                            handleCancelEdit();
+                          }
+                        }}
+                      />
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8"
+                        onClick={() => handleSaveEdit(message.id)}
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8"
+                        onClick={handleCancelEdit}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 items-start group">
+                      <div
+                        className={`rounded-2xl px-4 py-2 ${
+                          isOwn
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-secondary text-secondary-foreground"
+                        }`}
+                      >
+                        <p className="text-sm break-words">{message.content}</p>
+                      </div>
+                      {isOwn && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleStartEdit(message.id, message.content)
+                              }
+                            >
+                              <Edit className="h-4 w-4 ml-2" />
+                              ערוך
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteMessage(message.id)}
+                              className="text-destructive"
+                            >
+                              <Trash className="h-4 w-4 ml-2" />
+                              מחק
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
+                  )}
                   <span className="text-xs text-muted-foreground mt-1">
                     {formatDistanceToNow(new Date(message.created_at), {
                       addSuffix: true,

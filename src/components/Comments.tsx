@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { Heart } from "lucide-react";
 
 interface Comment {
   id: string;
@@ -15,6 +16,8 @@ interface Comment {
   avatar_url?: string;
   parent_comment_id?: string | null;
   replies?: Comment[];
+  likes_count?: number;
+  user_has_liked?: boolean;
 }
 
 interface CommentsProps {
@@ -79,9 +82,29 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
 
       const avatarMap = new Map(profiles?.map(p => [p.id, p.avatar_url]) || []);
       
+      // שליפת likes לכל התגובות
+      const commentIds = data.map(c => c.id);
+      const { data: likesData } = await supabase
+        .from("comment_likes")
+        .select("comment_id, user_id")
+        .in("comment_id", commentIds);
+      
+      // מיפוי של likes
+      const likesCountMap = new Map<string, number>();
+      const userLikesSet = new Set<string>();
+      
+      likesData?.forEach(like => {
+        likesCountMap.set(like.comment_id, (likesCountMap.get(like.comment_id) || 0) + 1);
+        if (like.user_id === currentUserId) {
+          userLikesSet.add(like.comment_id);
+        }
+      });
+      
       const commentsWithAvatars = data.map(comment => ({
         ...comment,
-        avatar_url: avatarMap.get(comment.user_id) || null
+        avatar_url: avatarMap.get(comment.user_id) || null,
+        likes_count: likesCountMap.get(comment.id) || 0,
+        user_has_liked: userLikesSet.has(comment.id)
       }));
       
       // Build threaded structure
@@ -216,6 +239,51 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
     }
   };
 
+  const handleLikeComment = async (commentId: string, currentlyLiked: boolean) => {
+    if (!currentUserId) {
+      toast({
+        title: "התחבר כדי להצביע",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (currentlyLiked) {
+      // Remove like
+      const { error } = await supabase
+        .from("comment_likes")
+        .delete()
+        .eq("comment_id", commentId)
+        .eq("user_id", currentUserId);
+
+      if (error) {
+        toast({
+          title: "שגיאה בהסרת ההצבעה",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } else {
+      // Add like
+      const { error } = await supabase
+        .from("comment_likes")
+        .insert({
+          comment_id: commentId,
+          user_id: currentUserId,
+        });
+
+      if (error) {
+        toast({
+          title: "שגיאה בהוספת הצבעה",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    }
+
+    fetchComments();
+  };
+
   const renderComment = (comment: Comment, depth: number = 0) => {
     const isExpanded = expandedComments.has(comment.id);
     const hasReplies = comment.replies && comment.replies.length > 0;
@@ -254,7 +322,16 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
               )}
             </div>
             <p className="mt-1 text-sm whitespace-pre-wrap break-words">{comment.content}</p>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-3 mt-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`h-7 px-2 text-xs gap-1 ${comment.user_has_liked ? 'text-red-500 hover:text-red-600' : 'text-muted-foreground hover:text-red-500'}`}
+                onClick={() => handleLikeComment(comment.id, comment.user_has_liked || false)}
+              >
+                <Heart className={`w-3.5 h-3.5 ${comment.user_has_liked ? 'fill-current' : ''}`} />
+                {comment.likes_count ? comment.likes_count : ''}
+              </Button>
               {currentUserId && (
                 <Button
                   variant="ghost"

@@ -1,4 +1,4 @@
-import { MessageCircle, Repeat2, Heart, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MessageCircle, Repeat2, Heart, MoreHorizontal, Pencil, Trash2, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,11 @@ interface PostCardProps {
   verified?: boolean;
   userId: string;
   currentUserId?: string;
+  isBoosted?: boolean;
+  initialLikesCount?: number;
+  initialCommentsCount?: number;
+  initialRetweetsCount?: number;
+  initialBoostsCount?: number;
 }
 
 export const PostCard = ({
@@ -35,15 +40,22 @@ export const PostCard = ({
   verified = false,
   userId,
   currentUserId,
+  isBoosted = false,
+  initialLikesCount = 0,
+  initialCommentsCount = 0,
+  initialRetweetsCount = 0,
+  initialBoostsCount = 0,
 }: PostCardProps) => {
   const { toast } = useToast();
   const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(0);
-  const [commentsCount, setCommentsCount] = useState(0);
+  const [likesCount, setLikesCount] = useState(initialLikesCount);
+  const [commentsCount, setCommentsCount] = useState(initialCommentsCount);
+  const [retweetsCount, setRetweetsCount] = useState(initialRetweetsCount);
+  const [boostsCount, setBoostsCount] = useState(initialBoostsCount);
+  const [isBoostedByUser, setIsBoostedByUser] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [retweetsCount, setRetweetsCount] = useState(0);
   const [isRetweeted, setIsRetweeted] = useState(false);
   const [showRetweetDialog, setShowRetweetDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -54,10 +66,41 @@ export const PostCard = ({
     fetchLikesAndComments();
     fetchUserAvatar();
     fetchRetweets();
+    fetchBoosts();
     if (currentUserId && userId !== currentUserId) {
       checkIfFollowing();
     }
   }, [postId, currentUserId]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`post-${postId}-updates`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "likes", filter: `post_id=eq.${postId}` },
+        () => fetchLikesAndComments()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "comments", filter: `post_id=eq.${postId}` },
+        () => fetchLikesAndComments()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "retweets", filter: `original_post_id=eq.${postId}` },
+        () => fetchRetweets()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "post_boosts", filter: `post_id=eq.${postId}` },
+        () => fetchBoosts()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [postId]);
 
   const fetchUserAvatar = async () => {
     const { data: profile } = await supabase
@@ -118,6 +161,26 @@ export const PostCard = ({
     }
   };
 
+  const fetchBoosts = async () => {
+    const { count: boostsCount } = await supabase
+      .from("post_boosts")
+      .select("*", { count: "exact", head: true })
+      .eq("post_id", postId);
+    
+    setBoostsCount(boostsCount || 0);
+
+    if (currentUserId) {
+      const { data: userBoost } = await supabase
+        .from("post_boosts")
+        .select("id")
+        .eq("post_id", postId)
+        .eq("user_id", currentUserId)
+        .maybeSingle();
+      
+      setIsBoostedByUser(!!userBoost);
+    }
+  };
+
   const checkIfFollowing = async () => {
     if (!currentUserId) return;
     
@@ -167,6 +230,29 @@ export const PostCard = ({
     }
   };
 
+  const handleBoost = async () => {
+    if (!currentUserId) {
+      toast({ title: "התחבר כדי לקדם פוסט", variant: "destructive" });
+      return;
+    }
+
+    if (isBoostedByUser) {
+      const { error } = await supabase.from("post_boosts").delete().eq("post_id", postId).eq("user_id", currentUserId);
+      if (!error) {
+        setIsBoostedByUser(false);
+        setBoostsCount((prev) => prev - 1);
+        toast({ title: "הקידום בוטל בהצלחה" });
+      }
+    } else {
+      const { error } = await supabase.from("post_boosts").insert({ post_id: postId, user_id: currentUserId });
+      if (!error) {
+        setIsBoostedByUser(true);
+        setBoostsCount((prev) => prev + 1);
+        toast({ title: "הפוסט קודם בהצלחה! 🚀" });
+      }
+    }
+  };
+
   const renderContent = (text: string) => {
     const parts = text.split(/(\s+)/);
     return parts.map((part, index) => {
@@ -180,7 +266,15 @@ export const PostCard = ({
   };
 
   return (
-    <div className="border-b border-border p-4 hover:bg-accent/5 transition-colors">
+    <div className={`border-b border-border p-4 hover:bg-accent/5 transition-colors ${isBoosted ? "bg-primary/5" : ""}`}>
+      {isBoosted && (
+        <div className="mb-2 flex items-center gap-2">
+          <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+            <TrendingUp className="w-3 h-3 ml-1" />
+            פוסט מקודם
+          </Badge>
+        </div>
+      )}
       <div className="flex gap-3">
         <Link to={`/profile/${handle}`} className="flex-shrink-0">
           <Avatar className="w-12 h-12">
@@ -216,6 +310,7 @@ export const PostCard = ({
             <Button variant="ghost" size="sm" onClick={() => setShowComments(!showComments)}><MessageCircle className="h-5 w-5 ml-2" /><span>{commentsCount}</span></Button>
             <Button variant="ghost" size="sm" onClick={() => setShowRetweetDialog(true)} className={isRetweeted ? "text-green-500" : ""}><Repeat2 className="h-5 w-5 ml-2" /><span>{retweetsCount}</span></Button>
             <Button variant="ghost" size="sm" onClick={handleLike} className={isLiked ? "text-pink-500" : ""}><Heart className={`h-5 w-5 ml-2 ${isLiked ? "fill-current" : ""}`} /><span>{likesCount}</span></Button>
+            <Button variant="ghost" size="sm" onClick={handleBoost} className={isBoostedByUser ? "text-primary" : ""}><TrendingUp className={`h-5 w-5 ml-2 ${isBoostedByUser ? "fill-current" : ""}`} /><span>{boostsCount}</span></Button>
             <BookmarkButton postId={postId} currentUserId={currentUserId} />
           </div>
           {showComments && <Comments postId={postId} currentUserId={currentUserId} onCommentAdded={() => setCommentsCount((prev) => prev + 1)} />}

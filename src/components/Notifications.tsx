@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 interface Notification {
   id: string;
-  type: "like" | "comment" | "follow" | "new_post" | "retweet" | "mention" | "boost";
+  type: "like" | "comment" | "follow" | "new_post" | "retweet" | "mention" | "boost" | "verification_approved" | "verification_rejected";
   actor_id: string;
   actor_name: string;
   actor_handle: string;
@@ -193,6 +193,10 @@ export function Notifications() {
         return "תייג אותך בפוסט";
       case "boost":
         return "קידם את הפוסט שלך 🚀";
+      case "verification_approved":
+        return `✓ בקשת האימות שלך אושרה! ${notification.content || ""}`;
+      case "verification_rejected":
+        return `✗ בקשת האימות שלך נדחתה. ${notification.content || ""}`;
       default:
         return "";
     }

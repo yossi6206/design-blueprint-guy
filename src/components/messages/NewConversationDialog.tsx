@@ -95,26 +95,32 @@ export const NewConversationDialog = ({
         }
       }
 
-      // יצירת שיחה חדשה
-      const { data: conversation, error: convError } = await supabase
+      // יצירת שיחה חדשה - הקוד יחזיר את ה-ID אוטומטית
+      const { data, error: convError } = await supabase
         .from("conversations")
-        .insert({})
-        .select()
-        .single();
+        .insert([{}])
+        .select("id");
 
       if (convError) throw convError;
+      if (!data || data.length === 0) throw new Error("Failed to create conversation");
+      
+      const conversationId = data[0].id;
 
       // הוספת שני המשתתפים
       const { error: participantsError } = await supabase
         .from("conversation_participants")
         .insert([
-          { conversation_id: conversation.id, user_id: currentUserId },
-          { conversation_id: conversation.id, user_id: otherUser.id },
+          { conversation_id: conversationId, user_id: currentUserId },
+          { conversation_id: conversationId, user_id: otherUser.id },
         ]);
 
-      if (participantsError) throw participantsError;
+      if (participantsError) {
+        // נסה למחוק את השיחה אם הוספת המשתתפים נכשלה
+        await supabase.from("conversations").delete().eq("id", conversationId);
+        throw participantsError;
+      }
 
-      onConversationCreated(conversation.id, otherUser);
+      onConversationCreated(conversationId, otherUser);
       onOpenChange(false);
       setSearchQuery("");
       setSearchResults([]);

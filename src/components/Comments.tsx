@@ -32,6 +32,7 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
   const [userHandle, setUserHandle] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyingToName, setReplyingToName] = useState<string>("");
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchComments();
@@ -179,50 +180,79 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
     return `${Math.floor(diffInSeconds / 86400)}י`;
   };
 
-  const renderComment = (comment: Comment, depth: number = 0) => (
-    <div key={comment.id} className={depth > 0 ? "mr-8 relative" : ""}>
-      {depth > 0 && (
-        <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-border" />
-      )}
-      <div className={`flex gap-2 p-3 rounded-lg ${depth > 0 ? 'bg-accent/10' : 'bg-accent/20'}`}>
-        <Avatar className="w-8 h-8 flex-shrink-0">
-          <AvatarImage
-            src={comment.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.author_handle}`}
-          />
-          <AvatarFallback>{comment.author_name[0]}</AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-bold text-sm">{comment.author_name}</span>
-            <span className="text-muted-foreground text-sm">@{comment.author_handle}</span>
-            <span className="text-muted-foreground text-sm">·</span>
-            <span className="text-muted-foreground text-sm">
-              {getTimeAgo(comment.created_at)}
-            </span>
+  const toggleReplies = (commentId: string) => {
+    setExpandedComments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(commentId)) {
+        newSet.delete(commentId);
+      } else {
+        newSet.add(commentId);
+      }
+      return newSet;
+    });
+  };
+
+  const renderComment = (comment: Comment, depth: number = 0) => {
+    const isExpanded = expandedComments.has(comment.id);
+    const hasReplies = comment.replies && comment.replies.length > 0;
+    
+    return (
+      <div key={comment.id} className={depth > 0 ? "mr-8 relative" : ""}>
+        {depth > 0 && (
+          <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-border" />
+        )}
+        <div className={`flex gap-2 p-3 rounded-lg ${depth > 0 ? 'bg-accent/10' : 'bg-accent/20'}`}>
+          <Avatar className="w-8 h-8 flex-shrink-0">
+            <AvatarImage
+              src={comment.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.author_handle}`}
+            />
+            <AvatarFallback>{comment.author_name[0]}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-bold text-sm">{comment.author_name}</span>
+              <span className="text-muted-foreground text-sm">@{comment.author_handle}</span>
+              <span className="text-muted-foreground text-sm">·</span>
+              <span className="text-muted-foreground text-sm">
+                {getTimeAgo(comment.created_at)}
+              </span>
+            </div>
+            <p className="mt-1 text-sm whitespace-pre-wrap break-words">{comment.content}</p>
+            <div className="flex items-center gap-2 mt-1">
+              {currentUserId && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs text-muted-foreground hover:text-primary"
+                  onClick={() => {
+                    setReplyingTo(comment.id);
+                    setReplyingToName(comment.author_name);
+                  }}
+                >
+                  הגב
+                </Button>
+              )}
+              {hasReplies && depth === 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs text-muted-foreground hover:text-primary"
+                  onClick={() => toggleReplies(comment.id)}
+                >
+                  {isExpanded ? "הסתר" : "הצג"} {comment.replies!.length} {comment.replies!.length === 1 ? "תגובה" : "תגובות"}
+                </Button>
+              )}
+            </div>
           </div>
-          <p className="mt-1 text-sm whitespace-pre-wrap break-words">{comment.content}</p>
-          {currentUserId && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mt-1 h-7 px-2 text-xs text-muted-foreground hover:text-primary"
-              onClick={() => {
-                setReplyingTo(comment.id);
-                setReplyingToName(comment.author_name);
-              }}
-            >
-              הגב
-            </Button>
-          )}
         </div>
+        {hasReplies && (isExpanded || depth > 0) && (
+          <div className="mt-2 space-y-2">
+            {comment.replies!.map(reply => renderComment(reply, depth + 1))}
+          </div>
+        )}
       </div>
-      {comment.replies && comment.replies.length > 0 && (
-        <div className="mt-2 space-y-2">
-          {comment.replies.map(reply => renderComment(reply, depth + 1))}
-        </div>
-      )}
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="mt-4 space-y-4">

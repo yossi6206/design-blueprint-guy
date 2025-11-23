@@ -205,7 +205,7 @@ export default function Followers() {
           <div className="flex items-center gap-1">
             <h3 className="font-bold text-sm truncate">{user.user_name}</h3>
             {user.is_verified && (
-              <BadgeCheck className="h-4 w-4 text-blue-500 fill-blue-500 shrink-0" />
+              <BadgeCheck className="h-4 w-4 text-background fill-primary shrink-0" />
             )}
           </div>
           <p className="text-sm text-muted-foreground">@{user.user_handle}</p>

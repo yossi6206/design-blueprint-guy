@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { he } from "date-fns/locale";
+import { BadgeCheck } from "lucide-react";
 
 interface Conversation {
   id: string;
@@ -14,6 +15,7 @@ interface Conversation {
     user_name: string;
     user_handle: string;
     avatar_url: string | null;
+    is_verified: boolean;
   };
   last_message: {
     content: string;
@@ -199,9 +201,14 @@ export const ConversationsList = ({
               </Avatar>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-semibold truncate">
-                    {conv.other_user.user_name}
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <span className="font-semibold truncate">
+                      {conv.other_user.user_name}
+                    </span>
+                    {conv.other_user.is_verified && (
+                      <BadgeCheck className="h-3.5 w-3.5 text-background fill-primary shrink-0" />
+                    )}
+                  </div>
                   {conv.last_message_at && (
                     <span className="text-xs text-muted-foreground mr-2">
                       {formatDistanceToNow(new Date(conv.last_message_at), {

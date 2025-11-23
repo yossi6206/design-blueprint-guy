@@ -1,4 +1,4 @@
-import { MessageCircle, Repeat2, Heart, MoreHorizontal, Pencil, Trash2, TrendingUp } from "lucide-react";
+import { MessageCircle, Repeat2, Heart, MoreHorizontal, Pencil, Trash2, TrendingUp, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -286,7 +286,7 @@ export const PostCard = ({
           <div className="flex items-center gap-1 justify-between">
             <div className="flex items-center gap-1 flex-wrap">
               <Link to={`/profile/${handle}`}><span className="font-bold hover:underline">{author}</span></Link>
-              {verified && <Badge variant="secondary" className="h-4 w-4 p-0">✓</Badge>}
+              {verified && <BadgeCheck className="h-4 w-4 text-background fill-primary" />}
               <span className="text-muted-foreground">@{handle} · {time}</span>
             </div>
             {userId !== currentUserId && currentUserId && (

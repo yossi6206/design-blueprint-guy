@@ -158,7 +158,7 @@ export default function SuggestedUsers({
                 <div className="flex items-center gap-1">
                   <p className="font-semibold text-sm truncate">{user.user_name}</p>
                   {user.is_verified && (
-                    <BadgeCheck className="h-3.5 w-3.5 text-blue-500 fill-blue-500 shrink-0" />
+                    <BadgeCheck className="h-3.5 w-3.5 text-background fill-primary shrink-0" />
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">@{user.user_handle}</p>

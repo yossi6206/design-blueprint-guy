@@ -227,7 +227,7 @@ const getEmailTemplate = (notification: NotificationData) => {
               <div class="divider"></div>
               
               <div style="text-align: center; margin-top: 30px;">
-                <a href="${Deno.env.get('VITE_SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com') || '#'}" class="cta-button">
+                <a href="https://twibber.co.il" class="cta-button">
                   צפה בפעילות 🚀
                 </a>
               </div>
@@ -262,7 +262,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { subject, html } = getEmailTemplate(notification);
 
     const emailResponse = await resend.emails.send({
-      from: "Social Network <onboarding@resend.dev>",
+      from: "Twibber <notifications@twibber.co.il>",
       to: [notification.user_email],
       subject,
       html,

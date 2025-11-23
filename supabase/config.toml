@@ -2,3 +2,6 @@ project_id = "kwpiinlgptnaazqzemvv"
 
 [functions.suggest-users]
 verify_jwt = true
+
+[functions.send-reset-password-email]
+verify_jwt = false

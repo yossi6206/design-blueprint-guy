@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Bell, MessageSquare, User, LogOut, MoreHorizontal, Search, Bookmark, ShieldCheck } from "lucide-react";
+import { Home, Bell, MessageSquare, User, LogOut, MoreHorizontal, Search, Bookmark, ShieldCheck, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -112,7 +112,12 @@ export const Sidebar = () => {
             <AvatarFallback>{userProfile.user_name[0]}</AvatarFallback>
           </Avatar>
           <div className="flex-1 text-right min-w-0">
-            <div className="font-bold text-sm truncate">{userProfile.user_name}</div>
+            <div className="font-bold text-sm truncate flex items-center gap-1">
+              {userProfile.user_name}
+              {userProfile.is_verified && (
+                <BadgeCheck className="h-3.5 w-3.5 text-background fill-primary shrink-0" />
+              )}
+            </div>
             <div className="text-muted-foreground text-sm truncate">@{userProfile.user_handle}</div>
           </div>
           <MoreHorizontal className="w-5 h-5 flex-shrink-0" />

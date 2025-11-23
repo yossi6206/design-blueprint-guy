@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Search as SearchIcon } from "lucide-react";
+import { Search as SearchIcon, BadgeCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 
@@ -17,6 +17,7 @@ interface Profile {
   user_handle: string;
   avatar_url: string | null;
   bio: string | null;
+  is_verified: boolean;
 }
 
 interface Post {
@@ -131,7 +132,12 @@ export default function Search() {
                       <AvatarFallback>{user.user_name[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <div className="font-semibold">{user.user_name}</div>
+                      <div className="flex items-center gap-1">
+                        <span className="font-semibold">{user.user_name}</span>
+                        {user.is_verified && (
+                          <BadgeCheck className="h-4 w-4 text-background fill-primary shrink-0" />
+                        )}
+                      </div>
                       <div className="text-sm text-muted-foreground">@{user.user_handle}</div>
                       {user.bio && <div className="text-sm mt-1">{user.bio}</div>}
                     </div>
@@ -166,7 +172,12 @@ export default function Search() {
                   <AvatarFallback>{user.user_name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <div className="font-semibold">{user.user_name}</div>
+                  <div className="flex items-center gap-1">
+                    <span className="font-semibold">{user.user_name}</span>
+                    {user.is_verified && (
+                      <BadgeCheck className="h-4 w-4 text-background fill-primary shrink-0" />
+                    )}
+                  </div>
                   <div className="text-sm text-muted-foreground">@{user.user_handle}</div>
                   {user.bio && <div className="text-sm mt-1">{user.bio}</div>}
                 </div>

@@ -49,7 +49,7 @@ export const Sidebar = () => {
     { icon: User, label: "פרופיל", path: userProfile ? `/profile/${userProfile.user_handle}` : "/profile" },
   ];
   return (
-    <div className="w-[275px] min-w-[275px] h-screen sticky top-0 flex flex-col px-3 py-2 border-l border-border hidden md:flex flex-shrink-0">
+    <div className="w-[275px] h-screen sticky top-0 flex flex-col px-3 py-2 border-l border-border hidden md:flex">
       <div className="flex-1">
         {/* Logo */}
         <div className="mb-2 px-3 py-2 cursor-pointer min-h-[48px] flex items-center" onClick={() => navigate("/")}>

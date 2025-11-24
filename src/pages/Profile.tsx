@@ -372,7 +372,7 @@ export default function Profile() {
                 value="posts"
                 className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent text-sm md:text-base py-3"
               >
-                פוסטים
+                פוסטים {posts.length > 0 && `(${posts.length})`}
               </TabsTrigger>
               <TabsTrigger
                 value="replies"
@@ -384,7 +384,7 @@ export default function Profile() {
                 value="media"
                 className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent text-sm md:text-base py-3"
               >
-                מדיה
+                מדיה {media.length > 0 && `(${media.length})`}
               </TabsTrigger>
             </TabsList>
 

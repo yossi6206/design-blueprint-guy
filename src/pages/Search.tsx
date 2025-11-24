@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Sidebar } from "@/components/Sidebar";
 import { RightSidebar } from "@/components/RightSidebar";
+import { MobileNav } from "@/components/MobileNav";
 import { PostCard } from "@/components/PostCard";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -85,20 +86,23 @@ export default function Search() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background justify-center">
-      <Sidebar />
-      
-      <main className="flex-1 max-w-[600px] border-x border-border">
-        <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b border-border">
-          <form onSubmit={handleSearch} className="p-4">
+    <>
+      <div className="flex min-h-screen bg-background justify-center pb-16 md:pb-0">
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
+        
+        <main className="flex-1 max-w-[600px] border-x border-border w-full">
+          <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b border-border">
+            <form onSubmit={handleSearch} className="p-3 md:p-4">
             <div className="relative">
-              <SearchIcon className="absolute right-3 top-3 h-5 w-5 text-muted-foreground" />
+              <SearchIcon className="absolute right-3 top-2.5 md:top-3 h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="חפש משתמשים, פוסטים, hashtags..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="pr-10"
+                className="pr-9 md:pr-10 text-sm md:text-base h-9 md:h-10"
               />
             </div>
           </form>
@@ -124,22 +128,22 @@ export default function Search() {
                 {users.slice(0, 3).map((user) => (
                   <Link
                     key={user.id}
-                    to={`/profile/${user.user_handle}`}
-                    className="flex items-center gap-3 p-4 hover:bg-accent transition-colors border-b border-border"
-                  >
-                    <Avatar>
-                      <AvatarImage src={user.avatar_url || ""} />
-                      <AvatarFallback>{user.user_name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-1">
-                        <span className="font-semibold">{user.user_name}</span>
-                        {user.is_verified && (
-                          <BadgeCheck className="h-4 w-4 text-background fill-primary shrink-0" />
-                        )}
-                      </div>
-                      <div className="text-sm text-muted-foreground">@{user.user_handle}</div>
-                      {user.bio && <div className="text-sm mt-1">{user.bio}</div>}
+            to={`/profile/${user.user_handle}`}
+            className="flex items-center gap-2 md:gap-3 p-3 md:p-4 hover:bg-accent transition-colors border-b border-border"
+          >
+            <Avatar className="h-10 w-10 md:h-12 md:w-12">
+              <AvatarImage src={user.avatar_url || ""} />
+              <AvatarFallback>{user.user_name[0]}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1">
+                <span className="font-semibold text-sm md:text-base truncate">{user.user_name}</span>
+                {user.is_verified && (
+                  <BadgeCheck className="h-3 w-3 md:h-4 md:w-4 text-background fill-primary shrink-0" />
+                )}
+              </div>
+              <div className="text-xs md:text-sm text-muted-foreground truncate">@{user.user_handle}</div>
+              {user.bio && <div className="text-xs md:text-sm mt-1 line-clamp-2">{user.bio}</div>}
                     </div>
                   </Link>
                 ))}
@@ -203,13 +207,17 @@ export default function Search() {
         </Tabs>
 
         {query && users.length === 0 && posts.length === 0 && (
-          <div className="p-8 text-center text-muted-foreground">
+          <div className="p-6 md:p-8 text-center text-muted-foreground">
             לא נמצאו תוצאות עבור "{query}"
           </div>
         )}
       </main>
 
-      <RightSidebar />
+      <div className="hidden lg:block">
+        <RightSidebar />
+      </div>
     </div>
+    <MobileNav />
+  </>
   );
 }

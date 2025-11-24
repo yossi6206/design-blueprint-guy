@@ -11,6 +11,7 @@ import { PostCard } from "@/components/PostCard";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { Sidebar } from "@/components/Sidebar";
 import { RightSidebar } from "@/components/RightSidebar";
+import { MobileNav } from "@/components/MobileNav";
 import { toast } from "sonner";
 
 interface Profile {
@@ -174,34 +175,37 @@ export default function Profile() {
   });
 
   return (
-    <div className="flex min-h-screen bg-background justify-center">
-      <Sidebar />
-      <div className="w-full max-w-2xl border-x border-border">
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border p-4">
-          <div className="flex items-center gap-8">
+    <>
+      <div className="flex min-h-screen bg-background justify-center pb-16 md:pb-0">
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
+        <div className="w-full max-w-2xl border-x border-border">
+          {/* Header */}
+          <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border p-3 md:p-4">
+            <div className="flex items-center gap-4 md:gap-8">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate("/")}
-              className="h-9 w-9"
+              className="h-8 w-8 md:h-9 md:w-9"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
             <div>
               <div className="flex items-center gap-1">
-                <h1 className="text-xl font-bold">{profile.user_name}</h1>
+                <h1 className="text-lg md:text-xl font-bold">{profile.user_name}</h1>
                 {profile.is_verified && (
-                  <BadgeCheck className="h-5 w-5 text-background fill-primary" />
+                  <BadgeCheck className="h-4 w-4 md:h-5 md:w-5 text-background fill-primary" />
                 )}
               </div>
-              <p className="text-sm text-muted-foreground">{posts.length} פוסטים</p>
+              <p className="text-xs md:text-sm text-muted-foreground">{posts.length} פוסטים</p>
             </div>
           </div>
         </div>
 
         {/* Cover Image */}
-        <div className="h-48 bg-muted">
+        <div className="h-32 md:h-48 bg-muted">
           {profile.cover_image && (
             <img
               src={profile.cover_image}
@@ -212,17 +216,17 @@ export default function Profile() {
         </div>
 
         {/* Profile Info */}
-        <div className="px-4 pb-4">
-          <div className="flex justify-between items-start -mt-16 mb-4">
-            <Avatar className="h-32 w-32 border-4 border-background">
+        <div className="px-3 md:px-4 pb-4">
+          <div className="flex justify-between items-start -mt-12 md:-mt-16 mb-4">
+            <Avatar className="h-20 w-20 md:h-32 md:w-32 border-4 border-background">
               <AvatarImage src={profile.avatar_url || ""} />
-              <AvatarFallback className="text-4xl">
+              <AvatarFallback className="text-2xl md:text-4xl">
                 {profile.user_name[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="mt-16 flex gap-2">
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="h-5 w-5" />
+            <div className="mt-12 md:mt-16 flex gap-2">
+              <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10">
+                <MoreHorizontal className="h-4 w-4 md:h-5 md:w-5" />
               </Button>
               {isOwnProfile ? (
                 <EditProfileDialog 
@@ -235,7 +239,7 @@ export default function Profile() {
                 <Button
                   onClick={handleFollow}
                   variant={isFollowing ? "outline" : "default"}
-                  className="rounded-full px-6"
+                  className="rounded-full px-4 md:px-6 text-sm h-8 md:h-10"
                 >
                   {isFollowing ? "עוקב" : "עקוב"}
                 </Button>
@@ -243,20 +247,20 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2 md:space-y-3">
             <div>
               <div className="flex items-center gap-1">
-                <h2 className="text-xl font-bold">{profile.user_name}</h2>
+                <h2 className="text-lg md:text-xl font-bold">{profile.user_name}</h2>
                 {profile.is_verified && (
-                  <BadgeCheck className="h-5 w-5 text-background fill-primary" />
+                  <BadgeCheck className="h-4 w-4 md:h-5 md:w-5 text-background fill-primary" />
                 )}
               </div>
-              <p className="text-muted-foreground">@{profile.user_handle}</p>
+              <p className="text-sm text-muted-foreground">@{profile.user_handle}</p>
             </div>
 
             {profile.bio && <p className="text-sm">{profile.bio}</p>}
 
-            <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+            <div className="flex flex-wrap gap-2 md:gap-3 text-xs md:text-sm text-muted-foreground">
               {profile.location && (
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
@@ -359,7 +363,11 @@ export default function Profile() {
           </TabsContent>
         </Tabs>
       </div>
-      <RightSidebar />
+      <div className="hidden lg:block">
+        <RightSidebar />
+      </div>
     </div>
+    <MobileNav />
+  </>
   );
 }

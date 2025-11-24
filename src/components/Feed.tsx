@@ -186,10 +186,10 @@ export const Feed = () => {
   if (!user) return null;
   
   return (
-    <div className="flex-1 border-r border-border max-w-[600px] w-full">
-      <div className="sticky top-0 bg-background/95 backdrop-blur-md z-10 border-b border-border/50 shadow-sm">
+    <div className="flex-1 border-r border-border max-w-[600px] w-full h-screen overflow-y-auto">
+      <div className="sticky top-0 bg-background/95 backdrop-blur-md z-10 border-b border-border/50">
         <div className="flex justify-between items-center p-3 md:p-4 gap-2">
-          <h1 className="text-lg md:text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">הבית</h1>
+          <div className="w-full"></div>
           <div className="flex items-center gap-1 md:gap-2">
             <div className="md:block hidden">
               <Notifications />
@@ -203,7 +203,7 @@ export const Feed = () => {
 
       {hasNewPosts && (
         <div 
-          className="sticky top-[73px] z-20 bg-gradient-primary text-white px-4 py-2 text-center cursor-pointer hover:opacity-90 transition-all shadow-md"
+          className="sticky top-[57px] z-20 bg-gradient-primary text-white px-4 py-2 text-center cursor-pointer hover:opacity-90 transition-all shadow-md"
           onClick={handleRefreshFeed}
         >
           <p className="text-sm font-medium">יש פוסטים חדשים - לחץ לרענון</p>
@@ -220,9 +220,9 @@ export const Feed = () => {
       />
 
       <Tabs defaultValue="for-you" className="w-full">
-        <TabsList className="w-full grid grid-cols-2 sticky top-[73px] z-10 rounded-none border-b">
-          <TabsTrigger value="for-you">בשבילך</TabsTrigger>
-          <TabsTrigger value="following">עוקבים</TabsTrigger>
+        <TabsList className="w-full grid grid-cols-2 sticky top-[57px] z-10 rounded-none border-b bg-background/95 backdrop-blur-md">
+          <TabsTrigger value="for-you" className="data-[state=active]:border-b-2 data-[state=active]:border-primary">בשבילך</TabsTrigger>
+          <TabsTrigger value="following" className="data-[state=active]:border-b-2 data-[state=active]:border-primary">עוקבים</TabsTrigger>
         </TabsList>
 
         <TabsContent value="for-you" className="mt-0">

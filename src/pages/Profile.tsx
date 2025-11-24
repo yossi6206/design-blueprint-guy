@@ -39,6 +39,20 @@ interface Post {
   user_id: string;
 }
 
+interface UserComment {
+  id: string;
+  content: string;
+  created_at: string;
+  post_id: string;
+  post: {
+    id: string;
+    content: string;
+    author_name: string;
+    author_handle: string;
+    user_id: string;
+  };
+}
+
 interface Media {
   id: string;
   file_url: string;
@@ -52,6 +66,7 @@ export default function Profile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [media, setMedia] = useState<Media[]>([]);
+  const [comments, setComments] = useState<UserComment[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
@@ -105,6 +120,32 @@ export default function Profile() {
 
         if (mediaError) throw mediaError;
         setMedia(mediaData || []);
+
+        // Fetch user comments with post details
+        const { data: commentsData, error: commentsError } = await supabase
+          .from("comments")
+          .select(`
+            id,
+            content,
+            created_at,
+            post_id,
+            posts!inner(id, content, author_name, author_handle, user_id)
+          `)
+          .eq("user_id", profileData.id)
+          .order("created_at", { ascending: false });
+
+        if (commentsError) throw commentsError;
+        
+        // Transform the data to match our interface
+        const transformedComments = (commentsData || []).map((comment: any) => ({
+          id: comment.id,
+          content: comment.content,
+          created_at: comment.created_at,
+          post_id: comment.post_id,
+          post: comment.posts
+        }));
+        
+        setComments(transformedComments);
 
         // Check if current user follows this profile
         if (currentUser && currentUser.id !== profileData.id) {
@@ -371,9 +412,54 @@ export default function Profile() {
             </TabsContent>
 
             <TabsContent value="replies" className="mt-0">
-              <div className="p-6 md:p-8 text-center text-sm md:text-base text-muted-foreground">
-                אין תגובות עדיין
-              </div>
+              {comments.length === 0 ? (
+                <div className="p-6 md:p-8 text-center text-sm md:text-base text-muted-foreground">
+                  אין תגובות עדיין
+                </div>
+              ) : (
+                comments.map((comment) => (
+                  <div key={comment.id} className="border-b border-border p-4 hover:bg-muted/30 transition-colors">
+                    <div className="text-xs md:text-sm text-muted-foreground mb-2">
+                      תגובה על פוסט של{" "}
+                      <Link
+                        to={`/profile/${comment.post.author_handle}`}
+                        className="text-primary hover:underline font-semibold"
+                      >
+                        @{comment.post.author_handle}
+                      </Link>
+                    </div>
+                    <div className="mb-3 p-3 bg-muted/50 rounded-lg border-r-2 border-primary/50">
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {comment.post.content}
+                      </p>
+                    </div>
+                    <div className="flex gap-3">
+                      <Avatar className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0">
+                        <AvatarImage src={profile?.avatar_url || ""} />
+                        <AvatarFallback>
+                          {profile?.user_name[0]?.toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-bold text-sm md:text-base truncate">
+                            {profile?.user_name}
+                          </span>
+                          <span className="text-muted-foreground text-xs md:text-sm truncate">
+                            @{profile?.user_handle}
+                          </span>
+                          <span className="text-muted-foreground text-xs">
+                            {new Date(comment.created_at).toLocaleDateString("he-IL")}
+                          </span>
+                        </div>
+                        <p className="text-sm md:text-base whitespace-pre-wrap break-words">
+                          {comment.content}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </TabsContent>
 
             <TabsContent value="media" className="mt-0">

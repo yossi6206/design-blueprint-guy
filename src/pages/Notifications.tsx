@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Sidebar } from "@/components/Sidebar";
 import { RightSidebar } from "@/components/RightSidebar";
+import { MobileNav } from "@/components/MobileNav";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bell, Heart, MessageCircle, UserPlus, Repeat2, AtSign, Rocket, CheckCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -170,20 +171,22 @@ export default function Notifications() {
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="flex max-w-7xl mx-auto">
-        <Sidebar />
+    <>
+      <div className="flex min-h-screen bg-background justify-center pb-16 md:pb-0">
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
         
-        <main className="flex-1 border-x border-border min-h-screen">
+        <main className="flex-1 border-x border-border min-h-screen max-w-[600px] w-full">
           <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-            <div className="px-4 py-3 flex items-center justify-between">
-              <h1 className="text-xl font-bold">התראות</h1>
+            <div className="px-3 md:px-4 py-3 flex items-center justify-between">
+              <h1 className="text-lg md:text-xl font-bold">התראות</h1>
               {unreadCount > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={markAllAsRead}
-                  className="text-sm"
+                  className="text-xs md:text-sm"
                 >
                   סמן הכל כנקרא
                 </Button>
@@ -192,74 +195,74 @@ export default function Notifications() {
           </div>
 
           {notifications.length === 0 ? (
-            <div className="p-8 md:p-16 text-center max-w-lg mx-auto">
-              <div className="flex justify-center mb-6">
-                <div className="h-24 w-24 rounded-full bg-accent/50 flex items-center justify-center">
-                  <Bell className="h-12 w-12 text-muted-foreground" />
+            <div className="p-4 md:p-8 lg:p-16 text-center max-w-lg mx-auto">
+              <div className="flex justify-center mb-4 md:mb-6">
+                <div className="h-16 w-16 md:h-24 md:w-24 rounded-full bg-accent/50 flex items-center justify-center">
+                  <Bell className="h-8 w-8 md:h-12 md:w-12 text-muted-foreground" />
                 </div>
               </div>
               
-              <h2 className="text-2xl font-bold mb-3">אין התראות עדיין</h2>
-              <p className="text-muted-foreground mb-8">
+              <h2 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">אין התראות עדיין</h2>
+              <p className="text-sm md:text-base text-muted-foreground mb-6 md:mb-8">
                 כשמשהו מעניין יקרה, תראה את זה כאן
               </p>
               
-              <div className="text-right space-y-4">
-                <p className="text-base font-semibold text-foreground mb-4">תקבל התראות על:</p>
+              <div className="text-right space-y-2 md:space-y-4">
+                <p className="text-sm md:text-base font-semibold text-foreground mb-3 md:mb-4">תקבל התראות על:</p>
                 
-                <div className="flex items-start gap-4 p-4 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
-                  <Heart className="h-6 w-6 mt-1 flex-shrink-0 text-primary" />
+                <div className="flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
+                  <Heart className="h-5 w-5 md:h-6 md:w-6 mt-1 flex-shrink-0 text-primary" />
                   <div className="text-right flex-1">
-                    <span className="font-semibold text-foreground block mb-1">לייקים</span>
-                    <span className="text-sm text-muted-foreground">כשמישהו אוהב את הפוסטים שלך</span>
+                    <span className="text-sm md:text-base font-semibold text-foreground block mb-0.5 md:mb-1">לייקים</span>
+                    <span className="text-xs md:text-sm text-muted-foreground">כשמישהו אוהב את הפוסטים שלך</span>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-4 p-4 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
-                  <MessageCircle className="h-6 w-6 mt-1 flex-shrink-0 text-primary" />
+                <div className="flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
+                  <MessageCircle className="h-5 w-5 md:h-6 md:w-6 mt-1 flex-shrink-0 text-primary" />
                   <div className="text-right flex-1">
-                    <span className="font-semibold text-foreground block mb-1">תגובות</span>
-                    <span className="text-sm text-muted-foreground">כשמגיבים לפוסט שלך</span>
+                    <span className="text-sm md:text-base font-semibold text-foreground block mb-0.5 md:mb-1">תגובות</span>
+                    <span className="text-xs md:text-sm text-muted-foreground">כשמגיבים לפוסט שלך</span>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-4 p-4 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
-                  <UserPlus className="h-6 w-6 mt-1 flex-shrink-0 text-primary" />
+                <div className="flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
+                  <UserPlus className="h-5 w-5 md:h-6 md:w-6 mt-1 flex-shrink-0 text-primary" />
                   <div className="text-right flex-1">
-                    <span className="font-semibold text-foreground block mb-1">עוקבים חדשים</span>
-                    <span className="text-sm text-muted-foreground">כשמישהו עוקב אחריך</span>
+                    <span className="text-sm md:text-base font-semibold text-foreground block mb-0.5 md:mb-1">עוקבים חדשים</span>
+                    <span className="text-xs md:text-sm text-muted-foreground">כשמישהו עוקב אחריך</span>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-4 p-4 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
-                  <Repeat2 className="h-6 w-6 mt-1 flex-shrink-0 text-primary" />
+                <div className="flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
+                  <Repeat2 className="h-5 w-5 md:h-6 md:w-6 mt-1 flex-shrink-0 text-primary" />
                   <div className="text-right flex-1">
-                    <span className="font-semibold text-foreground block mb-1">ריטוויטים</span>
-                    <span className="text-sm text-muted-foreground">כשמשתפים את הפוסט שלך</span>
+                    <span className="text-sm md:text-base font-semibold text-foreground block mb-0.5 md:mb-1">ריטוויטים</span>
+                    <span className="text-xs md:text-sm text-muted-foreground">כשמשתפים את הפוסט שלך</span>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-4 p-4 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
-                  <AtSign className="h-6 w-6 mt-1 flex-shrink-0 text-primary" />
+                <div className="flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
+                  <AtSign className="h-5 w-5 md:h-6 md:w-6 mt-1 flex-shrink-0 text-primary" />
                   <div className="text-right flex-1">
-                    <span className="font-semibold text-foreground block mb-1">תיוגים</span>
-                    <span className="text-sm text-muted-foreground">כשמתייגים אותך בפוסט</span>
+                    <span className="text-sm md:text-base font-semibold text-foreground block mb-0.5 md:mb-1">תיוגים</span>
+                    <span className="text-xs md:text-sm text-muted-foreground">כשמתייגים אותך בפוסט</span>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-4 p-4 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
-                  <Rocket className="h-6 w-6 mt-1 flex-shrink-0 text-primary" />
+                <div className="flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
+                  <Rocket className="h-5 w-5 md:h-6 md:w-6 mt-1 flex-shrink-0 text-primary" />
                   <div className="text-right flex-1">
-                    <span className="font-semibold text-foreground block mb-1">קידומים</span>
-                    <span className="text-sm text-muted-foreground">כשמקדמים את הפוסט שלך</span>
+                    <span className="text-sm md:text-base font-semibold text-foreground block mb-0.5 md:mb-1">קידומים</span>
+                    <span className="text-xs md:text-sm text-muted-foreground">כשמקדמים את הפוסט שלך</span>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-4 p-4 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
-                  <CheckCircle className="h-6 w-6 mt-1 flex-shrink-0 text-primary" />
+                <div className="flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
+                  <CheckCircle className="h-5 w-5 md:h-6 md:w-6 mt-1 flex-shrink-0 text-primary" />
                   <div className="text-right flex-1">
-                    <span className="font-semibold text-foreground block mb-1">אימותים</span>
-                    <span className="text-sm text-muted-foreground">עדכונים על בקשות אימות</span>
+                    <span className="text-sm md:text-base font-semibold text-foreground block mb-0.5 md:mb-1">אימותים</span>
+                    <span className="text-xs md:text-sm text-muted-foreground">עדכונים על בקשות אימות</span>
                   </div>
                 </div>
               </div>
@@ -274,33 +277,33 @@ export default function Notifications() {
                       ? `/profile/${notification.actor_handle}`
                       : `/profile/${notification.actor_handle}`
                   }
-                  onClick={() => markAsRead(notification.id)}
-                  className={`block p-4 hover:bg-accent/50 transition-colors border-b border-border ${
+                   onClick={() => markAsRead(notification.id)}
+                  className={`block p-3 md:p-4 hover:bg-accent/50 transition-colors border-b border-border ${
                     !notification.is_read ? "bg-accent/20" : ""
                   }`}
                 >
-                  <div className="flex gap-3">
-                    <Avatar className="h-12 w-12">
+                  <div className="flex gap-2 md:gap-3">
+                    <Avatar className="h-10 w-10 md:h-12 md:w-12">
                       <AvatarFallback>
                         {notification.actor_name[0]?.toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-bold">
+                      <div className="flex items-center gap-1.5 md:gap-2 mb-0.5 md:mb-1 flex-wrap">
+                        <span className="text-sm md:text-base font-bold truncate">
                           {notification.actor_name}
                         </span>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-xs md:text-sm text-muted-foreground truncate">
                           @{notification.actor_handle}
                         </span>
                         {!notification.is_read && (
-                          <span className="h-2 w-2 rounded-full bg-primary"></span>
+                          <span className="h-2 w-2 rounded-full bg-primary flex-shrink-0"></span>
                         )}
                       </div>
-                      <p className="text-muted-foreground">
+                      <p className="text-xs md:text-sm text-muted-foreground break-words">
                         {getNotificationText(notification)}
                       </p>
-                      <span className="text-sm text-muted-foreground mt-1 block">
+                      <span className="text-xs text-muted-foreground mt-0.5 md:mt-1 block">
                         {getTimeAgo(notification.created_at)}
                       </span>
                     </div>
@@ -311,8 +314,11 @@ export default function Notifications() {
           )}
         </main>
 
-        <RightSidebar />
+        <div className="hidden lg:block">
+          <RightSidebar />
+        </div>
       </div>
-    </div>
+      <MobileNav />
+    </>
   );
 }

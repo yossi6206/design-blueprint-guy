@@ -6,7 +6,7 @@ import { MobileNav } from "@/components/MobileNav";
 const Index = () => {
   return (
     <>
-      <div className="flex min-h-screen bg-background justify-center pb-16 md:pb-0">
+      <div className="flex min-h-screen bg-background justify-center pb-32 md:pb-0">
         <div className="hidden md:block">
           <Sidebar />
         </div>

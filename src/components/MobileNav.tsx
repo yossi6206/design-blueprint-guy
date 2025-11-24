@@ -47,39 +47,37 @@ export const MobileNav = () => {
 
   return (
     <>
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
-        <div className="flex flex-col">
-          {/* Navigation Items */}
-          <div className="flex justify-around items-center h-16">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={cn(
-                    "flex flex-col items-center justify-center flex-1 h-full transition-colors",
-                    isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <Icon className={cn("h-6 w-6", isActive && "fill-primary")} />
-                  <span className="text-xs mt-1">{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-          
-          {/* Post Button */}
-          <div className="px-4 pb-4 pt-2">
-            <Button
-              onClick={() => setIsPostDialogOpen(true)}
-              className="w-full h-12 rounded-full bg-foreground text-background hover:bg-foreground/90 font-bold text-base"
-            >
-              Post
-            </Button>
-          </div>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 pb-safe">
+        {/* Post Button */}
+        <div className="px-3 pt-3 pb-2 border-b border-border">
+          <Button
+            onClick={() => setIsPostDialogOpen(true)}
+            className="w-full h-11 rounded-full bg-foreground text-background hover:bg-foreground/90 font-bold text-base shadow-sm"
+          >
+            Post
+          </Button>
+        </div>
+        
+        {/* Navigation Items */}
+        <div className="flex justify-around items-center h-16">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={cn(
+                  "flex flex-col items-center justify-center flex-1 h-full transition-colors",
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Icon className={cn("h-6 w-6", isActive && "fill-primary")} />
+                <span className="text-xs mt-1">{item.label}</span>
+              </Link>
+            );
+          })}
         </div>
       </nav>
 

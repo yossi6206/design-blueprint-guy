@@ -117,12 +117,12 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border-b border-border p-4">
+    <form onSubmit={handleSubmit} className="border-b border-border p-3 md:p-4">
       <Textarea
         placeholder="מה קורה?"
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        className="min-h-[100px] resize-none border-0 focus-visible:ring-0 text-lg"
+        className="min-h-[80px] md:min-h-[100px] resize-none border-0 focus-visible:ring-0 text-base md:text-lg"
         maxLength={280}
       />
       

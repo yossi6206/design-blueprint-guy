@@ -266,31 +266,31 @@ export const PostCard = ({
   };
 
   return (
-    <div className={`border-b border-border p-4 hover:bg-accent/5 transition-colors ${isBoosted ? "bg-primary/5" : ""}`}>
+    <div className={`border-b border-border p-3 md:p-4 hover:bg-accent/5 transition-colors ${isBoosted ? "bg-primary/5" : ""}`}>
       {isBoosted && (
         <div className="mb-2 flex items-center gap-2">
-          <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+          <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs">
             <TrendingUp className="w-3 h-3 ml-1" />
             פוסט מקודם
           </Badge>
         </div>
       )}
-      <div className="flex gap-3">
+      <div className="flex gap-2 md:gap-3">
         <Link to={`/profile/${handle}`} className="flex-shrink-0">
-          <Avatar className="w-12 h-12">
+          <Avatar className="w-10 h-10 md:w-12 md:h-12">
             <AvatarImage src={avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${handle}`} />
             <AvatarFallback>{author[0]}</AvatarFallback>
           </Avatar>
         </Link>
         <div className="flex-1">
           <div className="flex items-center gap-1 justify-between">
-            <div className="flex items-center gap-1 flex-wrap">
+            <div className="flex items-center gap-1 flex-wrap text-sm md:text-base">
               <Link to={`/profile/${handle}`}><span className="font-bold hover:underline">{author}</span></Link>
-              {verified && <BadgeCheck className="h-4 w-4 text-background fill-primary" />}
-              <span className="text-muted-foreground">@{handle} · {time}</span>
+              {verified && <BadgeCheck className="h-3 w-3 md:h-4 md:w-4 text-background fill-primary" />}
+              <span className="text-muted-foreground text-xs md:text-sm">@{handle} · {time}</span>
             </div>
             {userId !== currentUserId && currentUserId && (
-              <Button variant={isFollowing ? "outline" : "default"} size="sm" onClick={handleFollow} className="rounded-full">
+              <Button variant={isFollowing ? "outline" : "default"} size="sm" onClick={handleFollow} className="rounded-full text-xs md:text-sm h-7 md:h-8 px-2 md:px-3">
                 {isFollowing ? "עוקב" : "עקוב"}
               </Button>
             )}
@@ -304,13 +304,13 @@ export const PostCard = ({
               </DropdownMenu>
             )}
           </div>
-          <p className="mt-1 whitespace-pre-wrap">{renderContent(content)}</p>
-          {image && <img src={image} alt="Post" className="mt-3 rounded-2xl max-w-full border border-border" />}
-          <div className="flex justify-between mt-3 text-muted-foreground">
-            <Button variant="ghost" size="sm" onClick={() => setShowComments(!showComments)}><MessageCircle className="h-5 w-5 ml-2" /><span>{commentsCount}</span></Button>
-            <Button variant="ghost" size="sm" onClick={() => setShowRetweetDialog(true)} className={isRetweeted ? "text-green-500" : ""}><Repeat2 className="h-5 w-5 ml-2" /><span>{retweetsCount}</span></Button>
-            <Button variant="ghost" size="sm" onClick={handleLike} className={isLiked ? "text-pink-500" : ""}><Heart className={`h-5 w-5 ml-2 ${isLiked ? "fill-current" : ""}`} /><span>{likesCount}</span></Button>
-            <Button variant="ghost" size="sm" onClick={handleBoost} className={isBoostedByUser ? "text-primary" : ""}><TrendingUp className={`h-5 w-5 ml-2 ${isBoostedByUser ? "fill-current" : ""}`} /><span>{boostsCount}</span></Button>
+          <p className="mt-1 whitespace-pre-wrap text-sm md:text-base">{renderContent(content)}</p>
+          {image && <img src={image} alt="Post" className="mt-2 md:mt-3 rounded-2xl max-w-full border border-border" />}
+          <div className="flex justify-between mt-2 md:mt-3 text-muted-foreground">
+            <Button variant="ghost" size="sm" onClick={() => setShowComments(!showComments)} className="h-8 px-2 md:px-3"><MessageCircle className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" /><span className="text-xs md:text-sm">{commentsCount}</span></Button>
+            <Button variant="ghost" size="sm" onClick={() => setShowRetweetDialog(true)} className={`h-8 px-2 md:px-3 ${isRetweeted ? "text-green-500" : ""}`}><Repeat2 className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" /><span className="text-xs md:text-sm">{retweetsCount}</span></Button>
+            <Button variant="ghost" size="sm" onClick={handleLike} className={`h-8 px-2 md:px-3 ${isLiked ? "text-pink-500" : ""}`}><Heart className={`h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2 ${isLiked ? "fill-current" : ""}`} /><span className="text-xs md:text-sm">{likesCount}</span></Button>
+            <Button variant="ghost" size="sm" onClick={handleBoost} className={`h-8 px-2 md:px-3 ${isBoostedByUser ? "text-primary" : ""}`}><TrendingUp className={`h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2 ${isBoostedByUser ? "fill-current" : ""}`} /><span className="text-xs md:text-sm">{boostsCount}</span></Button>
             <BookmarkButton postId={postId} currentUserId={currentUserId} />
           </div>
           {showComments && <Comments postId={postId} currentUserId={currentUserId} onCommentAdded={() => setCommentsCount((prev) => prev + 1)} />}

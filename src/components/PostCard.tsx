@@ -310,7 +310,7 @@ export const PostCard = ({
           </div>
           <div 
             onClick={() => navigate(`/post/${postId}`)}
-            className="cursor-pointer"
+            className="cursor-pointer transition-colors hover:bg-accent/10 rounded-lg p-2 -m-2"
           >
             <p className="mt-1 whitespace-pre-wrap text-sm md:text-base">{renderContent(content)}</p>
             {image && (

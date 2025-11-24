@@ -418,15 +418,16 @@ export default function Profile() {
                 </div>
               ) : (
                 comments.map((comment) => (
-                  <div key={comment.id} className="border-b border-border p-4 hover:bg-muted/30 transition-colors">
+                  <Link
+                    key={comment.id}
+                    to={`/post/${comment.post_id}`}
+                    className="block border-b border-border p-4 hover:bg-muted/30 transition-colors cursor-pointer"
+                  >
                     <div className="text-xs md:text-sm text-muted-foreground mb-2">
                       תגובה על פוסט של{" "}
-                      <Link
-                        to={`/profile/${comment.post.author_handle}`}
-                        className="text-primary hover:underline font-semibold"
-                      >
+                      <span className="text-primary hover:underline font-semibold">
                         @{comment.post.author_handle}
-                      </Link>
+                      </span>
                     </div>
                     <div className="mb-3 p-3 bg-muted/50 rounded-lg border-r-2 border-primary/50">
                       <p className="text-sm text-muted-foreground line-clamp-2">
@@ -457,7 +458,7 @@ export default function Profile() {
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               )}
             </TabsContent>

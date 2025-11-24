@@ -17,6 +17,7 @@ import ExperimentDashboard from "./pages/ExperimentDashboard";
 import AdminPanel from "./pages/AdminPanel";
 import VerificationRequest from "./pages/VerificationRequest";
 import Notifications from "./pages/Notifications";
+import Post from "./pages/Post";
 import Test from "./Test";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile/:handle" element={<Profile />} />
           <Route path="/profile/:handle/followers" element={<Followers />} />
+          <Route path="/post/:postId" element={<Post />} />
           <Route path="/suggestions" element={<Suggestions />} />
           <Route path="/experiments" element={<ExperimentDashboard />} />
           <Route path="/admin" element={<AdminPanel />} />

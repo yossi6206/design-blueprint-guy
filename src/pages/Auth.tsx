@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Twitter, BadgeCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import twitterLogo from "@/assets/twitter-logo.jpg";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -290,8 +291,8 @@ const Auth = () => {
             <>
               <div className="text-center space-y-6">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="text-7xl font-bold relative">
-                    <span className="bg-gradient-primary bg-clip-text text-transparent">X.</span>
+                  <div className="w-20 h-20 flex items-center justify-center">
+                    <img src={twitterLogo} alt="Twitter Logo" className="w-full h-full object-contain" />
                   </div>
                   <div className="space-y-2">
                     <h1 className="text-4xl md:text-5xl font-bold text-foreground">

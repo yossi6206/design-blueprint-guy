@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +27,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, ShieldCheck, BarChart3 } from "lucide-react";
+import { Loader2, Plus, Trash2, ShieldCheck, BarChart3, Mail } from "lucide-react";
 import { VerificationPanel } from "@/components/VerificationPanel";
 import { StatisticsOverview } from "@/components/admin/StatisticsOverview";
 
@@ -54,6 +54,18 @@ export default function AdminPanel() {
   const navigate = useNavigate();
   const { isAdmin, isLoading: isCheckingAdmin } = useAdminRole();
   const [isCreating, setIsCreating] = useState(false);
+  const [isSendingTestEmail, setIsSendingTestEmail] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    };
+    fetchCurrentUser();
+  }, []);
 
   const form = useForm<ExperimentForm>({
     resolver: zodResolver(experimentSchema),
@@ -109,6 +121,29 @@ export default function AdminPanel() {
       "variants",
       currentVariants.filter((_, i) => i !== index)
     );
+  };
+
+  const sendTestEmail = async () => {
+    if (!currentUserId) {
+      toast.error("לא נמצא משתמש מחובר");
+      return;
+    }
+
+    setIsSendingTestEmail(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-weekly-summary", {
+        body: { userId: currentUserId },
+      });
+
+      if (error) throw error;
+
+      toast.success(`מייל דוגמה נשלח בהצלחה! 📧`);
+    } catch (error: any) {
+      console.error("Error sending test email:", error);
+      toast.error(error.message || "שגיאה בשליחת מייל דוגמה");
+    } finally {
+      setIsSendingTestEmail(false);
+    }
   };
 
   const onSubmit = async (data: ExperimentForm) => {
@@ -186,7 +221,7 @@ export default function AdminPanel() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
       <Tabs defaultValue="statistics" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6">
+        <TabsList className="grid w-full grid-cols-4 mb-6">
           <TabsTrigger value="statistics" className="gap-2">
             <BarChart3 className="w-4 h-4" />
             סטטיסטיקות
@@ -195,11 +230,61 @@ export default function AdminPanel() {
             <ShieldCheck className="w-4 h-4" />
             אימותים
           </TabsTrigger>
+          <TabsTrigger value="emails" className="gap-2">
+            <Mail className="w-4 h-4" />
+            מיילים
+          </TabsTrigger>
           <TabsTrigger value="experiments">ניסויי A/B</TabsTrigger>
         </TabsList>
 
         <TabsContent value="statistics">
           <StatisticsOverview />
+        </TabsContent>
+
+        <TabsContent value="emails">
+          <Card>
+            <CardHeader>
+              <CardTitle>מיילים שבועיים</CardTitle>
+              <CardDescription>
+                ניהול מערכת המיילים השבועיים האוטומטיים
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="bg-muted/50 p-6 rounded-lg space-y-4">
+                <h3 className="text-lg font-semibold">📬 איך זה עובד?</h3>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li>✅ המערכת עוברת על כל המשתמשים פעם בשבוע</li>
+                  <li>✅ אוספת נתונים על הפעילות מהשבוע האחרון</li>
+                  <li>✅ שולחת מייל רק למי שהיה פעיל (לא שולחת מיילים ריקים)</li>
+                  <li>✅ כוללת את הפוסטים הפופולריים ביותר בקהילה</li>
+                  <li>✅ המערכת רצה אוטומטית כל יום ראשון בבוקר</li>
+                </ul>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold">🧪 בדיקת מייל דוגמה</h3>
+                <p className="text-sm text-muted-foreground">
+                  רוצה לראות איך המייל השבועי ייראה? שלח לעצמך מייל דוגמה עם הנתונים שלך מהשבוע האחרון
+                </p>
+                <Button
+                  onClick={sendTestEmail}
+                  disabled={isSendingTestEmail}
+                  size="lg"
+                  className="w-full sm:w-auto"
+                >
+                  {isSendingTestEmail && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                  <Mail className="ml-2 h-4 w-4" />
+                  שלח מייל דוגמה למייל שלי
+                </Button>
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  💡 <strong>טיפ:</strong> המייל ישלח לכתובת המייל שרשומה בחשבון שלך. בדוק את תיבת הדואר (ואת תיקיית הספאם אם צריך)
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="experiments">

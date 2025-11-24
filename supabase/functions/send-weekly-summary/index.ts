@@ -273,6 +273,49 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Check if this is a test/preview request for a specific user
+    const body = req.method === "POST" ? await req.json() : {};
+    const testUserId = body.userId;
+
+    if (testUserId) {
+      console.log("Sending test email to user:", testUserId);
+      
+      const summaryData = await getWeeklySummaryData(testUserId);
+      
+      if (!summaryData) {
+        return new Response(
+          JSON.stringify({ error: "לא נמצאו נתונים למשתמש זה" }),
+          {
+            status: 404,
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          }
+        );
+      }
+
+      const emailHtml = createWeeklySummaryEmail(summaryData);
+
+      const emailResponse = await resend.emails.send({
+        from: "סיכום שבועי <weekly@twibber.co.il>",
+        to: [summaryData.userEmail],
+        subject: "📊 [דוגמה] הסיכום השבועי שלך - ראה מה קרה השבוע!",
+        html: emailHtml,
+      });
+
+      console.log("Test email sent successfully:", emailResponse);
+
+      return new Response(JSON.stringify({ 
+        message: "מייל דוגמה נשלח בהצלחה!",
+        email: summaryData.userEmail
+      }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
+      });
+    }
+
+    // Regular weekly summary job for all users
     console.log("Starting weekly summary email job...");
 
     // Get all users
@@ -316,7 +359,7 @@ const handler = async (req: Request): Promise<Response> => {
         const emailHtml = createWeeklySummaryEmail(summaryData);
 
         const emailResponse = await resend.emails.send({
-          from: "סיכום שבועי <onboarding@resend.dev>",
+          from: "סיכום שבועי <weekly@twibber.co.il>",
           to: [summaryData.userEmail],
           subject: "📊 הסיכום השבועי שלך - ראה מה קרה השבוע!",
           html: emailHtml,

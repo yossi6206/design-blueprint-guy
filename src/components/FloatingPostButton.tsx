@@ -36,10 +36,10 @@ export const FloatingPostButton = () => {
 
   return (
     <>
-      {/* Floating Action Button - visible on all screens */}
+      {/* Floating Action Button - visible only on desktop */}
       <Button
         onClick={() => setIsPostDialogOpen(true)}
-        className="fixed bottom-20 left-4 md:bottom-8 md:left-auto md:right-8 h-14 w-14 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg z-40 flex items-center justify-center"
+        className="hidden md:flex fixed bottom-8 right-8 h-14 w-14 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg z-40 items-center justify-center"
         size="icon"
       >
         <Plus className="h-6 w-6" />

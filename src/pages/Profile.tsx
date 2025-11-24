@@ -11,6 +11,7 @@ import { PostCard } from "@/components/PostCard";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { Sidebar } from "@/components/Sidebar";
 import { RightSidebar } from "@/components/RightSidebar";
+import { MobileNav } from "@/components/MobileNav";
 import { toast } from "sonner";
 
 interface Profile {
@@ -174,56 +175,59 @@ export default function Profile() {
   });
 
   return (
-    <div className="flex min-h-screen bg-background justify-center">
-      <Sidebar />
-      <div className="w-full max-w-2xl border-x border-border">
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border p-4">
-          <div className="flex items-center gap-8">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/")}
-              className="h-9 w-9"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <div className="flex items-center gap-1">
-                <h1 className="text-xl font-bold">{profile.user_name}</h1>
-                {profile.is_verified && (
-                  <BadgeCheck className="h-5 w-5 text-background fill-primary" />
-                )}
+    <>
+      <div className="flex min-h-screen bg-background justify-center pb-16 md:pb-0">
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
+        <div className="w-full max-w-2xl md:border-x border-border">
+          {/* Header */}
+          <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border p-3 md:p-4">
+            <div className="flex items-center gap-4 md:gap-8">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/")}
+                className="h-8 w-8 md:h-9 md:w-9"
+              >
+                <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
+              </Button>
+              <div>
+                <div className="flex items-center gap-1">
+                  <h1 className="text-lg md:text-xl font-bold">{profile.user_name}</h1>
+                  {profile.is_verified && (
+                    <BadgeCheck className="h-4 w-4 md:h-5 md:w-5 text-background fill-primary" />
+                  )}
+                </div>
+                <p className="text-xs md:text-sm text-muted-foreground">{posts.length} פוסטים</p>
               </div>
-              <p className="text-sm text-muted-foreground">{posts.length} פוסטים</p>
             </div>
           </div>
-        </div>
 
-        {/* Cover Image */}
-        <div className="h-48 bg-muted">
-          {profile.cover_image && (
-            <img
-              src={profile.cover_image}
-              alt="Cover"
-              className="w-full h-full object-cover"
-            />
-          )}
-        </div>
+          {/* Cover Image */}
+          <div className="h-32 md:h-48 bg-muted">
+            {profile.cover_image && (
+              <img
+                src={profile.cover_image}
+                alt="Cover"
+                className="w-full h-full object-cover"
+              />
+            )}
+          </div>
 
-        {/* Profile Info */}
-        <div className="px-4 pb-4">
-          <div className="flex justify-between items-start -mt-16 mb-4">
-            <Avatar className="h-32 w-32 border-4 border-background">
-              <AvatarImage src={profile.avatar_url || ""} />
-              <AvatarFallback className="text-4xl">
-                {profile.user_name[0]?.toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="mt-16 flex gap-2">
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="h-5 w-5" />
-              </Button>
+          {/* Profile Info */}
+          <div className="px-3 md:px-4 pb-4">
+            <div className="flex justify-between items-start -mt-12 md:-mt-16 mb-4">
+              <Avatar className="h-20 w-20 md:h-32 md:w-32 border-4 border-background">
+                <AvatarImage src={profile.avatar_url || ""} />
+                <AvatarFallback className="text-2xl md:text-4xl">
+                  {profile.user_name[0]?.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="mt-12 md:mt-16 flex gap-2">
+                <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10">
+                  <MoreHorizontal className="h-4 w-4 md:h-5 md:w-5" />
+                </Button>
               {isOwnProfile ? (
                 <EditProfileDialog 
                   profile={profile} 
@@ -235,131 +239,135 @@ export default function Profile() {
                 <Button
                   onClick={handleFollow}
                   variant={isFollowing ? "outline" : "default"}
-                  className="rounded-full px-6"
+                  className="rounded-full px-4 md:px-6 text-sm md:text-base h-8 md:h-10"
                 >
                   {isFollowing ? "עוקב" : "עקוב"}
                 </Button>
               )}
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-3">
-            <div>
-              <div className="flex items-center gap-1">
-                <h2 className="text-xl font-bold">{profile.user_name}</h2>
-                {profile.is_verified && (
-                  <BadgeCheck className="h-5 w-5 text-background fill-primary" />
+            <div className="space-y-3">
+              <div>
+                <div className="flex items-center gap-1">
+                  <h2 className="text-lg md:text-xl font-bold">{profile.user_name}</h2>
+                  {profile.is_verified && (
+                    <BadgeCheck className="h-4 w-4 md:h-5 md:w-5 text-background fill-primary" />
+                  )}
+                </div>
+                <p className="text-sm md:text-base text-muted-foreground">@{profile.user_handle}</p>
+              </div>
+
+              {profile.bio && <p className="text-sm md:text-base">{profile.bio}</p>}
+
+              <div className="flex flex-wrap gap-2 md:gap-3 text-xs md:text-sm text-muted-foreground">
+                {profile.location && (
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3 md:h-4 md:w-4" />
+                    <span>{profile.location}</span>
+                  </div>
                 )}
-              </div>
-              <p className="text-muted-foreground">@{profile.user_handle}</p>
-            </div>
-
-            {profile.bio && <p className="text-sm">{profile.bio}</p>}
-
-            <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-              {profile.location && (
+                {profile.website && (
+                  <div className="flex items-center gap-1">
+                    <Link2 className="h-3 w-3 md:h-4 md:w-4" />
+                    <a
+                      href={profile.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline truncate max-w-[150px] md:max-w-none"
+                    >
+                      {profile.website}
+                    </a>
+                  </div>
+                )}
                 <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  <span>{profile.location}</span>
+                  <Calendar className="h-3 w-3 md:h-4 md:w-4" />
+                  <span>הצטרף {joinDate}</span>
                 </div>
-              )}
-              {profile.website && (
-                <div className="flex items-center gap-1">
-                  <Link2 className="h-4 w-4" />
-                  <a
-                    href={profile.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    {profile.website}
-                  </a>
-                </div>
-              )}
-              <div className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                <span>הצטרף {joinDate}</span>
               </div>
-            </div>
 
-            <div className="flex gap-4 text-sm">
-              <Link 
-                to={`/profile/${handle}/followers?tab=following`}
-                className="hover:underline"
-              >
-                <span className="font-bold">{followingCount}</span>{" "}
-                <span className="text-muted-foreground">עוקב</span>
-              </Link>
-              <Link 
-                to={`/profile/${handle}/followers?tab=followers`}
-                className="hover:underline"
-              >
-                <span className="font-bold">{followersCount}</span>{" "}
-                <span className="text-muted-foreground">עוקבים</span>
-              </Link>
+              <div className="flex gap-3 md:gap-4 text-xs md:text-sm">
+                <Link 
+                  to={`/profile/${handle}/followers?tab=following`}
+                  className="hover:underline"
+                >
+                  <span className="font-bold">{followingCount}</span>{" "}
+                  <span className="text-muted-foreground">עוקב</span>
+                </Link>
+                <Link 
+                  to={`/profile/${handle}/followers?tab=followers`}
+                  className="hover:underline"
+                >
+                  <span className="font-bold">{followersCount}</span>{" "}
+                  <span className="text-muted-foreground">עוקבים</span>
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="posts" className="w-full">
-          <TabsList className="w-full justify-around rounded-none border-b bg-transparent h-auto p-0">
-            <TabsTrigger
-              value="posts"
-              className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-            >
-              פוסטים
-            </TabsTrigger>
-            <TabsTrigger
-              value="replies"
-              className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-            >
-              תגובות
-            </TabsTrigger>
-            <TabsTrigger
-              value="media"
-              className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-            >
-              מדיה
-            </TabsTrigger>
-          </TabsList>
+          {/* Tabs */}
+          <Tabs defaultValue="posts" className="w-full">
+            <TabsList className="w-full justify-around rounded-none border-b bg-transparent h-auto p-0">
+              <TabsTrigger
+                value="posts"
+                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent text-sm md:text-base py-3"
+              >
+                פוסטים
+              </TabsTrigger>
+              <TabsTrigger
+                value="replies"
+                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent text-sm md:text-base py-3"
+              >
+                תגובות
+              </TabsTrigger>
+              <TabsTrigger
+                value="media"
+                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent text-sm md:text-base py-3"
+              >
+                מדיה
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="posts" className="mt-0">
-            {posts.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">
-                אין פוסטים עדיין
+            <TabsContent value="posts" className="mt-0">
+              {posts.length === 0 ? (
+                <div className="p-6 md:p-8 text-center text-sm md:text-base text-muted-foreground">
+                  אין פוסטים עדיין
+                </div>
+              ) : (
+                posts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    postId={post.id}
+                    author={post.author_name}
+                    handle={post.author_handle}
+                    time={new Date(post.created_at).toLocaleDateString("he-IL")}
+                    content={post.content}
+                    image={post.image || undefined}
+                    userId={post.user_id}
+                    currentUserId={currentUser?.id}
+                  />
+                ))
+              )}
+            </TabsContent>
+
+            <TabsContent value="replies" className="mt-0">
+              <div className="p-6 md:p-8 text-center text-sm md:text-base text-muted-foreground">
+                אין תגובות עדיין
               </div>
-            ) : (
-              posts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  postId={post.id}
-                  author={post.author_name}
-                  handle={post.author_handle}
-                  time={new Date(post.created_at).toLocaleDateString("he-IL")}
-                  content={post.content}
-                  image={post.image || undefined}
-                  userId={post.user_id}
-                  currentUserId={currentUser?.id}
-                />
-              ))
-            )}
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="replies" className="mt-0">
-            <div className="p-8 text-center text-muted-foreground">
-              אין תגובות עדיין
-            </div>
-          </TabsContent>
-
-          <TabsContent value="media" className="mt-0">
-            <div className="p-8 text-center text-muted-foreground">
-              אין מדיה עדיין
-            </div>
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="media" className="mt-0">
+              <div className="p-6 md:p-8 text-center text-sm md:text-base text-muted-foreground">
+                אין מדיה עדיין
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+        <div className="hidden lg:block">
+          <RightSidebar />
+        </div>
       </div>
-      <RightSidebar />
-    </div>
+      <MobileNav />
+    </>
   );
 }

@@ -287,9 +287,10 @@ export const PostCard = ({
         <div className="flex-1">
           <div className="flex items-center gap-1 justify-between">
             <div className="flex items-center gap-1 flex-wrap text-sm md:text-base">
-              <Link to={`/profile/${handle}`}><span className="font-bold hover:underline">{author}</span></Link>
+              <Link to={`/profile/${handle}`} className="font-bold hover:underline">{author}</Link>
               {verified && <BadgeCheck className="h-3 w-3 md:h-4 md:w-4 text-background fill-primary" />}
-              <span className="text-muted-foreground text-xs md:text-sm">@{handle} · {time}</span>
+              <Link to={`/profile/${handle}`} className="text-muted-foreground text-xs md:text-sm hover:underline">@{handle}</Link>
+              <span className="text-muted-foreground text-xs md:text-sm">· {time}</span>
             </div>
             {userId !== currentUserId && currentUserId && (
               <Button variant={isFollowing ? "outline" : "default"} size="sm" onClick={handleFollow} className="rounded-full text-xs md:text-sm h-7 md:h-8 px-2 md:px-3">

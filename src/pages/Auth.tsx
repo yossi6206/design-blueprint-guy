@@ -15,6 +15,7 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [isResetPassword, setIsResetPassword] = useState(isResetMode);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -64,17 +65,26 @@ const Auth = () => {
           // Don't fail the signup if email fails
         }
         
-        toast({
-          title: "נרשמת בהצלחה!",
-          description: "כעת תוכל להתחבר",
-        });
+        setShowEmailConfirmation(true);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) throw error;
-        navigate("/");
+        
+        if (error) {
+          if (error.message.includes("Email not confirmed")) {
+            toast({
+              title: "דרוש אימות מייל",
+              description: "אנא אמת את כתובת המייל שלך לפני ההתחברות. בדוק את תיבת הדואר שלך.",
+              variant: "destructive",
+            });
+          } else {
+            throw error;
+          }
+        } else {
+          navigate("/");
+        }
       }
     } catch (error: any) {
       toast({
@@ -238,23 +248,63 @@ const Auth = () => {
       {/* Auth Form */}
       <div className="w-full flex items-center justify-center p-8 relative z-10">
         <div className="w-full max-w-md space-y-8 animate-fade-in">
-          <div className="text-center space-y-6">
-            <div className="flex flex-col items-center gap-4">
-              <div className="text-7xl font-bold relative">
-                <span className="bg-gradient-primary bg-clip-text text-transparent">X.</span>
-              </div>
-              <div className="space-y-2">
-                <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-                  {isForgotPassword ? "שחזור סיסמה" : isResetPassword ? "סיסמה חדשה" : "הקול שלך."}
-                </h1>
-                {!isForgotPassword && !isResetPassword && (
-                  <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-                    החופש שלך.
+          {showEmailConfirmation ? (
+            <div className="text-center space-y-6">
+              <div className="flex flex-col items-center gap-4">
+                <div className="text-7xl">📧</div>
+                <div className="space-y-4">
+                  <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+                    בדוק את המייל שלך
                   </h1>
-                )}
+                  <p className="text-muted-foreground text-lg">
+                    שלחנו לך מייל אימות ל-
+                    <span className="font-semibold text-foreground block mt-1">{email}</span>
+                  </p>
+                  <p className="text-muted-foreground">
+                    אנא לחץ על הקישור במייל כדי לאמת את החשבון שלך ולהתחיל להשתמש באפליקציה.
+                  </p>
+                </div>
               </div>
+              <Card className="p-6 bg-muted/50">
+                <div className="space-y-3 text-sm text-muted-foreground text-right">
+                  <p>💡 <strong>טיפ:</strong> המייל עשוי להגיע לתיקיית הספאם</p>
+                  <p>🔄 לא קיבלת מייל? בדוק את כתובת המייל או נסה להירשם שוב</p>
+                </div>
+              </Card>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setShowEmailConfirmation(false);
+                  setIsSignUp(false);
+                  setEmail("");
+                  setPassword("");
+                  setName("");
+                  setHandle("");
+                }}
+              >
+                חזרה להתחברות
+              </Button>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="text-center space-y-6">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="text-7xl font-bold relative">
+                    <span className="bg-gradient-primary bg-clip-text text-transparent">X.</span>
+                  </div>
+                  <div className="space-y-2">
+                    <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+                      {isForgotPassword ? "שחזור סיסמה" : isResetPassword ? "סיסמה חדשה" : "הקול שלך."}
+                    </h1>
+                    {!isForgotPassword && !isResetPassword && (
+                      <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+                        החופש שלך.
+                      </h1>
+                    )}
+                  </div>
+                </div>
+              </div>
 
           {isResetPassword ? (
             <form onSubmit={handleResetPassword} className="space-y-4">
@@ -433,6 +483,8 @@ const Auth = () => {
               </span>
             </p>
           </form>
+           )}
+            </>
           )}
         </div>
       </div>

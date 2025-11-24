@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Comments } from "./Comments";
@@ -49,6 +49,7 @@ export const PostCard = ({
   initialBoostsCount = 0,
 }: PostCardProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(initialLikesCount);
   const [commentsCount, setCommentsCount] = useState(initialCommentsCount);
@@ -259,9 +260,9 @@ export const PostCard = ({
     const parts = text.split(/(\s+)/);
     return parts.map((part, index) => {
       if (part.startsWith('#')) {
-        return <Link key={index} to={`/hashtag/${part.substring(1)}`} className="text-primary hover:underline">{part}</Link>;
+        return <Link key={index} to={`/hashtag/${part.substring(1)}`} className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>{part}</Link>;
       } else if (part.startsWith('@')) {
-        return <Link key={index} to={`/profile/${part.substring(1)}`} className="text-primary hover:underline">{part}</Link>;
+        return <Link key={index} to={`/profile/${part.substring(1)}`} className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>{part}</Link>;
       }
       return part;
     });
@@ -307,23 +308,28 @@ export const PostCard = ({
               </DropdownMenu>
             )}
           </div>
-          <p className="mt-1 whitespace-pre-wrap text-sm md:text-base">{renderContent(content)}</p>
-          {image && (
-            <div className="mt-2 md:mt-3 rounded-2xl overflow-hidden border border-border">
-              {mediaType === "video" ? (
-                <video
-                  src={image}
-                  controls
-                  className="w-full max-h-[500px] object-cover"
-                  playsInline
-                >
-                  הדפדפן שלך לא תומך בתגית וידאו.
-                </video>
-              ) : (
-                <img src={image} alt="Post" className="w-full" />
-              )}
-            </div>
-          )}
+          <div 
+            onClick={() => navigate(`/post/${postId}`)}
+            className="cursor-pointer"
+          >
+            <p className="mt-1 whitespace-pre-wrap text-sm md:text-base">{renderContent(content)}</p>
+            {image && (
+              <div className="mt-2 md:mt-3 rounded-2xl overflow-hidden border border-border">
+                {mediaType === "video" ? (
+                  <video
+                    src={image}
+                    controls
+                    className="w-full max-h-[500px] object-cover"
+                    playsInline
+                  >
+                    הדפדפן שלך לא תומך בתגית וידאו.
+                  </video>
+                ) : (
+                  <img src={image} alt="Post" className="w-full" />
+                )}
+              </div>
+            )}
+          </div>
           <div className="flex justify-between mt-2 md:mt-3 text-muted-foreground">
             <Button variant="ghost" size="sm" onClick={() => setShowComments(!showComments)} className="h-8 px-2 md:px-3"><MessageCircle className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" /><span className="text-xs md:text-sm">{commentsCount}</span></Button>
             <Button variant="ghost" size="sm" onClick={() => setShowRetweetDialog(true)} className={`h-8 px-2 md:px-3 ${isRetweeted ? "text-green-500" : ""}`}><Repeat2 className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" /><span className="text-xs md:text-sm">{retweetsCount}</span></Button>

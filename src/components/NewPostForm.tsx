@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Image, X, Video, Loader2 } from "lucide-react";
 import { EmojiPicker } from "./EmojiPicker";
@@ -19,6 +20,7 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
   const [mediaPreview, setMediaPreview] = useState<string>("");
   const [mediaType, setMediaType] = useState<"image" | "video" | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -66,6 +68,7 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
     setMediaFile(null);
     setMediaPreview("");
     setMediaType(null);
+    setUploadProgress(0);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -75,13 +78,29 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
     if (!mediaFile) return null;
 
     setUploading(true);
+    setUploadProgress(0);
+    
     try {
       const fileExt = mediaFile.name.split(".").pop();
       const fileName = `${userId}/${Date.now()}.${fileExt}`;
 
+      // Simulate progress for better UX
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return prev;
+          }
+          return prev + 10;
+        });
+      }, 200);
+
       const { error: uploadError, data } = await supabase.storage
         .from("post-media")
         .upload(fileName, mediaFile);
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
 
       if (uploadError) throw uploadError;
 
@@ -99,6 +118,7 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
       return null;
     } finally {
       setUploading(false);
+      setTimeout(() => setUploadProgress(0), 500);
     }
   };
 
@@ -182,6 +202,7 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
 
       setContent("");
       clearMedia();
+      setUploadProgress(0);
       onPostCreated();
       toast({
         title: "הפוסט פורסם בהצלחה!",
@@ -208,29 +229,40 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
       />
       
       {mediaPreview && (
-        <div className="mt-3 relative rounded-2xl overflow-hidden border border-border">
-          {mediaType === "video" ? (
-            <video
-              src={mediaPreview}
-              controls
-              className="w-full max-h-[400px] object-cover"
-            />
-          ) : (
-            <img
-              src={mediaPreview}
-              alt="Preview"
-              className="w-full max-h-[400px] object-cover"
-            />
+        <div className="mt-3 space-y-2">
+          <div className="relative rounded-2xl overflow-hidden border border-border">
+            {mediaType === "video" ? (
+              <video
+                src={mediaPreview}
+                controls
+                className="w-full max-h-[400px] object-cover"
+              />
+            ) : (
+              <img
+                src={mediaPreview}
+                alt="Preview"
+                className="w-full max-h-[400px] object-cover"
+              />
+            )}
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon"
+              onClick={clearMedia}
+              className="absolute top-2 right-2 h-8 w-8 rounded-full"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          {uploading && uploadProgress > 0 && (
+            <div className="space-y-1">
+              <Progress value={uploadProgress} className="h-2" />
+              <p className="text-xs text-muted-foreground text-center">
+                {uploadProgress}% - מעלה קובץ...
+              </p>
+            </div>
           )}
-          <Button
-            type="button"
-            variant="secondary"
-            size="icon"
-            onClick={clearMedia}
-            className="absolute top-2 right-2 h-8 w-8 rounded-full"
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </div>
       )}
 

@@ -54,7 +54,7 @@ export const MobileNav = () => {
             onClick={() => setIsPostDialogOpen(true)}
             className="w-full h-11 rounded-full bg-foreground text-background hover:bg-foreground/90 font-bold text-base shadow-sm"
           >
-            Post
+            פוסט חדש
           </Button>
         </div>
         

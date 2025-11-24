@@ -32,6 +32,7 @@ interface Post {
   id: string;
   content: string;
   image: string | null;
+  media_type?: string | null;
   created_at: string;
   author_name: string;
   author_handle: string;
@@ -343,6 +344,7 @@ export default function Profile() {
                     time={new Date(post.created_at).toLocaleDateString("he-IL")}
                     content={post.content}
                     image={post.image || undefined}
+                    mediaType={post.media_type}
                     userId={post.user_id}
                     currentUserId={currentUser?.id}
                   />

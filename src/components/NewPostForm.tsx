@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Image, X } from "lucide-react";
+import { Image, X, Video, Loader2 } from "lucide-react";
 import { EmojiPicker } from "./EmojiPicker";
 
 interface NewPostFormProps {
@@ -15,9 +15,12 @@ interface NewPostFormProps {
 
 export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostFormProps) => {
   const [content, setContent] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [showImageInput, setShowImageInput] = useState(false);
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string>("");
+  const [mediaType, setMediaType] = useState<"image" | "video" | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const extractHashtags = (text: string): string[] => {
@@ -32,6 +35,73 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
     return matches ? matches.map(mention => mention.substring(1)) : [];
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (50MB limit)
+    if (file.size > 52428800) {
+      toast({
+        title: "הקובץ גדול מדי",
+        description: "גודל מקסימלי: 50MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Determine media type
+    const type = file.type.startsWith("video/") ? "video" : "image";
+    setMediaType(type);
+    setMediaFile(file);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setMediaPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const clearMedia = () => {
+    setMediaFile(null);
+    setMediaPreview("");
+    setMediaType(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const uploadMedia = async (userId: string): Promise<string | null> => {
+    if (!mediaFile) return null;
+
+    setUploading(true);
+    try {
+      const fileExt = mediaFile.name.split(".").pop();
+      const fileName = `${userId}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from("post-media")
+        .upload(fileName, mediaFile);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("post-media")
+        .getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error: any) {
+      toast({
+        title: "שגיאה בהעלאת קובץ",
+        description: error.message,
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
@@ -41,12 +111,24 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Upload media if exists
+      let mediaUrl: string | null = null;
+      if (mediaFile) {
+        mediaUrl = await uploadMedia(user.id);
+        if (!mediaUrl && mediaFile) {
+          // Upload failed
+          setLoading(false);
+          return;
+        }
+      }
+
       const { data: post, error } = await supabase.from("posts").insert({
         user_id: user.id,
         author_name: userName,
         author_handle: userHandle,
         content: content.trim(),
-        image: imageUrl || null,
+        image: mediaUrl,
+        media_type: mediaType,
       }).select().single();
 
       if (error) throw error;
@@ -99,8 +181,7 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
       }
 
       setContent("");
-      setImageUrl("");
-      setShowImageInput(false);
+      clearMedia();
       onPostCreated();
       toast({
         title: "הפוסט פורסם בהצלחה!",
@@ -126,46 +207,81 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
         maxLength={280}
       />
       
-      {showImageInput && (
-        <div className="mt-2 flex gap-2 animate-fade-in">
-          <Input
-            type="url"
-            placeholder="הכנס קישור לתמונה"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            className="flex-1"
-          />
+      {mediaPreview && (
+        <div className="mt-3 relative rounded-2xl overflow-hidden border border-border">
+          {mediaType === "video" ? (
+            <video
+              src={mediaPreview}
+              controls
+              className="w-full max-h-[400px] object-cover"
+            />
+          ) : (
+            <img
+              src={mediaPreview}
+              alt="Preview"
+              className="w-full max-h-[400px] object-cover"
+            />
+          )}
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             size="icon"
-            onClick={() => {
-              setShowImageInput(false);
-              setImageUrl("");
-            }}
+            onClick={clearMedia}
+            className="absolute top-2 right-2 h-8 w-8 rounded-full"
           >
             <X className="h-4 w-4" />
           </Button>
         </div>
       )}
 
-      <div className="flex justify-between items-center mt-2">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,video/*"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+
+      <div className="flex justify-between items-center mt-3">
         <div className="flex gap-1 items-center">
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            onClick={() => setShowImageInput(!showImageInput)}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading || !!mediaFile}
           >
             <Image className="h-5 w-5 text-primary" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              if (fileInputRef.current) {
+                fileInputRef.current.accept = "video/*";
+                fileInputRef.current.click();
+                fileInputRef.current.accept = "image/*,video/*";
+              }
+            }}
+            disabled={uploading || !!mediaFile}
+          >
+            <Video className="h-5 w-5 text-primary" />
           </Button>
           <EmojiPicker onEmojiSelect={(emoji) => setContent(content + emoji)} />
           <span className={`text-sm ${content.length > 260 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
             {content.length}/280
           </span>
         </div>
-        <Button type="submit" disabled={loading || !content.trim() || content.length > 280}>
-          {loading ? "שולח..." : "פרסם"}
+        <Button type="submit" disabled={loading || uploading || !content.trim() || content.length > 280}>
+          {loading || uploading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin ml-2" />
+              {uploading ? "מעלה..." : "שולח..."}
+            </>
+          ) : (
+            "פרסם"
+          )}
         </Button>
       </div>
     </form>

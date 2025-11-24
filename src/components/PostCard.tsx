@@ -20,6 +20,7 @@ interface PostCardProps {
   time: string;
   content: string;
   image?: string;
+  mediaType?: string | null;
   verified?: boolean;
   userId: string;
   currentUserId?: string;
@@ -37,6 +38,7 @@ export const PostCard = ({
   time,
   content,
   image,
+  mediaType,
   verified = false,
   userId,
   currentUserId,
@@ -305,7 +307,22 @@ export const PostCard = ({
             )}
           </div>
           <p className="mt-1 whitespace-pre-wrap text-sm md:text-base">{renderContent(content)}</p>
-          {image && <img src={image} alt="Post" className="mt-2 md:mt-3 rounded-2xl max-w-full border border-border" />}
+          {image && (
+            <div className="mt-2 md:mt-3 rounded-2xl overflow-hidden border border-border">
+              {mediaType === "video" ? (
+                <video
+                  src={image}
+                  controls
+                  className="w-full max-h-[500px] object-cover"
+                  playsInline
+                >
+                  הדפדפן שלך לא תומך בתגית וידאו.
+                </video>
+              ) : (
+                <img src={image} alt="Post" className="w-full" />
+              )}
+            </div>
+          )}
           <div className="flex justify-between mt-2 md:mt-3 text-muted-foreground">
             <Button variant="ghost" size="sm" onClick={() => setShowComments(!showComments)} className="h-8 px-2 md:px-3"><MessageCircle className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" /><span className="text-xs md:text-sm">{commentsCount}</span></Button>
             <Button variant="ghost" size="sm" onClick={() => setShowRetweetDialog(true)} className={`h-8 px-2 md:px-3 ${isRetweeted ? "text-green-500" : ""}`}><Repeat2 className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" /><span className="text-xs md:text-sm">{retweetsCount}</span></Button>

@@ -2,6 +2,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { Feed } from "@/components/Feed";
 import { RightSidebar } from "@/components/RightSidebar";
 import { MobileNav } from "@/components/MobileNav";
+import { FloatingPostButton } from "@/components/FloatingPostButton";
 
 const Index = () => {
   return (
@@ -15,6 +16,7 @@ const Index = () => {
           <RightSidebar />
         </div>
       </div>
+      <FloatingPostButton />
       <MobileNav />
     </>
   );

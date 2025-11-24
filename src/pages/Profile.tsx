@@ -378,7 +378,7 @@ export default function Profile() {
                 value="replies"
                 className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent text-sm md:text-base py-3"
               >
-                תגובות
+                תגובות {comments.length > 0 && `(${comments.length})`}
               </TabsTrigger>
               <TabsTrigger
                 value="media"

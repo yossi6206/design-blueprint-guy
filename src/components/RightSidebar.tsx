@@ -49,12 +49,12 @@ export const RightSidebar = () => {
         </div>
       </div>
 
-      <div className="bg-muted rounded-2xl p-4 mb-4">
+      <div className="bg-muted/50 rounded-2xl p-4 mb-4 border border-border/50 backdrop-blur-sm">
         <h2 className="text-xl font-bold mb-2">הירשם לפרימיום</h2>
-        <p className="text-sm mb-3">
+        <p className="text-sm mb-3 text-muted-foreground">
           הירשם כדי לפתוח תכונות חדשות ואם כשיר, לקבל חלק מהכנסות הפרסום.
         </p>
-        <Button className="rounded-full font-bold bg-primary hover:bg-hover-primary">
+        <Button className="rounded-full font-bold bg-gradient-primary hover:opacity-90 transition-all text-white shadow-sm">
           הירשם
         </Button>
       </div>

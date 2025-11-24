@@ -48,15 +48,17 @@ export const MobileNav = () => {
   return (
     <>
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 pb-safe">
-        {/* Post Button */}
-        <div className="px-3 pt-3 pb-2 border-b border-border">
-          <Button
-            onClick={() => setIsPostDialogOpen(true)}
-            className="w-full h-11 rounded-full bg-foreground text-background hover:bg-foreground/90 font-bold text-base shadow-sm"
-          >
-            פוסט חדש
-          </Button>
-        </div>
+        {/* Post Button - Only show on home page */}
+        {location.pathname === "/" && (
+          <div className="px-3 pt-3 pb-2 border-b border-border">
+            <Button
+              onClick={() => setIsPostDialogOpen(true)}
+              className="w-full h-11 rounded-full bg-foreground text-background hover:bg-foreground/90 font-bold text-base shadow-sm"
+            >
+              פוסט חדש
+            </Button>
+          </div>
+        )}
         
         {/* Navigation Items */}
         <div className="flex justify-around items-center h-16">

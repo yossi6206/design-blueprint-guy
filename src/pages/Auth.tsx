@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Twitter, BadgeCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import twitterLogo from "@/assets/twitter-logo.jpg";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();

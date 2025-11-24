@@ -67,6 +67,7 @@ export default function Profile() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [media, setMedia] = useState<Media[]>([]);
   const [comments, setComments] = useState<UserComment[]>([]);
+  const [likedPosts, setLikedPosts] = useState<Post[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
@@ -146,6 +147,26 @@ export default function Profile() {
         }));
         
         setComments(transformedComments);
+
+        // Fetch liked posts
+        const { data: likesData, error: likesError } = await supabase
+          .from("likes")
+          .select(`
+            created_at,
+            posts!inner(*)
+          `)
+          .eq("user_id", profileData.id)
+          .order("created_at", { ascending: false });
+
+        if (likesError) throw likesError;
+        
+        // Transform the data to match our interface
+        const transformedLikes = (likesData || []).map((like: any) => ({
+          ...like.posts,
+          liked_at: like.created_at
+        }));
+        
+        setLikedPosts(transformedLikes);
 
         // Check if current user follows this profile
         if (currentUser && currentUser.id !== profileData.id) {
@@ -386,6 +407,12 @@ export default function Profile() {
               >
                 מדיה {media.length > 0 && `(${media.length})`}
               </TabsTrigger>
+              <TabsTrigger
+                value="likes"
+                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent text-sm md:text-base py-3"
+              >
+                לייקים {likedPosts.length > 0 && `(${likedPosts.length})`}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="posts" className="mt-0">
@@ -495,6 +522,29 @@ export default function Profile() {
                     </div>
                   ))}
                 </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="likes" className="mt-0">
+              {likedPosts.length === 0 ? (
+                <div className="p-6 md:p-8 text-center text-sm md:text-base text-muted-foreground">
+                  אין לייקים עדיין
+                </div>
+              ) : (
+                likedPosts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    postId={post.id}
+                    author={post.author_name}
+                    handle={post.author_handle}
+                    time={new Date(post.created_at).toLocaleDateString("he-IL")}
+                    content={post.content}
+                    image={post.image || undefined}
+                    mediaType={post.media_type}
+                    userId={post.user_id}
+                    currentUserId={currentUser?.id}
+                  />
+                ))
               )}
             </TabsContent>
           </Tabs>

@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Link2, MapPin, Calendar, MoreHorizontal, BadgeCheck } from "lucide-react";
 import { PostCard } from "@/components/PostCard";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
+import { Sidebar } from "@/components/Sidebar";
+import { RightSidebar } from "@/components/RightSidebar";
 import { toast } from "sonner";
 
 interface Profile {
@@ -173,6 +175,7 @@ export default function Profile() {
 
   return (
     <div className="flex min-h-screen bg-background justify-center">
+      <Sidebar />
       <div className="w-full max-w-2xl border-x border-border">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border p-4">
@@ -356,6 +359,7 @@ export default function Profile() {
           </TabsContent>
         </Tabs>
       </div>
+      <RightSidebar />
     </div>
   );
 }

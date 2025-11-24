@@ -50,6 +50,20 @@ const Auth = () => {
           },
         });
         if (error) throw error;
+        
+        // Send welcome email
+        try {
+          await supabase.functions.invoke('send-welcome-email', {
+            body: {
+              email,
+              userName: name || 'משתמש חדש',
+            },
+          });
+        } catch (emailError) {
+          console.error("Failed to send welcome email:", emailError);
+          // Don't fail the signup if email fails
+        }
+        
         toast({
           title: "נרשמת בהצלחה!",
           description: "כעת תוכל להתחבר",

@@ -14,6 +14,7 @@ interface Post {
   author_handle: string;
   content: string;
   image?: string;
+  media_type?: string | null;
   created_at: string;
   user_id: string;
   engagement_score?: number;
@@ -234,6 +235,7 @@ export const Feed = () => {
               time={getTimeAgo(post.created_at)}
               content={post.content}
               image={post.image}
+              mediaType={post.media_type}
               userId={post.user_id}
               currentUserId={currentUserId}
               isBoosted={post.is_boosted}
@@ -261,6 +263,7 @@ export const Feed = () => {
                 time={getTimeAgo(post.created_at)}
                 content={post.content}
                 image={post.image}
+                mediaType={post.media_type}
                 userId={post.user_id}
                 currentUserId={currentUserId}
                 isBoosted={post.is_boosted}

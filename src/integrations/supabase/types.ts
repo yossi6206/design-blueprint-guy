@@ -647,6 +647,7 @@ export type Database = {
           id: string
           image: string | null
           is_retweet: boolean | null
+          media_type: string | null
           original_post_id: string | null
           updated_at: string
           user_id: string
@@ -659,6 +660,7 @@ export type Database = {
           id?: string
           image?: string | null
           is_retweet?: boolean | null
+          media_type?: string | null
           original_post_id?: string | null
           updated_at?: string
           user_id: string
@@ -671,6 +673,7 @@ export type Database = {
           id?: string
           image?: string | null
           is_retweet?: boolean | null
+          media_type?: string | null
           original_post_id?: string | null
           updated_at?: string
           user_id?: string

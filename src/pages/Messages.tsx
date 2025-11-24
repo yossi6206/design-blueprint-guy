@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ConversationsList } from "@/components/messages/ConversationsList";
 import { ChatWindow } from "@/components/messages/ChatWindow";
 import { NewConversationDialog } from "@/components/messages/NewConversationDialog";
+import { MobileNav } from "@/components/MobileNav";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageSquarePlus } from "lucide-react";
 
@@ -70,30 +71,33 @@ const Messages = () => {
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* סרגל צד - רשימת שיחות */}
-      <div
-        className={`${
-          selectedConversationId ? "hidden md:flex" : "flex"
-        } flex-col w-full md:w-80 border-l`}
-      >
-        <div className="border-b p-4 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/")}
-          >
-            <ArrowRight className="h-5 w-5" />
-          </Button>
-          <h2 className="text-xl font-bold">הודעות</h2>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowNewConversation(true)}
-          >
-            <MessageSquarePlus className="h-5 w-5" />
-          </Button>
-        </div>
+    <>
+      <div className="flex h-screen bg-background pb-16 md:pb-0">
+        {/* סרגל צד - רשימת שיחות */}
+        <div
+          className={`${
+            selectedConversationId ? "hidden md:flex" : "flex"
+          } flex-col w-full md:w-80 border-l`}
+        >
+          <div className="border-b p-3 md:p-4 flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/")}
+              className="h-8 w-8 md:h-10 md:w-10"
+            >
+              <ArrowRight className="h-4 w-4 md:h-5 md:w-5" />
+            </Button>
+            <h2 className="text-lg md:text-xl font-bold">הודעות</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowNewConversation(true)}
+              className="h-8 w-8 md:h-10 md:w-10"
+            >
+              <MessageSquarePlus className="h-4 w-4 md:h-5 md:w-5" />
+            </Button>
+          </div>
         
         <ConversationsList
           currentUserId={currentUser.id}
@@ -118,11 +122,11 @@ const Messages = () => {
             onBack={handleBack}
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-center p-8">
+          <div className="flex items-center justify-center h-full text-center p-6 md:p-8">
             <div>
-              <MessageSquarePlus className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-xl font-semibold mb-2">בחר שיחה</h3>
-              <p className="text-muted-foreground">
+              <MessageSquarePlus className="h-12 w-12 md:h-16 md:w-16 mx-auto mb-3 md:mb-4 text-muted-foreground" />
+              <h3 className="text-lg md:text-xl font-semibold mb-2">בחר שיחה</h3>
+              <p className="text-sm md:text-base text-muted-foreground">
                 בחר שיחה מהרשימה או התחל שיחה חדשה
               </p>
             </div>
@@ -136,7 +140,9 @@ const Messages = () => {
         currentUserId={currentUser.id}
         onConversationCreated={handleConversationCreated}
       />
-    </div>
+      </div>
+      <MobileNav />
+    </>
   );
 };
 

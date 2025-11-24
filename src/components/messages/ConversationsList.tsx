@@ -199,9 +199,9 @@ export const ConversationsList = ({
 
   if (conversations.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center p-8">
-        <p className="text-muted-foreground text-lg mb-2">אין שיחות עדיין</p>
-        <p className="text-sm text-muted-foreground">
+      <div className="flex flex-col items-center justify-center h-full text-center p-6 md:p-8">
+        <p className="text-base md:text-lg text-muted-foreground mb-2">אין שיחות עדיין</p>
+        <p className="text-xs md:text-sm text-muted-foreground">
           התחל שיחה חדשה עם משתמשים אחרים
         </p>
       </div>
@@ -210,14 +210,14 @@ export const ConversationsList = ({
 
   return (
     <ScrollArea className="h-full">
-      <div className="space-y-1 p-2">
+      <div className="space-y-1 p-1 md:p-2">
         {conversations.map((conv) => (
           <button
             key={conv.id}
             onClick={() =>
               onSelectConversation(conv.id, conv.other_user)
             }
-            className={`w-full text-right p-4 rounded-lg transition-colors hover:bg-accent ${
+            className={`w-full text-right p-3 md:p-4 rounded-lg transition-colors hover:bg-accent ${
               selectedConversationId === conv.id
                 ? "bg-accent"
                 : conv.unread_count > 0 
@@ -225,8 +225,8 @@ export const ConversationsList = ({
                 : ""
             }`}
           >
-            <div className="flex gap-3 items-start">
-              <Avatar className="h-12 w-12">
+            <div className="flex gap-2 md:gap-3 items-start">
+              <Avatar className="h-10 w-10 md:h-12 md:w-12">
                 <AvatarImage src={conv.other_user.avatar_url || ""} />
                 <AvatarFallback>
                   {conv.other_user.user_name[0]}
@@ -235,15 +235,15 @@ export const ConversationsList = ({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-1">
-                    <span className="font-semibold truncate">
+                    <span className="text-sm md:text-base font-semibold truncate">
                       {conv.other_user.user_name}
                     </span>
                     {conv.other_user.is_verified && (
-                      <BadgeCheck className="h-3.5 w-3.5 text-background fill-primary shrink-0" />
+                      <BadgeCheck className="h-3 w-3 md:h-3.5 md:w-3.5 text-background fill-primary shrink-0" />
                     )}
                   </div>
                   {conv.last_message_at && (
-                    <span className="text-xs text-muted-foreground mr-2">
+                    <span className="text-[10px] md:text-xs text-muted-foreground mr-1 md:mr-2">
                       {formatDistanceToNow(new Date(conv.last_message_at), {
                         addSuffix: true,
                         locale: he,
@@ -252,7 +252,7 @@ export const ConversationsList = ({
                   )}
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <p className={`text-sm truncate ${conv.unread_count > 0 ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
+                  <p className={`text-xs md:text-sm truncate ${conv.unread_count > 0 ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
                     {conv.last_message
                       ? conv.last_message.sender_id === currentUserId
                         ? `את/ה: ${conv.last_message.content}`
@@ -260,7 +260,7 @@ export const ConversationsList = ({
                       : "אין הודעות עדיין"}
                   </p>
                   {conv.unread_count > 0 && (
-                    <span className="bg-primary text-primary-foreground text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5 shrink-0">
+                    <span className="bg-primary text-primary-foreground text-[10px] md:text-xs font-bold rounded-full min-w-[18px] md:min-w-[20px] h-[18px] md:h-5 flex items-center justify-center px-1 md:px-1.5 shrink-0">
                       {conv.unread_count}
                     </span>
                   )}

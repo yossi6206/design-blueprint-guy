@@ -289,44 +289,44 @@ export const ChatWindow = ({
   return (
     <div className="flex flex-col h-full">
       {/* כותרת */}
-      <div className="border-b p-4 flex items-center gap-3">
+      <div className="border-b p-3 md:p-4 flex items-center gap-2 md:gap-3">
         <Button
           variant="ghost"
           size="icon"
           onClick={onBack}
-          className="md:hidden"
+          className="md:hidden h-8 w-8"
         >
-          <ArrowRight className="h-5 w-5" />
+          <ArrowRight className="h-4 w-4" />
         </Button>
-        <Avatar className="h-10 w-10">
+        <Avatar className="h-8 w-8 md:h-10 md:w-10">
           <AvatarImage src={otherUser.avatar_url || ""} />
           <AvatarFallback>{otherUser.user_name[0]}</AvatarFallback>
         </Avatar>
         <div>
-          <h3 className="font-semibold">{otherUser.user_name}</h3>
-          <p className="text-sm text-muted-foreground">@{otherUser.user_handle}</p>
+          <h3 className="text-sm md:text-base font-semibold">{otherUser.user_name}</h3>
+          <p className="text-xs md:text-sm text-muted-foreground">@{otherUser.user_handle}</p>
         </div>
       </div>
 
       {/* חיפוש הודעות */}
-      <div className="border-b p-3">
+      <div className="border-b p-2 md:p-3">
         <div className="relative">
-          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
           <Input
             type="text"
             placeholder="חפש הודעות..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-10"
+            className="pr-9 md:pr-10 text-sm md:text-base h-9 md:h-10"
           />
         </div>
       </div>
 
       {/* הודעות */}
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-        <div className="space-y-4">
+      <ScrollArea className="flex-1 p-3 md:p-4" ref={scrollRef}>
+        <div className="space-y-3 md:space-y-4">
           {filteredMessages.length === 0 && searchQuery ? (
-            <div className="text-center text-muted-foreground py-8">
+            <div className="text-center text-sm md:text-base text-muted-foreground py-8">
               לא נמצאו הודעות התואמות לחיפוש
             </div>
           ) : (
@@ -336,27 +336,27 @@ export const ChatWindow = ({
             return (
               <div
                 key={message.id}
-                className={`flex gap-3 animate-fade-in ${
+                className={`flex gap-2 md:gap-3 animate-fade-in ${
                   isOwn ? "flex-row-reverse" : ""
                 }`}
               >
                 {!isOwn && (
-                  <Avatar className="h-8 w-8">
+                  <Avatar className="h-6 w-6 md:h-8 md:w-8">
                     <AvatarImage src={otherUser.avatar_url || ""} />
                     <AvatarFallback>{otherUser.user_name[0]}</AvatarFallback>
                   </Avatar>
                 )}
                 <div
-                  className={`flex flex-col max-w-[70%] ${
+                  className={`flex flex-col max-w-[75%] md:max-w-[70%] ${
                     isOwn ? "items-end" : "items-start"
                   }`}
                 >
                   {isEditing ? (
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-1 md:gap-2 items-center">
                       <Input
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
-                        className="text-sm"
+                        className="text-xs md:text-sm h-8 md:h-10"
                         autoFocus
                         onKeyDown={(e) => {
                           if (e.key === "Enter" && !e.shiftKey) {
@@ -370,30 +370,30 @@ export const ChatWindow = ({
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-8 w-8"
+                        className="h-7 w-7 md:h-8 md:w-8"
                         onClick={() => handleSaveEdit(message.id)}
                       >
-                        <Check className="h-4 w-4" />
+                        <Check className="h-3 w-3 md:h-4 md:w-4" />
                       </Button>
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-8 w-8"
+                        className="h-7 w-7 md:h-8 md:w-8"
                         onClick={handleCancelEdit}
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-3 w-3 md:h-4 md:w-4" />
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex gap-2 items-start group">
+                    <div className="flex gap-1 md:gap-2 items-start group">
                       <div
-                        className={`rounded-2xl px-4 py-2 ${
+                        className={`rounded-2xl px-3 py-2 md:px-4 ${
                           isOwn
                             ? "bg-primary text-primary-foreground"
                             : "bg-secondary text-secondary-foreground"
                         }`}
                       >
-                        <p className="text-sm break-words">{message.content}</p>
+                        <p className="text-xs md:text-sm break-words">{message.content}</p>
                       </div>
                       {isOwn && (
                         <div className="flex items-center gap-1">
@@ -452,16 +452,16 @@ export const ChatWindow = ({
           
           {/* אינדיקטור הקלדה */}
           {isOtherUserTyping && (
-            <div className="flex gap-3 animate-fade-in">
-              <Avatar className="h-8 w-8">
+            <div className="flex gap-2 md:gap-3 animate-fade-in">
+              <Avatar className="h-6 w-6 md:h-8 md:w-8">
                 <AvatarImage src={otherUser.avatar_url || ""} />
                 <AvatarFallback>{otherUser.user_name[0]}</AvatarFallback>
               </Avatar>
-              <div className="bg-secondary text-secondary-foreground rounded-2xl px-4 py-2">
+              <div className="bg-secondary text-secondary-foreground rounded-2xl px-3 py-2 md:px-4">
                 <div className="flex gap-1">
-                  <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
             </div>

@@ -154,7 +154,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailHtml = createWelcomeEmail(userName);
 
     const emailResponse = await resend.emails.send({
-      from: "ברוכים הבאים <onboarding@resend.dev>",
+      from: "ברוכים הבאים <welcome@twibber.co.il>",
       to: [email],
       subject: "🎉 ברוכים הבאים! ההרשמה הושלמה בהצלחה",
       html: emailHtml,

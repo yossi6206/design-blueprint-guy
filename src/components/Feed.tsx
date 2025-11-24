@@ -186,15 +186,15 @@ export const Feed = () => {
   if (!user) return null;
   
   return (
-    <div className="flex-1 border-r border-border max-w-[600px] w-full h-screen overflow-y-auto">
-      <div className="sticky top-0 bg-background/95 backdrop-blur-md z-10 border-b border-border/50">
+    <div className="flex-1 border-r border-border max-w-[600px] w-full">
+      <div className="sticky top-0 bg-background/80 backdrop-blur-md z-10 border-b border-border">
         <div className="flex justify-between items-center p-3 md:p-4 gap-2">
-          <div className="w-full"></div>
+          <h1 className="text-lg md:text-xl font-bold">הבית</h1>
           <div className="flex items-center gap-1 md:gap-2">
             <div className="md:block hidden">
               <Notifications />
             </div>
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="h-8 w-8 md:h-10 md:w-10 hover:bg-accent/50 transition-colors">
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="h-8 w-8 md:h-10 md:w-10">
               <LogOut className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
           </div>
@@ -203,7 +203,7 @@ export const Feed = () => {
 
       {hasNewPosts && (
         <div 
-          className="sticky top-[57px] z-20 bg-gradient-primary text-white px-4 py-2 text-center cursor-pointer hover:opacity-90 transition-all shadow-md"
+          className="sticky top-[73px] z-20 bg-primary text-primary-foreground px-4 py-2 text-center cursor-pointer hover:bg-primary/90 transition-colors"
           onClick={handleRefreshFeed}
         >
           <p className="text-sm font-medium">יש פוסטים חדשים - לחץ לרענון</p>
@@ -220,9 +220,9 @@ export const Feed = () => {
       />
 
       <Tabs defaultValue="for-you" className="w-full">
-        <TabsList className="w-full grid grid-cols-2 sticky top-[57px] z-10 rounded-none border-b bg-background/95 backdrop-blur-md">
-          <TabsTrigger value="for-you" className="data-[state=active]:border-b-2 data-[state=active]:border-primary">בשבילך</TabsTrigger>
-          <TabsTrigger value="following" className="data-[state=active]:border-b-2 data-[state=active]:border-primary">עוקבים</TabsTrigger>
+        <TabsList className="w-full grid grid-cols-2 sticky top-[73px] z-10 rounded-none border-b">
+          <TabsTrigger value="for-you">בשבילך</TabsTrigger>
+          <TabsTrigger value="following">עוקבים</TabsTrigger>
         </TabsList>
 
         <TabsContent value="for-you" className="mt-0">

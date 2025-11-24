@@ -39,11 +39,19 @@ interface Post {
   user_id: string;
 }
 
+interface Media {
+  id: string;
+  file_url: string;
+  file_type: string;
+  created_at: string;
+}
+
 export default function Profile() {
   const { handle } = useParams<{ handle: string }>();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [media, setMedia] = useState<Media[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
@@ -87,6 +95,16 @@ export default function Profile() {
 
         if (postsError) throw postsError;
         setPosts(postsData || []);
+
+        // Fetch user media
+        const { data: mediaData, error: mediaError } = await supabase
+          .from("media")
+          .select("*")
+          .eq("user_id", profileData.id)
+          .order("created_at", { ascending: false });
+
+        if (mediaError) throw mediaError;
+        setMedia(mediaData || []);
 
         // Check if current user follows this profile
         if (currentUser && currentUser.id !== profileData.id) {
@@ -359,9 +377,38 @@ export default function Profile() {
             </TabsContent>
 
             <TabsContent value="media" className="mt-0">
-              <div className="p-6 md:p-8 text-center text-sm md:text-base text-muted-foreground">
-                אין מדיה עדיין
-              </div>
+              {media.length === 0 ? (
+                <div className="p-6 md:p-8 text-center text-sm md:text-base text-muted-foreground">
+                  אין מדיה עדיין
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-0.5 md:gap-1">
+                  {media.map((item) => (
+                    <div
+                      key={item.id}
+                      className="relative aspect-square bg-muted cursor-pointer hover:opacity-90 transition-opacity overflow-hidden"
+                    >
+                      {item.file_type === "video" ? (
+                        <>
+                          <video
+                            src={item.file_url}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
+                            0:06
+                          </div>
+                        </>
+                      ) : (
+                        <img
+                          src={item.file_url}
+                          alt="Media"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>

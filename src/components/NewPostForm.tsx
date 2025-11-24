@@ -74,7 +74,7 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
     }
   };
 
-  const uploadMedia = async (userId: string): Promise<string | null> => {
+  const uploadMedia = async (userId: string): Promise<{ url: string; fileName: string; fileSize: number } | null> => {
     if (!mediaFile) return null;
 
     setUploading(true);
@@ -108,7 +108,11 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
         .from("post-media")
         .getPublicUrl(fileName);
 
-      return publicUrl;
+      return {
+        url: publicUrl,
+        fileName,
+        fileSize: mediaFile.size
+      };
     } catch (error: any) {
       toast({
         title: "שגיאה בהעלאת קובץ",
@@ -133,13 +137,15 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
 
       // Upload media if exists
       let mediaUrl: string | null = null;
+      let mediaData: { url: string; fileName: string; fileSize: number } | null = null;
       if (mediaFile) {
-        mediaUrl = await uploadMedia(user.id);
-        if (!mediaUrl && mediaFile) {
+        mediaData = await uploadMedia(user.id);
+        if (!mediaData && mediaFile) {
           // Upload failed
           setLoading(false);
           return;
         }
+        mediaUrl = mediaData.url;
       }
 
       const { data: post, error } = await supabase.from("posts").insert({
@@ -152,6 +158,17 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
       }).select().single();
 
       if (error) throw error;
+
+      // Save media record to database
+      if (mediaData && mediaType) {
+        await supabase.from("media").insert({
+          user_id: user.id,
+          file_url: mediaData.url,
+          file_type: mediaType,
+          file_size: mediaData.fileSize,
+          post_id: post.id,
+        });
+      }
 
       // Process hashtags
       const hashtags = extractHashtags(content);

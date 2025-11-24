@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bell } from "lucide-react";
+import { Bell, Heart, MessageCircle, UserPlus, Repeat2, AtSign, Rocket, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -247,8 +247,69 @@ export function Notifications() {
         </div>
         <ScrollArea className="h-[400px]">
           {notifications.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              אין התראות חדשות
+            <div className="p-8 text-center">
+              <div className="flex justify-center mb-4">
+                <div className="h-20 w-20 rounded-full bg-accent/50 flex items-center justify-center">
+                  <Bell className="h-10 w-10 text-muted-foreground" />
+                </div>
+              </div>
+              <h3 className="font-bold text-lg mb-2">אין התראות עדיין</h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                כשמשהו מעניין יקרה, תראה את זה כאן
+              </p>
+              
+              <div className="text-right space-y-3 max-w-sm mx-auto">
+                <p className="text-sm font-semibold text-foreground mb-3">תקבל התראות על:</p>
+                
+                <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <Heart className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
+                  <div className="text-right">
+                    <span className="font-medium text-foreground">לייקים</span> - כשמישהו אוהב את הפוסטים שלך
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <MessageCircle className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
+                  <div className="text-right">
+                    <span className="font-medium text-foreground">תגובות</span> - כשמגיבים לפוסט שלך
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <UserPlus className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
+                  <div className="text-right">
+                    <span className="font-medium text-foreground">עוקבים חדשים</span> - כשמישהו עוקב אחריך
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <Repeat2 className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
+                  <div className="text-right">
+                    <span className="font-medium text-foreground">ריטוויטים</span> - כשמשתפים את הפוסט שלך
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <AtSign className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
+                  <div className="text-right">
+                    <span className="font-medium text-foreground">תיוגים</span> - כשמתייגים אותך בפוסט
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <Rocket className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
+                  <div className="text-right">
+                    <span className="font-medium text-foreground">קידומים</span> - כשמקדמים את הפוסט שלך
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
+                  <div className="text-right">
+                    <span className="font-medium text-foreground">אימותים</span> - עדכונים על בקשות אימות
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             notifications.map((notification) => (

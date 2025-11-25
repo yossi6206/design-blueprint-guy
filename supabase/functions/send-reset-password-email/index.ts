@@ -173,7 +173,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "X. <onboarding@resend.dev>",
+        from: "X. <noreply@twibber.co.il>",
         to: [email],
         subject: "🔐 איפוס סיסמה - X.",
         html,

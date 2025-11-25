@@ -11,6 +11,7 @@ import { BookmarkButton } from "./BookmarkButton";
 import { RetweetDialog } from "./RetweetDialog";
 import { EditPostDialog } from "./EditPostDialog";
 import { DeletePostDialog } from "./DeletePostDialog";
+import { CommentDialog } from "./CommentDialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 
 interface PostCardProps {
@@ -65,6 +66,7 @@ export const PostCard = ({
   const [showRetweetDialog, setShowRetweetDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCommentDialog, setShowCommentDialog] = useState(false);
   const isOwnPost = currentUserId === userId;
 
   useEffect(() => {
@@ -333,7 +335,7 @@ export const PostCard = ({
             )}
           </div>
           <div className="flex justify-between mt-2 md:mt-3 text-muted-foreground">
-            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/post/${postId}`); }} className="h-8 px-2 md:px-3"><MessageCircle className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" /><span className="text-xs md:text-sm">{commentsCount}</span></Button>
+            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setShowCommentDialog(true); }} className="h-8 px-2 md:px-3"><MessageCircle className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" /><span className="text-xs md:text-sm">{commentsCount}</span></Button>
             <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setShowRetweetDialog(true); }} className={`h-8 px-2 md:px-3 ${isRetweeted ? "text-green-500" : ""}`}><Repeat2 className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" /><span className="text-xs md:text-sm">{retweetsCount}</span></Button>
             <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleLike(); }} className={`h-8 px-2 md:px-3 ${isLiked ? "text-pink-500" : ""}`}><Heart className={`h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2 ${isLiked ? "fill-current" : ""}`} /><span className="text-xs md:text-sm">{likesCount}</span></Button>
             <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleBoost(); }} className={`h-8 px-2 md:px-3 ${isBoostedByUser ? "text-primary" : ""}`}><TrendingUp className={`h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2 ${isBoostedByUser ? "fill-current" : ""}`} /><span className="text-xs md:text-sm">{boostsCount}</span></Button>
@@ -353,6 +355,13 @@ export const PostCard = ({
       <RetweetDialog open={showRetweetDialog} onOpenChange={setShowRetweetDialog} postId={postId} originalAuthor={author} originalContent={content} onSuccess={() => fetchRetweets()} />
       <EditPostDialog open={showEditDialog} onOpenChange={setShowEditDialog} postId={postId} currentContent={content} currentImage={image} onSuccess={() => window.location.reload()} />
       <DeletePostDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog} postId={postId} onSuccess={() => window.location.reload()} />
+      <CommentDialog
+        open={showCommentDialog}
+        onOpenChange={setShowCommentDialog}
+        postId={postId}
+        currentUserId={currentUserId || ""}
+        onCommentAdded={() => fetchLikesAndComments()}
+      />
     </div>
   );
 };

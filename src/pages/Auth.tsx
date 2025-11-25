@@ -122,11 +122,9 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const resetLink = `${window.location.origin}/auth?mode=reset`;
-      
-      // Supabase will send the email with token
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: resetLink,
+      // Call edge function to generate token and send styled email
+      const { error } = await supabase.functions.invoke('send-password-reset', {
+        body: { email },
       });
       
       if (error) throw error;

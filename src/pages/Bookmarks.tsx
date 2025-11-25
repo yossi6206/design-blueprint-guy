@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sidebar } from "@/components/Sidebar";
 import { RightSidebar } from "@/components/RightSidebar";
+import { MobileNav } from "@/components/MobileNav";
+import { FloatingPostButton } from "@/components/FloatingPostButton";
 import { PostCard } from "@/components/PostCard";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -53,8 +55,11 @@ export default function Bookmarks() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background justify-center">
-      <Sidebar />
+    <>
+      <div className="flex min-h-screen bg-background justify-center pb-[140px] md:pb-0">
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
       
       <main className="flex-1 max-w-[600px] border-x border-border">
         <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b border-border p-4">
@@ -84,7 +89,12 @@ export default function Bookmarks() {
         )}
       </main>
 
-      <RightSidebar />
-    </div>
+        <div className="hidden lg:block">
+          <RightSidebar />
+        </div>
+      </div>
+      <FloatingPostButton />
+      <MobileNav />
+    </>
   );
 }

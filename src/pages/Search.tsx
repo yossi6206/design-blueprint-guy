@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Sidebar } from "@/components/Sidebar";
 import { RightSidebar } from "@/components/RightSidebar";
 import { MobileNav } from "@/components/MobileNav";
+import { FloatingPostButton } from "@/components/FloatingPostButton";
 import { PostCard } from "@/components/PostCard";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -220,6 +221,7 @@ export default function Search() {
           <RightSidebar />
         </div>
       </div>
+      <FloatingPostButton />
       <MobileNav />
     </>
   );

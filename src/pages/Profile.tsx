@@ -12,6 +12,7 @@ import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { Sidebar } from "@/components/Sidebar";
 import { RightSidebar } from "@/components/RightSidebar";
 import { MobileNav } from "@/components/MobileNav";
+import { FloatingPostButton } from "@/components/FloatingPostButton";
 import { toast } from "sonner";
 
 interface Profile {
@@ -553,6 +554,7 @@ export default function Profile() {
           <RightSidebar />
         </div>
       </div>
+      <FloatingPostButton />
       <MobileNav />
     </>
   );

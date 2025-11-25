@@ -29,6 +29,7 @@ interface PostCardProps {
   initialCommentsCount?: number;
   initialRetweetsCount?: number;
   initialBoostsCount?: number;
+  showComments?: boolean;
 }
 
 export const PostCard = ({
@@ -47,6 +48,7 @@ export const PostCard = ({
   initialCommentsCount = 0,
   initialRetweetsCount = 0,
   initialBoostsCount = 0,
+  showComments = false,
 }: PostCardProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -56,7 +58,6 @@ export const PostCard = ({
   const [retweetsCount, setRetweetsCount] = useState(initialRetweetsCount);
   const [boostsCount, setBoostsCount] = useState(initialBoostsCount);
   const [isBoostedByUser, setIsBoostedByUser] = useState(false);
-  const [showComments, setShowComments] = useState(true);
   const [showAllComments, setShowAllComments] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);

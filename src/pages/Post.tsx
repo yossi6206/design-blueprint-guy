@@ -114,6 +114,7 @@ export default function Post() {
             mediaType={post.media_type}
             userId={post.user_id}
             currentUserId={currentUser?.id}
+            showComments={true}
           />
         </div>
         <div className="hidden lg:block">

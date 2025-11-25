@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Heart } from "lucide-react";
 import { Link } from "react-router-dom";
+import { MentionAutocomplete } from "./MentionAutocomplete";
 
 interface Comment {
   id: string;
@@ -37,6 +38,7 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyingToName, setReplyingToName] = useState<string>("");
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     fetchComments();
@@ -437,14 +439,22 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
               </Button>
             </div>
           )}
-          <Textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder={replyingTo ? `תגובה ל-${replyingToName}...` : "כתוב תגובה..."}
-            className="min-h-[80px] resize-none"
-            disabled={loading}
-            maxLength={280}
-          />
+          <div className="relative">
+            <Textarea
+              ref={textareaRef}
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder={replyingTo ? `תגובה ל-${replyingToName}...` : "כתוב תגובה..."}
+              className="min-h-[80px] resize-none"
+              disabled={loading}
+              maxLength={280}
+            />
+            <MentionAutocomplete
+              textareaRef={textareaRef}
+              value={newComment}
+              onChange={setNewComment}
+            />
+          </div>
           <div className="flex justify-between items-center">
             <span className={`text-sm ${newComment.length > 260 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
               {newComment.length}/280

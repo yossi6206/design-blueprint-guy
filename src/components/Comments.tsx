@@ -381,6 +381,10 @@ export const Comments = ({ postId, currentUserId, onCommentAdded, previewMode = 
                   onClick={() => {
                     setReplyingTo(comment.id);
                     setReplyingToName(comment.author_name);
+                    setTimeout(() => {
+                      textareaRef.current?.focus();
+                      textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
                   }}
                 >
                   הגב
@@ -413,7 +417,7 @@ export const Comments = ({ postId, currentUserId, onCommentAdded, previewMode = 
 
   return (
     <div className="mt-4 space-y-4">
-      {!previewMode && currentUserId && (
+      {currentUserId && (
         <form onSubmit={handleSubmit} className="space-y-2">
           {replyingTo && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground bg-accent/20 p-2 rounded">

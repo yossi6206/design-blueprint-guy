@@ -47,7 +47,7 @@ export const Sidebar = () => {
     { icon: Bell, label: "התראות", path: "/notifications" },
     { icon: MessageSquare, label: "הודעות", path: "/messages" },
     { icon: Bookmark, label: "מועדפים", path: "/bookmarks" },
-    { icon: User, label: "פרופיל", path: userProfile ? `/profile/${userProfile.user_handle}` : "/profile" },
+    { icon: User, label: "פרופיל", path: "/profile" },
   ];
 
   const handleRequestVerification = () => {
@@ -95,40 +95,52 @@ export const Sidebar = () => {
         </nav>
 
         {/* Request Verification Button - only if not verified */}
-        {userProfile && !userProfile.is_verified && (
-          <Button
-            onClick={handleRequestVerification}
-            variant="outline"
-            className="w-full gap-2 border-primary/20 hover:bg-primary/10 mt-4"
-          >
-            <ShieldCheck className="w-4 h-4" />
-            בקש תג מאומת
-          </Button>
-        )}
+        <div className="mt-4" style={{ minHeight: userProfile?.is_verified ? 0 : 40 }}>
+          {userProfile && !userProfile.is_verified && (
+            <Button
+              onClick={handleRequestVerification}
+              variant="outline"
+              className="w-full gap-2 border-primary/20 hover:bg-primary/10"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              בקש תג מאומת
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Profile Button */}
-      {userProfile && (
-        <button
-          onClick={() => navigate(`/profile/${userProfile.user_handle}`)}
-          className="flex items-center gap-3 p-3 rounded-full hover:bg-accent transition-colors w-full mt-auto min-h-[64px]"
-        >
-          <Avatar className="w-10 h-10 flex-shrink-0">
-            <AvatarImage src={userProfile.avatar_url || ""} />
-            <AvatarFallback>{userProfile.user_name[0]}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 text-right min-w-0">
-            <div className="font-bold text-sm truncate flex items-center gap-1">
-              {userProfile.user_name}
-              {userProfile.is_verified && (
-                <BadgeCheck className="h-3.5 w-3.5 text-background fill-primary shrink-0" />
-              )}
+      <div className="mt-auto min-h-[64px]">
+        {userProfile ? (
+          <button
+            onClick={() => navigate(`/profile/${userProfile.user_handle}`)}
+            className="flex items-center gap-3 p-3 rounded-full hover:bg-accent transition-colors w-full"
+          >
+            <Avatar className="w-10 h-10 flex-shrink-0">
+              <AvatarImage src={userProfile.avatar_url || ""} />
+              <AvatarFallback>{userProfile.user_name[0]}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 text-right min-w-0">
+              <div className="font-bold text-sm truncate flex items-center gap-1">
+                {userProfile.user_name}
+                {userProfile.is_verified && (
+                  <BadgeCheck className="h-3.5 w-3.5 text-background fill-primary shrink-0" />
+                )}
+              </div>
+              <div className="text-muted-foreground text-sm truncate">@{userProfile.user_handle}</div>
             </div>
-            <div className="text-muted-foreground text-sm truncate">@{userProfile.user_handle}</div>
+            <MoreHorizontal className="w-5 h-5 flex-shrink-0" />
+          </button>
+        ) : (
+          <div className="flex items-center gap-3 p-3 w-full">
+            <div className="w-10 h-10 rounded-full bg-muted flex-shrink-0 animate-pulse" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 bg-muted rounded animate-pulse" />
+              <div className="h-3 bg-muted rounded w-2/3 animate-pulse" />
+            </div>
           </div>
-          <MoreHorizontal className="w-5 h-5 flex-shrink-0" />
-        </button>
-      )}
+        )}
+      </div>
     </div>
   );
 };

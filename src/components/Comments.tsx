@@ -187,7 +187,7 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
         variant: "destructive",
       });
     } else {
-      // Process mentions in comments
+      // Process mentions in comments (trigger will create notifications automatically)
       const mentions = extractMentions(newComment);
       for (const handle of mentions) {
         const { data: profile } = await supabase
@@ -201,18 +201,6 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
             post_id: postId,
             mentioned_user_id: profile.id,
             mentioned_handle: handle,
-          });
-
-          // Create notification for mentioned user in comment
-          await supabase.from("notifications").insert({
-            user_id: profile.id,
-            actor_id: currentUserId,
-            actor_name: userName,
-            actor_handle: userHandle,
-            type: "mention",
-            post_id: postId,
-            comment_id: comment.id,
-            content: newComment.substring(0, 100),
           });
         }
       }

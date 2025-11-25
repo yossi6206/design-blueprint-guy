@@ -87,6 +87,8 @@ export default function Profile() {
     const fetchProfile = async () => {
       if (!handle) return;
 
+      setLoading(true);
+      
       try {
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
@@ -179,6 +181,8 @@ export default function Profile() {
             .maybeSingle();
 
           setIsFollowing(!!followData);
+        } else {
+          setIsFollowing(false);
         }
 
         // Get followers count

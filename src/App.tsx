@@ -7,23 +7,31 @@ import { Suspense, lazy } from "react";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import Hashtag from "./pages/Hashtag";
-import Followers from "./pages/Followers";
-import Suggestions from "./pages/Suggestions";
-import VerificationRequest from "./pages/VerificationRequest";
-import Notifications from "./pages/Notifications";
 import Post from "./pages/Post";
 import Test from "./Test";
 
-// Lazy load heavy routes
+// Lazy load all secondary routes for faster initial load
 const Profile = lazy(() => import("./pages/Profile"));
 const Search = lazy(() => import("./pages/Search"));
 const Bookmarks = lazy(() => import("./pages/Bookmarks"));
 const Messages = lazy(() => import("./pages/Messages"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const ExperimentDashboard = lazy(() => import("./pages/ExperimentDashboard"));
+const Hashtag = lazy(() => import("./pages/Hashtag"));
+const Followers = lazy(() => import("./pages/Followers"));
+const Suggestions = lazy(() => import("./pages/Suggestions"));
+const VerificationRequest = lazy(() => import("./pages/VerificationRequest"));
+const Notifications = lazy(() => import("./pages/Notifications"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 10, // 10 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -31,7 +39,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen bg-background" />}>
           <Routes>
             <Route path="/test" element={<Test />} />
             <Route path="/" element={<Index />} />

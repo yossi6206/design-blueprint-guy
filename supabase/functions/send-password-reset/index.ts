@@ -32,113 +32,91 @@ const createResetPasswordEmail = (resetLink: string, userEmail: string): string 
       .content {
         padding: 30px 20px !important;
       }
-      .logo {
-        font-size: 36px !important;
-      }
-      .heading {
-        font-size: 24px !important;
-      }
     }
   </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; background-color: #0a0a0a;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%); padding: 40px 20px;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; background-color: #ffffff;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; padding: 60px 20px;">
     <tr>
       <td align="center">
-        <table class="container" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
-          <!-- Logo & Header -->
+        <table class="container" width="500" cellpadding="0" cellspacing="0" style="max-width: 500px; width: 100%;">
+          
+          <!-- Logo -->
           <tr>
             <td align="center" style="padding-bottom: 40px;">
-              <div class="logo" style="font-size: 56px; font-weight: 900; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block; letter-spacing: -2px;">
-                X.
+              <svg width="80" height="65" viewBox="0 0 24 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M23.643 2.937c-.835.37-1.732.62-2.675.733a4.67 4.67 0 0 0 2.048-2.578 9.3 9.3 0 0 1-2.958 1.13 4.66 4.66 0 0 0-7.938 4.25 13.229 13.229 0 0 1-9.602-4.868c-.4.69-.63 1.49-.63 2.342A4.66 4.66 0 0 0 3.96 9.824a4.647 4.647 0 0 1-2.11-.583v.06a4.66 4.66 0 0 0 3.737 4.568 4.692 4.692 0 0 1-2.104.08 4.661 4.661 0 0 0 4.352 3.234 9.348 9.348 0 0 1-5.786 1.995 9.5 9.5 0 0 1-1.112-.065 13.175 13.175 0 0 0 7.14 2.093c8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602a9.47 9.47 0 0 0 2.323-2.41z" fill="url(#gradient)"/>
+                <defs>
+                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </td>
+          </tr>
+          
+          <!-- Heading -->
+          <tr>
+            <td align="center" style="padding-bottom: 32px;">
+              <h1 style="color: #0a0a0a; font-size: 32px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">
+                שחזור סיסמה
+              </h1>
+            </td>
+          </tr>
+          
+          <!-- Content -->
+          <tr>
+            <td align="center" style="padding-bottom: 24px;">
+              <p style="color: #525252; font-size: 16px; line-height: 24px; margin: 0;">
+                שלום! קיבלנו בקשה לאיפוס הסיסמה עבור<br>
+                <strong style="color: #0a0a0a;">${userEmail}</strong>
+              </p>
+            </td>
+          </tr>
+          
+          <!-- Button -->
+          <tr>
+            <td align="center" style="padding-bottom: 32px;">
+              <a href="${resetLink}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 14px 40px; border-radius: 12px; letter-spacing: 0.3px;">
+                שלח קישור לאיפוס
+              </a>
+            </td>
+          </tr>
+          
+          <!-- Link alternative -->
+          <tr>
+            <td align="center" style="padding-bottom: 24px;">
+              <p style="color: #737373; font-size: 14px; line-height: 20px; margin: 0 0 12px 0;">
+                או העתק את הקישור הזה:
+              </p>
+              <div style="background-color: #f5f5f5; border-radius: 8px; padding: 12px; word-break: break-all; direction: ltr;">
+                <a href="${resetLink}" style="color: #667eea; font-size: 12px; text-decoration: none;">${resetLink}</a>
               </div>
             </td>
           </tr>
           
-          <!-- Main Content Card -->
+          <!-- Warning -->
           <tr>
-            <td class="content" style="background: linear-gradient(180deg, #1e1e1e 0%, #1a1a1a 100%); border-radius: 16px; padding: 48px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);">
-              <!-- Icon -->
-              <table width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td align="center" style="padding-bottom: 24px;">
-                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 80px; height: 80px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);">
-                      <span style="color: #ffffff; font-size: 40px;">🔐</span>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-              
-              <h1 class="heading" style="color: #ffffff; font-size: 32px; font-weight: 800; margin: 0 0 24px 0; text-align: center; letter-spacing: -0.5px;">
-                איפוס סיסמה
-              </h1>
-              
-              <p style="color: #e5e5e5; font-size: 16px; line-height: 26px; margin: 0 0 16px 0; text-align: center;">
-                שלום 👋
-              </p>
-              
-              <p style="color: #d4d4d4; font-size: 16px; line-height: 26px; margin: 0 0 32px 0; text-align: center;">
-                קיבלנו בקשה לאיפוס הסיסמה עבור החשבון המשויך ל-<br>
-                <strong style="color: #667eea; font-weight: 600;">${userEmail}</strong>
-              </p>
-              
-              <!-- Primary Button -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 32px 0;">
-                <tr>
-                  <td align="center">
-                    <a href="${resetLink}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; font-size: 18px; font-weight: 700; text-decoration: none; padding: 18px 48px; border-radius: 12px; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); transition: all 0.3s ease; letter-spacing: 0.5px;">
-                      🔑 אפס את הסיסמה שלך
-                    </a>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Divider -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 32px 0;">
-                <tr>
-                  <td>
-                    <div style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);"></div>
-                  </td>
-                </tr>
-              </table>
-              
-              <p style="color: #a3a3a3; font-size: 14px; line-height: 22px; margin: 0 0 16px 0; text-align: center;">
-                או העתק והדבק את הקישור הזה בדפדפן שלך:
-              </p>
-              
-              <!-- Link Box -->
-              <div style="background-color: #0a0a0a; border-radius: 10px; border: 1px solid #2a2a2a; padding: 16px; margin: 0 0 32px 0; word-break: break-all; direction: ltr; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);">
-                <a href="${resetLink}" style="color: #667eea; font-size: 13px; text-decoration: none; display: block; text-align: left;">${resetLink}</a>
-              </div>
-              
-              <!-- Warning Notice -->
-              <div style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%); border-right: 4px solid #f59e0b; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px 0;">
-                <p style="color: #fbbf24; font-size: 14px; margin: 0; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                  <span style="font-size: 20px;">⏰</span>
-                  הקישור תקף למשך שעה אחת בלבד
-                </p>
-              </div>
-              
-              <p style="color: #737373; font-size: 14px; line-height: 22px; margin: 0; text-align: center; padding: 20px 0 0 0; border-top: 1px solid rgba(255, 255, 255, 0.05);">
-                אם לא ביקשת לאפס את הסיסמה שלך, אתה יכול להתעלם מהמייל הזה בבטחה. 
-                <span style="display: block; margin-top: 8px; color: #525252;">🔒 חשבונך מאובטח.</span>
+            <td align="center" style="padding-bottom: 24px;">
+              <p style="color: #a3a3a3; font-size: 13px; line-height: 20px; margin: 0;">
+                הקישור תקף למשך שעה אחת בלבד
               </p>
             </td>
           </tr>
           
           <!-- Footer -->
           <tr>
-            <td style="padding-top: 32px; text-align: center;">
-              <p style="color: #a3a3a3; font-size: 16px; line-height: 24px; margin: 0 0 16px 0; font-weight: 500;">
-                בברכה,<br>
-                <strong style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">צוות X.</strong>
+            <td align="center" style="padding-top: 24px; border-top: 1px solid #e5e5e5;">
+              <p style="color: #a3a3a3; font-size: 13px; line-height: 20px; margin: 0;">
+                אם לא ביקשת לאפס את הסיסמה, אתה יכול להתעלם מהמייל הזה
               </p>
-              
-              <p style="color: #525252; font-size: 12px; line-height: 18px; margin: 16px 0 0 0;">
-                © 2025 X. כל הזכויות שמורות.
+              <p style="color: #d4d4d4; font-size: 12px; margin: 16px 0 0 0;">
+                © 2025 X. כל הזכויות שמורות
               </p>
             </td>
           </tr>
+          
         </table>
       </td>
     </tr>

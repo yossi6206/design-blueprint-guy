@@ -26,6 +26,14 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check hash parameters for recovery token
+    const hash = window.location.hash;
+    if (hash && hash.includes('type=recovery')) {
+      setIsResetPassword(true);
+      setIsForgotPassword(false);
+      setIsSignUp(false);
+    }
+
     // Listen for auth state changes to detect password recovery
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {

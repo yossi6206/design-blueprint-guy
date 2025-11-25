@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Link2, MapPin, Calendar, MoreHorizontal, BadgeCheck } from "lucide-react";
 import { PostCard } from "@/components/PostCard";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
+import { NewPostForm } from "@/components/NewPostForm";
 import { Sidebar } from "@/components/Sidebar";
 import { RightSidebar } from "@/components/RightSidebar";
 import { MobileNav } from "@/components/MobileNav";
@@ -386,6 +387,29 @@ export default function Profile() {
               </div>
             </div>
           </div>
+
+          {/* New Post Form - Only show on own profile */}
+          {isOwnProfile && (
+            <div className="border-b border-border p-3 md:p-4">
+              <NewPostForm
+                onPostCreated={() => {
+                  // Refresh posts after creating
+                  if (profile?.id) {
+                    supabase
+                      .from("posts")
+                      .select("*")
+                      .eq("user_id", profile.id)
+                      .order("created_at", { ascending: false })
+                      .then(({ data }) => {
+                        if (data) setPosts(data);
+                      });
+                  }
+                }}
+                userName={profile.user_name}
+                userHandle={profile.user_handle}
+              />
+            </div>
+          )}
 
           {/* Tabs */}
           <Tabs defaultValue="posts" className="w-full">

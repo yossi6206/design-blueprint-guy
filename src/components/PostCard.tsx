@@ -67,6 +67,7 @@ export const PostCard = ({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showReplyInput, setShowReplyInput] = useState(false);
+  const [showCommentsSection, setShowCommentsSection] = useState(showComments);
   const [replyContent, setReplyContent] = useState("");
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
   const isOwnPost = currentUserId === userId;
@@ -393,39 +394,61 @@ export const PostCard = ({
             )}
           </div>
           <div className="flex justify-between mt-2 md:mt-3 text-muted-foreground">
-            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setShowReplyInput(!showReplyInput); }} className="h-8 px-2 md:px-3"><MessageCircle className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" /><span className="text-xs md:text-sm">{commentsCount}</span></Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                setShowCommentsSection(!showCommentsSection);
+                if (!showCommentsSection) {
+                  setShowReplyInput(true);
+                }
+              }} 
+              className="h-8 px-2 md:px-3"
+            >
+              <MessageCircle className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" />
+              <span className="text-xs md:text-sm">{commentsCount}</span>
+            </Button>
             <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setShowRetweetDialog(true); }} className={`h-8 px-2 md:px-3 ${isRetweeted ? "text-green-500" : ""}`}><Repeat2 className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" /><span className="text-xs md:text-sm">{retweetsCount}</span></Button>
             <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleLike(); }} className={`h-8 px-2 md:px-3 ${isLiked ? "text-pink-500" : ""}`}><Heart className={`h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2 ${isLiked ? "fill-current" : ""}`} /><span className="text-xs md:text-sm">{likesCount}</span></Button>
             <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleBoost(); }} className={`h-8 px-2 md:px-3 ${isBoostedByUser ? "text-primary" : ""}`}><TrendingUp className={`h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2 ${isBoostedByUser ? "fill-current" : ""}`} /><span className="text-xs md:text-sm">{boostsCount}</span></Button>
             <BookmarkButton postId={postId} currentUserId={currentUserId} />
           </div>
-          {showReplyInput && currentUserId && (
-            <form onSubmit={handleReplySubmit} className="mt-3 border-t pt-3">
-              <Textarea
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                placeholder="כתוב תגובה..."
-                className="resize-none text-right"
-                rows={3}
-                disabled={isSubmittingReply}
-                maxLength={280}
-              />
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-sm text-muted-foreground">{replyContent.length}/280</span>
-                <Button type="submit" disabled={isSubmittingReply || !replyContent.trim()} size="sm">
-                  הגב
-                </Button>
-              </div>
-            </form>
-          )}
-          {showComments && (
-            <Comments 
-              postId={postId} 
-              currentUserId={currentUserId} 
-              onCommentAdded={() => setCommentsCount((prev) => prev + 1)} 
-              previewMode={!showAllComments}
-              onShowMore={() => setShowAllComments(true)}
-            />
+          {showCommentsSection && (
+            <>
+              {showReplyInput && currentUserId && (
+                <form onSubmit={handleReplySubmit} className="mt-3 border-t pt-3">
+                  <Textarea
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    placeholder="כתוב תגובה..."
+                    className="resize-none text-right"
+                    rows={3}
+                    disabled={isSubmittingReply}
+                    maxLength={280}
+                  />
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-sm text-muted-foreground">{replyContent.length}/280</span>
+                    <Button type="submit" disabled={isSubmittingReply || !replyContent.trim()} size="sm">
+                      הגב
+                    </Button>
+                  </div>
+                </form>
+              )}
+              {(
+                <Comments 
+                  postId={postId} 
+                  currentUserId={currentUserId} 
+                  onCommentAdded={() => {
+                    setCommentsCount((prev) => prev + 1);
+                    setReplyContent("");
+                    setShowReplyInput(false);
+                  }} 
+                  previewMode={!showAllComments}
+                  onShowMore={() => setShowAllComments(true)}
+                />
+              )}
+            </>
           )}
         </div>
       </div>

@@ -95,7 +95,7 @@ export const Sidebar = () => {
         </nav>
 
         {/* Request Verification Button - only if not verified */}
-        <div className="mt-4" style={{ minHeight: userProfile?.is_verified ? 0 : 40 }}>
+        <div className="mt-4 min-h-[56px]">
           {userProfile && !userProfile.is_verified && (
             <Button
               onClick={handleRequestVerification}

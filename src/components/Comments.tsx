@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Heart } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface Comment {
   id: string;
@@ -141,6 +142,12 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
     }
   };
 
+  const extractMentions = (text: string): string[] => {
+    const mentionRegex = /@(\w+)/g;
+    const matches = text.match(mentionRegex);
+    return matches ? matches.map(mention => mention.substring(1)) : [];
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -162,14 +169,14 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
 
     setLoading(true);
 
-    const { error } = await supabase.from("comments").insert({
+    const { data: comment, error } = await supabase.from("comments").insert({
       post_id: postId,
       user_id: currentUserId,
       content: newComment,
       author_name: userName,
       author_handle: userHandle,
       parent_comment_id: replyingTo,
-    });
+    }).select().single();
 
     if (error) {
       toast({
@@ -178,6 +185,36 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
         variant: "destructive",
       });
     } else {
+      // Process mentions in comments
+      const mentions = extractMentions(newComment);
+      for (const handle of mentions) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("user_handle", handle)
+          .maybeSingle();
+
+        if (profile && comment) {
+          await supabase.from("mentions").insert({
+            post_id: postId,
+            mentioned_user_id: profile.id,
+            mentioned_handle: handle,
+          });
+
+          // Create notification for mentioned user in comment
+          await supabase.from("notifications").insert({
+            user_id: profile.id,
+            actor_id: currentUserId,
+            actor_name: userName,
+            actor_handle: userHandle,
+            type: "mention",
+            post_id: postId,
+            comment_id: comment.id,
+            content: newComment.substring(0, 100),
+          });
+        }
+      }
+
       setNewComment("");
       setReplyingTo(null);
       setReplyingToName("");
@@ -201,6 +238,18 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}ד`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}ש`;
     return `${Math.floor(diffInSeconds / 86400)}י`;
+  };
+
+  const renderContent = (text: string) => {
+    const parts = text.split(/(\s+)/);
+    return parts.map((part, index) => {
+      if (part.startsWith('#')) {
+        return <Link key={index} to={`/hashtag/${part.substring(1)}`} className="text-primary hover:underline">{part}</Link>;
+      } else if (part.startsWith('@')) {
+        return <Link key={index} to={`/profile/${part.substring(1)}`} className="text-primary hover:underline">{part}</Link>;
+      }
+      return part;
+    });
   };
 
   const toggleReplies = (commentId: string) => {
@@ -321,7 +370,7 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
                 </Button>
               )}
             </div>
-            <p className="mt-1 text-sm whitespace-pre-wrap break-words">{comment.content}</p>
+            <p className="mt-1 text-sm whitespace-pre-wrap break-words">{renderContent(comment.content)}</p>
             <div className="flex items-center gap-3 mt-1">
               <Button
                 variant="ghost"

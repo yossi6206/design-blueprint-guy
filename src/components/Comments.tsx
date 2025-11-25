@@ -26,9 +26,11 @@ interface CommentsProps {
   postId: string;
   currentUserId?: string;
   onCommentAdded?: () => void;
+  previewMode?: boolean;
+  onShowMore?: () => void;
 }
 
-export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProps) => {
+export const Comments = ({ postId, currentUserId, onCommentAdded, previewMode = false, onShowMore }: CommentsProps) => {
   const { toast } = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -328,9 +330,9 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
     const hasReplies = comment.replies && comment.replies.length > 0;
     
     return (
-      <div key={comment.id} className={depth > 0 ? "mr-8 relative" : ""}>
+      <div key={comment.id} className={depth > 0 ? "mr-6 relative" : ""}>
         {depth > 0 && (
-          <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-border" />
+          <div className="absolute right-3 top-0 bottom-0 w-[2px] bg-border rounded-full" />
         )}
         <div className={`flex gap-2 p-3 rounded-lg ${depth > 0 ? 'bg-accent/10' : 'bg-accent/20'}`}>
           <Avatar className="w-8 h-8 flex-shrink-0">
@@ -406,9 +408,12 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
     );
   };
 
+  const displayedComments = previewMode ? comments.slice(0, 2) : comments;
+  const hasMoreComments = comments.length > 2;
+
   return (
     <div className="mt-4 space-y-4">
-      {currentUserId && (
+      {!previewMode && currentUserId && (
         <form onSubmit={handleSubmit} className="space-y-2">
           {replyingTo && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground bg-accent/20 p-2 rounded">
@@ -455,8 +460,18 @@ export const Comments = ({ postId, currentUserId, onCommentAdded }: CommentsProp
       )}
 
       <div className="space-y-3">
-        {comments.map((comment) => renderComment(comment, 0))}
+        {displayedComments.map((comment) => renderComment(comment, 0))}
       </div>
+      
+      {previewMode && hasMoreComments && onShowMore && (
+        <Button 
+          variant="ghost" 
+          className="w-full text-primary hover:bg-accent/20"
+          onClick={onShowMore}
+        >
+          הצג עוד תגובות ({comments.length - 2})
+        </Button>
+      )}
     </div>
   );
 };

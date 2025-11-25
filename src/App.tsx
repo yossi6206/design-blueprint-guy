@@ -6,10 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-import Search from "./pages/Search";
-import Bookmarks from "./pages/Bookmarks";
 import Hashtag from "./pages/Hashtag";
 import Followers from "./pages/Followers";
 import Suggestions from "./pages/Suggestions";
@@ -19,6 +16,9 @@ import Post from "./pages/Post";
 import Test from "./Test";
 
 // Lazy load heavy routes
+const Profile = lazy(() => import("./pages/Profile"));
+const Search = lazy(() => import("./pages/Search"));
+const Bookmarks = lazy(() => import("./pages/Bookmarks"));
 const Messages = lazy(() => import("./pages/Messages"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const ExperimentDashboard = lazy(() => import("./pages/ExperimentDashboard"));

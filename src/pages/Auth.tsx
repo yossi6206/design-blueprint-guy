@@ -31,6 +31,16 @@ const Auth = () => {
       setIsForgotPassword(false);
       setIsSignUp(false);
     }
+    
+    // Check if this is a recovery link from Supabase (token in hash)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const type = hashParams.get('type');
+    
+    if (type === 'recovery') {
+      setIsResetPassword(true);
+      setIsForgotPassword(false);
+      setIsSignUp(false);
+    }
   }, [isResetMode]);
 
   const handleAuth = async (e: React.FormEvent) => {

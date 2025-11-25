@@ -26,9 +26,12 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check hash parameters for recovery token
+    // Check if this is a password reset link from URL or hash
+    const searchParams = new URLSearchParams(window.location.search);
     const hash = window.location.hash;
-    if (hash && hash.includes('type=recovery')) {
+    const mode = searchParams.get('mode');
+    
+    if (mode === 'reset' || (hash && hash.includes('type=recovery'))) {
       setIsResetPassword(true);
       setIsForgotPassword(false);
       setIsSignUp(false);

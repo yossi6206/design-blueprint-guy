@@ -1,40 +1,14 @@
-import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Home, Bell, MessageSquare, User, LogOut, MoreHorizontal, Search, Bookmark, ShieldCheck, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-interface Profile {
-  user_name: string;
-  user_handle: string;
-  avatar_url: string | null;
-  is_verified: boolean;
-}
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 export const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [userProfile, setUserProfile] = useState<Profile | null>(null);
-
-  useEffect(() => {
-    fetchUserProfile();
-  }, []);
-
-  const fetchUserProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    if (profile) {
-      setUserProfile(profile);
-    }
-  };
+  const { data: userProfile, isLoading } = useUserProfile();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -96,9 +70,9 @@ export const Sidebar = () => {
 
         {/* Request Verification Button - only if not verified */}
         <div className="mt-4 h-[40px]">
-          {userProfile === null ? (
+          {isLoading ? (
             <div className="h-10 bg-muted rounded animate-pulse" />
-          ) : !userProfile.is_verified ? (
+          ) : userProfile && !userProfile.is_verified ? (
             <Button
               onClick={handleRequestVerification}
               variant="outline"
@@ -113,7 +87,7 @@ export const Sidebar = () => {
 
       {/* Profile Button */}
       <div className="mt-auto h-[64px] flex items-center">
-        {userProfile ? (
+        {!isLoading && userProfile ? (
           <button
             onClick={() => navigate(`/profile/${userProfile.user_handle}`)}
             className="flex items-center gap-3 p-3 rounded-full hover:bg-accent transition-colors w-full"

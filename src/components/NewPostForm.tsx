@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Image, X, Video, Loader2 } from "lucide-react";
 import { EmojiPicker } from "./EmojiPicker";
+import { MentionAutocomplete } from "./MentionAutocomplete";
 
 interface NewPostFormProps {
   onPostCreated: () => void;
@@ -23,6 +24,7 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
   const [uploadProgress, setUploadProgress] = useState(0);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
 
   const extractHashtags = (text: string): string[] => {
@@ -248,13 +250,21 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
 
   return (
     <form onSubmit={handleSubmit} className="border-b border-border p-3 md:p-4">
-      <Textarea
-        placeholder="מה קורה?"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        className="min-h-[80px] md:min-h-[100px] resize-none border-0 focus-visible:ring-0 text-base md:text-lg"
-        maxLength={280}
-      />
+      <div className="relative">
+        <Textarea
+          ref={textareaRef}
+          placeholder="מה קורה?"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          className="min-h-[80px] md:min-h-[100px] resize-none border-0 focus-visible:ring-0 text-base md:text-lg"
+          maxLength={280}
+        />
+        <MentionAutocomplete
+          textareaRef={textareaRef}
+          value={content}
+          onChange={setContent}
+        />
+      </div>
       
       {mediaPreview && (
         <div className="mt-3 space-y-2">

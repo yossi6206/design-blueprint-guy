@@ -227,8 +227,8 @@ const getEmailTemplate = (notification: NotificationData) => {
               <div class="divider"></div>
               
               <div style="text-align: center; margin-top: 30px;">
-                <a href="https://twibber.co.il" class="cta-button">
-                  צפה בפעילות 🚀
+                <a href="${type === 'message' ? 'https://twibber.co.il/messages' : 'https://twibber.co.il'}" class="cta-button">
+                  ${type === 'message' ? 'צפה בהודעות 💬' : 'צפה בפעילות 🚀'}
                 </a>
               </div>
             </div>

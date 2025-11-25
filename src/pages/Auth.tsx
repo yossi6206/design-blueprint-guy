@@ -26,22 +26,19 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (isResetMode) {
-      setIsResetPassword(true);
-      setIsForgotPassword(false);
-      setIsSignUp(false);
-    }
-    
-    // Check if this is a recovery link from Supabase (token in hash)
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const type = hashParams.get('type');
-    
-    if (type === 'recovery') {
-      setIsResetPassword(true);
-      setIsForgotPassword(false);
-      setIsSignUp(false);
-    }
-  }, [isResetMode]);
+    // Listen for auth state changes to detect password recovery
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsResetPassword(true);
+        setIsForgotPassword(false);
+        setIsSignUp(false);
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();

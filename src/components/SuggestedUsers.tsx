@@ -39,14 +39,15 @@ export default function SuggestedUsers({
 
   const fetchSuggestions = async () => {
     try {
-      setLoading(true);
+      // Check authentication first
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
         setSuggestions([]);
-        setLoading(false);
         return;
       }
+
+      setLoading(true);
 
       const { data, error } = await supabase.functions.invoke('suggest-users', {
         body: { limit }

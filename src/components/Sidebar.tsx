@@ -29,7 +29,7 @@ export const Sidebar = () => {
   };
   return (
     <div className="w-[275px] h-screen sticky top-0 flex flex-col px-3 py-2 border-l border-border hidden md:flex">
-      <div className="flex-1">
+      <div className="flex-1 flex flex-col">
         {/* Logo */}
         <div className="mb-2 px-3 py-2 cursor-pointer min-h-[48px] flex items-center" onClick={() => navigate("/")}>
           <svg viewBox="0 0 24 24" className="w-8 h-8 flex-shrink-0">
@@ -44,7 +44,7 @@ export const Sidebar = () => {
         </div>
 
         {/* Navigation */}
-        <nav className="space-y-1">
+        <nav className="space-y-1 flex-1">
           {navItems.map((item) => (
             <button
               key={item.label}

@@ -201,7 +201,7 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
         }
       }
 
-      // Process mentions
+      // Process mentions (trigger will create notifications automatically)
       const mentions = extractMentions(content);
       for (const handle of mentions) {
         const { data: profile } = await supabase
@@ -215,17 +215,6 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
             post_id: post.id,
             mentioned_user_id: profile.id,
             mentioned_handle: handle,
-          });
-
-          // Create notification for mentioned user
-          await supabase.from("notifications").insert({
-            user_id: profile.id,
-            actor_id: user.id,
-            actor_name: userName,
-            actor_handle: userHandle,
-            type: "mention",
-            post_id: post.id,
-            content: content.substring(0, 100),
           });
         }
       }

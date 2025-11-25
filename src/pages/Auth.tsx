@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Twitter, BadgeCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -24,6 +25,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // Check if this is a password reset link from URL or hash
@@ -101,6 +103,8 @@ const Auth = () => {
             throw error;
           }
         } else {
+          // Invalidate user profile query to refresh data immediately
+          await queryClient.invalidateQueries({ queryKey: ["userProfile"] });
           navigate("/");
         }
       }
@@ -199,6 +203,8 @@ const Auth = () => {
         description: "הסיסמה שלך שונתה בהצלחה",
       });
       
+      // Invalidate user profile query to refresh data immediately
+      await queryClient.invalidateQueries({ queryKey: ["userProfile"] });
       navigate("/");
     } catch (error: any) {
       toast({

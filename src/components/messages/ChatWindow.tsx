@@ -81,6 +81,12 @@ export const ChatWindow = ({
           if (newMessage.sender_id !== currentUserId) {
             markAsRead();
             
+            // הצג Toast notification
+            toast({
+              title: "הודעה חדשה",
+              description: `${otherUser.user_name}: ${newMessage.content.slice(0, 50)}${newMessage.content.length > 50 ? '...' : ''}`,
+            });
+            
             // שלח התראה רק אם הטאב לא פעיל
             if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
               const notification = new Notification(`הודעה חדשה מ-${otherUser.user_name}`, {

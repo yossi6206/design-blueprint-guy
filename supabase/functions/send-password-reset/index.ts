@@ -139,10 +139,17 @@ const handler = async (req: Request): Promise<Response> => {
     // Create Supabase admin client
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // Get the origin from request or use a default
+    const origin = req.headers.get('origin') || 'https://design-blueprint-guy.lovable.app';
+    const redirectTo = `${origin}/auth?mode=reset`;
+
     // Generate recovery link with token
     const { data, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'recovery',
       email: email,
+      options: {
+        redirectTo: redirectTo,
+      },
     });
 
     if (linkError) {

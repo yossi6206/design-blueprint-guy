@@ -56,7 +56,8 @@ export const PostCard = ({
   const [retweetsCount, setRetweetsCount] = useState(initialRetweetsCount);
   const [boostsCount, setBoostsCount] = useState(initialBoostsCount);
   const [isBoostedByUser, setIsBoostedByUser] = useState(false);
-  const [showComments, setShowComments] = useState(false);
+  const [showComments, setShowComments] = useState(true);
+  const [showAllComments, setShowAllComments] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isRetweeted, setIsRetweeted] = useState(false);
@@ -331,13 +332,21 @@ export const PostCard = ({
             )}
           </div>
           <div className="flex justify-between mt-2 md:mt-3 text-muted-foreground">
-            <Button variant="ghost" size="sm" onClick={() => setShowComments(!showComments)} className="h-8 px-2 md:px-3"><MessageCircle className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" /><span className="text-xs md:text-sm">{commentsCount}</span></Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate(`/post/${postId}`)} className="h-8 px-2 md:px-3"><MessageCircle className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" /><span className="text-xs md:text-sm">{commentsCount}</span></Button>
             <Button variant="ghost" size="sm" onClick={() => setShowRetweetDialog(true)} className={`h-8 px-2 md:px-3 ${isRetweeted ? "text-green-500" : ""}`}><Repeat2 className="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" /><span className="text-xs md:text-sm">{retweetsCount}</span></Button>
             <Button variant="ghost" size="sm" onClick={handleLike} className={`h-8 px-2 md:px-3 ${isLiked ? "text-pink-500" : ""}`}><Heart className={`h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2 ${isLiked ? "fill-current" : ""}`} /><span className="text-xs md:text-sm">{likesCount}</span></Button>
             <Button variant="ghost" size="sm" onClick={handleBoost} className={`h-8 px-2 md:px-3 ${isBoostedByUser ? "text-primary" : ""}`}><TrendingUp className={`h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2 ${isBoostedByUser ? "fill-current" : ""}`} /><span className="text-xs md:text-sm">{boostsCount}</span></Button>
             <BookmarkButton postId={postId} currentUserId={currentUserId} />
           </div>
-          {showComments && <Comments postId={postId} currentUserId={currentUserId} onCommentAdded={() => setCommentsCount((prev) => prev + 1)} />}
+          {showComments && (
+            <Comments 
+              postId={postId} 
+              currentUserId={currentUserId} 
+              onCommentAdded={() => setCommentsCount((prev) => prev + 1)} 
+              previewMode={!showAllComments}
+              onShowMore={() => setShowAllComments(true)}
+            />
+          )}
         </div>
       </div>
       <RetweetDialog open={showRetweetDialog} onOpenChange={setShowRetweetDialog} postId={postId} originalAuthor={author} originalContent={content} onSuccess={() => fetchRetweets()} />

@@ -12,7 +12,6 @@ import { RetweetDialog } from "./RetweetDialog";
 import { EditPostDialog } from "./EditPostDialog";
 import { DeletePostDialog } from "./DeletePostDialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { Textarea } from "./ui/textarea";
 
 interface PostCardProps {
   postId: string;
@@ -66,10 +65,7 @@ export const PostCard = ({
   const [showRetweetDialog, setShowRetweetDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showReplyInput, setShowReplyInput] = useState(false);
   const [showCommentsSection, setShowCommentsSection] = useState(showComments);
-  const [replyContent, setReplyContent] = useState("");
-  const [isSubmittingReply, setIsSubmittingReply] = useState(false);
   const isOwnPost = currentUserId === userId;
 
   useEffect(() => {
@@ -263,62 +259,6 @@ export const PostCard = ({
     }
   };
 
-  const handleReplySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!replyContent.trim() || !currentUserId) {
-      toast({
-        title: "שגיאה",
-        description: "נא להזין תגובה",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSubmittingReply(true);
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("user_name, user_handle")
-        .eq("id", user.id)
-        .single();
-
-      if (!profile) throw new Error("Profile not found");
-
-      const { error } = await supabase.from("comments").insert({
-        post_id: postId,
-        user_id: currentUserId,
-        content: replyContent.trim(),
-        author_name: profile.user_name,
-        author_handle: profile.user_handle,
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "הצלחה",
-        description: "התגובה נוספה בהצלחה",
-      });
-
-      setReplyContent("");
-      setShowReplyInput(false);
-      fetchLikesAndComments();
-    } catch (error) {
-      console.error("Error posting comment:", error);
-      toast({
-        title: "שגיאה",
-        description: "שליחת התגובה נכשלה",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmittingReply(false);
-    }
-  };
-
   const renderContent = (text: string) => {
     const parts = text.split(/(\s+)/);
     return parts.map((part, index) => {
@@ -400,9 +340,6 @@ export const PostCard = ({
               onClick={(e) => { 
                 e.stopPropagation(); 
                 setShowCommentsSection(!showCommentsSection);
-                if (!showCommentsSection) {
-                  setShowReplyInput(true);
-                }
               }} 
               className="h-8 px-2 md:px-3"
             >
@@ -415,40 +352,15 @@ export const PostCard = ({
             <BookmarkButton postId={postId} currentUserId={currentUserId} />
           </div>
           {showCommentsSection && (
-            <>
-              {showReplyInput && currentUserId && (
-                <form onSubmit={handleReplySubmit} className="mt-3 border-t pt-3">
-                  <Textarea
-                    value={replyContent}
-                    onChange={(e) => setReplyContent(e.target.value)}
-                    placeholder="כתוב תגובה..."
-                    className="resize-none text-right"
-                    rows={3}
-                    disabled={isSubmittingReply}
-                    maxLength={280}
-                  />
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-sm text-muted-foreground">{replyContent.length}/280</span>
-                    <Button type="submit" disabled={isSubmittingReply || !replyContent.trim()} size="sm">
-                      הגב
-                    </Button>
-                  </div>
-                </form>
-              )}
-              {(
-                <Comments 
-                  postId={postId} 
-                  currentUserId={currentUserId} 
-                  onCommentAdded={() => {
-                    setCommentsCount((prev) => prev + 1);
-                    setReplyContent("");
-                    setShowReplyInput(false);
-                  }} 
-                  previewMode={!showAllComments}
-                  onShowMore={() => setShowAllComments(true)}
-                />
-              )}
-            </>
+            <Comments 
+              postId={postId} 
+              currentUserId={currentUserId} 
+              onCommentAdded={() => {
+                setCommentsCount((prev) => prev + 1);
+              }} 
+              previewMode={!showAllComments}
+              onShowMore={() => setShowAllComments(true)}
+            />
           )}
         </div>
       </div>

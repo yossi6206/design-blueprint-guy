@@ -95,22 +95,24 @@ export const Sidebar = () => {
         </nav>
 
         {/* Request Verification Button - only if not verified */}
-        <div className="mt-4 min-h-[56px]">
-          {userProfile && !userProfile.is_verified && (
+        <div className="mt-4 h-[40px]">
+          {userProfile === null ? (
+            <div className="h-10 bg-muted rounded animate-pulse" />
+          ) : !userProfile.is_verified ? (
             <Button
               onClick={handleRequestVerification}
               variant="outline"
-              className="w-full gap-2 border-primary/20 hover:bg-primary/10"
+              className="w-full h-10 gap-2 border-primary/20 hover:bg-primary/10"
             >
               <ShieldCheck className="w-4 h-4" />
               בקש תג מאומת
             </Button>
-          )}
+          ) : null}
         </div>
       </div>
 
       {/* Profile Button */}
-      <div className="mt-auto min-h-[64px]">
+      <div className="mt-auto h-[64px] flex items-center">
         {userProfile ? (
           <button
             onClick={() => navigate(`/profile/${userProfile.user_handle}`)}

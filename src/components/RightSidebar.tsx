@@ -37,7 +37,7 @@ export const RightSidebar = () => {
   };
 
   return (
-    <div className="w-[350px] h-screen sticky top-0 px-6 py-2 overflow-y-auto">
+    <div className="w-[350px] h-screen sticky top-0 px-6 py-2 overflow-y-auto scrollbar-hide">
       <div className="mb-4">
         <div className="relative">
           <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />

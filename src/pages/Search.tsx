@@ -56,8 +56,11 @@ export default function Search() {
   useEffect(() => {
     const q = searchParams.get("q") || "";
     setQuery(q);
-    if (q) {
+    if (q.trim()) {
       searchContent(q);
+    } else {
+      setUsers([]);
+      setPosts([]);
     }
   }, [searchParams]);
 
@@ -102,8 +105,23 @@ export default function Search() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+    const trimmedQuery = query.trim();
+    if (trimmedQuery) {
+      navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+    
+    // Auto-search while typing (with debounce effect)
+    if (value.trim()) {
+      navigate(`/search?q=${encodeURIComponent(value)}`);
+    } else {
+      navigate('/search');
+      setUsers([]);
+      setPosts([]);
     }
   };
 
@@ -118,13 +136,13 @@ export default function Search() {
           <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b border-border">
             <form onSubmit={handleSearch} className="p-3 md:p-4">
               <div className="relative">
-                <SearchIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
+                <SearchIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="חפש משתמשים, פוסטים..."
+                  placeholder="חיפוש"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  className="pr-9 md:pr-10 text-sm md:text-base h-9 md:h-10"
+                  onChange={handleInputChange}
+                  className="pr-12 text-base h-12 bg-muted/30 border-muted hover:bg-muted/50 focus:bg-background transition-colors"
                 />
               </div>
             </form>
@@ -144,97 +162,132 @@ export default function Search() {
             </TabsList>
 
             <TabsContent value="all" className="mt-0">
-              {users.length > 0 && (
-                <div className="border-b border-border">
-                  <div className="p-3 md:p-4 text-sm md:text-base font-semibold">משתמשים</div>
-                  {users.slice(0, 3).map((user) => (
-                    <Link
-                      key={user.id}
-                      to={`/profile/${user.user_handle}`}
-                      className="flex items-center gap-2 md:gap-3 p-3 md:p-4 hover:bg-accent transition-colors border-b border-border"
-                    >
-                      <Avatar className="h-10 w-10 md:h-12 md:w-12">
-                        <AvatarImage src={user.avatar_url || ""} />
-                        <AvatarFallback>{user.user_name[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm md:text-base font-semibold truncate">{user.user_name}</span>
-                          {user.is_verified && (
-                            <BadgeCheck className="h-3.5 w-3.5 md:h-4 md:w-4 text-background fill-primary shrink-0" />
-                          )}
-                        </div>
-                        <div className="text-xs md:text-sm text-muted-foreground truncate">@{user.user_handle}</div>
-                        {user.bio && <div className="text-xs md:text-sm mt-1 line-clamp-2">{user.bio}</div>}
-                      </div>
-                    </Link>
-                  ))}
+              {users.length > 0 || posts.length > 0 ? (
+                <>
+                  {users.length > 0 && (
+                    <div className="border-b border-border">
+                      <div className="p-4 text-base font-semibold">משתמשים</div>
+                      {users.slice(0, 3).map((user) => (
+                        <Link
+                          key={user.id}
+                          to={`/profile/${user.user_handle}`}
+                          className="flex items-center gap-3 p-4 hover:bg-accent/50 transition-all border-b border-border"
+                        >
+                          <Avatar className="h-12 w-12">
+                            <AvatarImage src={user.avatar_url || ""} />
+                            <AvatarFallback className="bg-gradient-to-br from-primary to-primary/50 text-primary-foreground">
+                              {user.user_name[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1">
+                              <span className="text-base font-semibold truncate">{user.user_name}</span>
+                              {user.is_verified && (
+                                <BadgeCheck className="h-4 w-4 text-background fill-primary shrink-0" />
+                              )}
+                            </div>
+                            <div className="text-sm text-muted-foreground truncate">@{user.user_handle}</div>
+                            {user.bio && <div className="text-sm mt-1 line-clamp-2 text-foreground/80">{user.bio}</div>}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                  {posts.length > 0 && (
+                    <div>
+                      {users.length > 0 && <div className="p-4 text-base font-semibold">פוסטים</div>}
+                      {posts.slice(0, 5).map((post) => (
+                        <PostCard
+                          key={post.id}
+                          postId={post.id}
+                          author={post.author_name}
+                          handle={post.author_handle}
+                          time={post.created_at}
+                          content={post.content}
+                          image={post.image}
+                          mediaType={post.media_type}
+                          userId={post.user_id}
+                          currentUserId={currentUserId}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : query ? (
+                <div className="p-8 text-center text-muted-foreground">
+                  לא נמצאו תוצאות עבור "{query}"
+                </div>
+              ) : (
+                <div className="p-8 text-center text-muted-foreground">
+                  חפש משתמשים ופוסטים
                 </div>
               )}
-              {posts.slice(0, 5).map((post) => (
-                <PostCard
-                  key={post.id}
-                  postId={post.id}
-                  author={post.author_name}
-                  handle={post.author_handle}
-                  time={post.created_at}
-                  content={post.content}
-                  image={post.image}
-                  mediaType={post.media_type}
-                  userId={post.user_id}
-                  currentUserId={currentUserId}
-                />
-              ))}
             </TabsContent>
 
             <TabsContent value="users" className="mt-0">
-              {users.map((user) => (
-                <Link
-                  key={user.id}
-                  to={`/profile/${user.user_handle}`}
-                  className="flex items-center gap-2 md:gap-3 p-3 md:p-4 hover:bg-accent transition-colors border-b border-border"
-                >
-                  <Avatar className="h-10 w-10 md:h-12 md:w-12">
-                    <AvatarImage src={user.avatar_url || ""} />
-                    <AvatarFallback>{user.user_name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm md:text-base font-semibold truncate">{user.user_name}</span>
-                      {user.is_verified && (
-                        <BadgeCheck className="h-3.5 w-3.5 md:h-4 md:w-4 text-background fill-primary shrink-0" />
-                      )}
+              {users.length > 0 ? (
+                users.map((user) => (
+                  <Link
+                    key={user.id}
+                    to={`/profile/${user.user_handle}`}
+                    className="flex items-center gap-3 p-4 hover:bg-accent/50 transition-all border-b border-border"
+                  >
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={user.avatar_url || ""} />
+                      <AvatarFallback className="bg-gradient-to-br from-primary to-primary/50 text-primary-foreground">
+                        {user.user_name[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1">
+                        <span className="text-base font-semibold truncate">{user.user_name}</span>
+                        {user.is_verified && (
+                          <BadgeCheck className="h-4 w-4 text-background fill-primary shrink-0" />
+                        )}
+                      </div>
+                      <div className="text-sm text-muted-foreground truncate">@{user.user_handle}</div>
+                      {user.bio && <div className="text-sm mt-1 line-clamp-2 text-foreground/80">{user.bio}</div>}
                     </div>
-                    <div className="text-xs md:text-sm text-muted-foreground truncate">@{user.user_handle}</div>
-                    {user.bio && <div className="text-xs md:text-sm mt-1 line-clamp-2">{user.bio}</div>}
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))
+              ) : query ? (
+                <div className="p-8 text-center text-muted-foreground">
+                  לא נמצאו משתמשים עבור "{query}"
+                </div>
+              ) : (
+                <div className="p-8 text-center text-muted-foreground">
+                  חפש משתמשים לפי שם או כינוי
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="posts" className="mt-0">
-              {posts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  postId={post.id}
-                  author={post.author_name}
-                  handle={post.author_handle}
-                  time={post.created_at}
-                  content={post.content}
-                  image={post.image}
-                  mediaType={post.media_type}
-                  userId={post.user_id}
-                  currentUserId={currentUserId}
-                />
-              ))}
+              {posts.length > 0 ? (
+                posts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    postId={post.id}
+                    author={post.author_name}
+                    handle={post.author_handle}
+                    time={post.created_at}
+                    content={post.content}
+                    image={post.image}
+                    mediaType={post.media_type}
+                    userId={post.user_id}
+                    currentUserId={currentUserId}
+                  />
+                ))
+              ) : query ? (
+                <div className="p-8 text-center text-muted-foreground">
+                  לא נמצאו פוסטים עבור "{query}"
+                </div>
+              ) : (
+                <div className="p-8 text-center text-muted-foreground">
+                  חפש פוסטים לפי תוכן
+                </div>
+              )}
             </TabsContent>
           </Tabs>
-
-          {query && users.length === 0 && posts.length === 0 && (
-            <div className="p-6 md:p-8 text-center text-sm md:text-base text-muted-foreground">
-              לא נמצאו תוצאות עבור "{query}"
-            </div>
-          )}
         </main>
 
         <div className="hidden lg:block">

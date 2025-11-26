@@ -1,9 +1,20 @@
 import { Search, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import SuggestedUsers from "./SuggestedUsers";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { BadgeCheck } from "lucide-react";
+
+interface Profile {
+  id: string;
+  user_name: string;
+  user_handle: string;
+  avatar_url: string | null;
+  bio: string | null;
+  is_verified: boolean;
+}
 
 interface TrendingHashtag {
   id: string;
@@ -15,7 +26,56 @@ interface TrendingHashtag {
 export const RightSidebar = () => {
   const [trendingHashtags, setTrendingHashtags] = useState<TrendingHashtag[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Profile[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchTrendingHashtags();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      searchUsers(searchQuery);
+    } else {
+      setSearchResults([]);
+      setShowResults(false);
+    }
+  }, [searchQuery]);
+
+  const searchUsers = async (query: string) => {
+    const { data: usersByName } = await supabase
+      .from("profiles")
+      .select("*")
+      .ilike("user_name", `%${query}%`)
+      .limit(5);
+
+    const { data: usersByHandle } = await supabase
+      .from("profiles")
+      .select("*")
+      .ilike("user_handle", `%${query}%`)
+      .limit(5);
+
+    const allUsers = [...(usersByName || []), ...(usersByHandle || [])];
+    const uniqueUsers = Array.from(
+      new Map(allUsers.map(user => [user.id, user])).values()
+    ).slice(0, 5);
+
+    setSearchResults(uniqueUsers);
+    setShowResults(uniqueUsers.length > 0);
+  };
 
   useEffect(() => {
     fetchTrendingHashtags();
@@ -48,7 +108,7 @@ export const RightSidebar = () => {
 
   return (
     <div className="w-[350px] h-screen sticky top-0 px-6 py-2 overflow-y-auto scrollbar-hide">
-      <div className="mb-4">
+      <div className="mb-4" ref={searchRef}>
         <form onSubmit={handleSearch}>
           <div className="relative">
             <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -57,10 +117,43 @@ export const RightSidebar = () => {
               placeholder="חיפוש משתמשים"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => searchResults.length > 0 && setShowResults(true)}
               className="w-full pr-14 pl-4 py-3 bg-muted rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
         </form>
+        
+        {showResults && searchResults.length > 0 && (
+          <div className="absolute z-50 w-[calc(100%-3rem)] mt-2 bg-background border border-border rounded-2xl shadow-lg overflow-hidden">
+            {searchResults.map((user) => (
+              <Link
+                key={user.id}
+                to={`/profile/${user.user_handle}`}
+                onClick={() => {
+                  setSearchQuery("");
+                  setShowResults(false);
+                }}
+                className="flex items-center gap-3 p-3 hover:bg-accent/50 transition-all border-b border-border last:border-b-0"
+              >
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={user.avatar_url || ""} />
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-primary/50 text-primary-foreground">
+                    {user.user_name[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-semibold truncate">{user.user_name}</span>
+                    {user.is_verified && (
+                      <BadgeCheck className="h-3.5 w-3.5 text-background fill-primary shrink-0" />
+                    )}
+                  </div>
+                  <div className="text-xs text-muted-foreground truncate">@{user.user_handle}</div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="mb-4">

@@ -238,7 +238,7 @@ export const NewPostForm = ({ onPostCreated, userName, userHandle }: NewPostForm
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border-b border-border p-3 md:p-4">
+    <form onSubmit={handleSubmit} className="border-b border-border p-3 md:p-4 bg-gradient-to-r from-[hsl(203,89%,53%)]/[0.02] to-[hsl(270,70%,60%)]/[0.02] hover:from-[hsl(203,89%,53%)]/[0.03] hover:to-[hsl(270,70%,60%)]/[0.03] transition-all duration-300">
       <div className="relative">
         <Textarea
           ref={textareaRef}

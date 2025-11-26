@@ -62,14 +62,32 @@ export default function Search() {
   }, [searchParams]);
 
   const searchContent = async (searchQuery: string) => {
-    // Search users
-    const { data: usersData } = await supabase
+    if (!searchQuery.trim()) {
+      setUsers([]);
+      setPosts([]);
+      return;
+    }
+
+    // Search users - using separate queries to avoid parsing issues
+    const { data: usersByName } = await supabase
       .from("profiles")
       .select("*")
-      .or(`user_name.ilike.%${searchQuery}%,user_handle.ilike.%${searchQuery}%`)
+      .ilike("user_name", `%${searchQuery}%`)
       .limit(20);
 
-    setUsers(usersData || []);
+    const { data: usersByHandle } = await supabase
+      .from("profiles")
+      .select("*")
+      .ilike("user_handle", `%${searchQuery}%`)
+      .limit(20);
+
+    // Combine and deduplicate users
+    const allUsers = [...(usersByName || []), ...(usersByHandle || [])];
+    const uniqueUsers = Array.from(
+      new Map(allUsers.map(user => [user.id, user])).values()
+    ).slice(0, 20);
+
+    setUsers(uniqueUsers);
 
     // Search posts
     const { data: postsData } = await supabase

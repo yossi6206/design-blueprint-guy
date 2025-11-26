@@ -54,9 +54,9 @@ export const RightSidebar = () => {
       </div>
 
       {trendingHashtags.length > 0 && (
-        <div className="bg-muted rounded-2xl p-4 mb-4 border border-primary/10">
+        <div className="bg-muted rounded-2xl p-4 mb-4 border-2 border-transparent bg-gradient-to-br from-[hsl(203,89%,53%)]/5 to-[hsl(270,70%,60%)]/5 hover:border-[hsl(203,89%,53%)]/20 transition-all duration-300">
           <div className="flex items-center gap-2 mb-4">
-            <div className="bg-primary/10 rounded-full p-2">
+            <div className="bg-gradient-to-r from-[hsl(203,89%,53%)]/10 to-[hsl(270,70%,60%)]/10 rounded-full p-2">
               <Hash className="h-5 w-5 text-primary" />
             </div>
             <h2 className="text-xl font-bold">נושאים חמים</h2>

@@ -150,10 +150,12 @@ export default function SuggestedUsers({
   }
 
   return (
-    <div className="bg-card rounded-xl border border-border p-4">
+    <div className="bg-card rounded-xl border-2 border-transparent bg-gradient-to-br from-[hsl(203,89%,53%)]/5 to-[hsl(270,70%,60%)]/5 hover:border-[hsl(203,89%,53%)]/20 transition-all duration-300 p-4">
       {showHeader && (
         <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-          <Users className="h-5 w-5" />
+          <div className="bg-gradient-to-r from-[hsl(203,89%,53%)]/10 to-[hsl(270,70%,60%)]/10 rounded-full p-1.5">
+            <Users className="h-4 w-4 text-primary" />
+          </div>
           אנשים שאולי תכיר
         </h2>
       )}

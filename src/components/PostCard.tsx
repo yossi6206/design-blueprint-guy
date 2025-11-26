@@ -272,10 +272,10 @@ export const PostCard = ({
   };
 
   return (
-    <div className={`border-b border-border p-3 md:p-4 hover:bg-accent/5 transition-colors ${isBoosted ? "bg-primary/5" : ""}`}>
+    <div className={`border-b border-border p-3 md:p-4 hover:bg-accent/5 transition-all duration-300 ${isBoosted ? "bg-gradient-to-r from-[hsl(203,89%,53%)]/5 to-[hsl(270,70%,60%)]/5 border-l-2 border-l-[hsl(203,89%,53%)]" : ""}`}>
       {isBoosted && (
         <div className="mb-2 flex items-center gap-2">
-          <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs">
+          <Badge variant="secondary" className="bg-gradient-to-r from-[hsl(203,89%,53%)]/10 to-[hsl(270,70%,60%)]/10 text-primary border-primary/20 text-xs">
             <TrendingUp className="w-3 h-3 ml-1" />
             פוסט מקודם
           </Badge>

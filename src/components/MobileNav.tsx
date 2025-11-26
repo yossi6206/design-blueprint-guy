@@ -52,7 +52,7 @@ export const MobileNav = () => {
         <div className="px-3 pt-3 pb-2 border-b border-border">
           <Button
             onClick={() => setIsPostDialogOpen(true)}
-            className="w-full h-11 rounded-full bg-foreground text-background hover:bg-foreground/90 font-bold text-base shadow-sm"
+            className="w-full h-11 rounded-full bg-gradient-to-r from-[hsl(203,89%,53%)] to-[hsl(270,70%,60%)] text-white hover:opacity-90 font-bold text-base shadow-sm transition-opacity"
           >
             פוסט חדש
           </Button>
@@ -69,12 +69,35 @@ export const MobileNav = () => {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "flex flex-col items-center justify-center flex-1 h-full transition-colors",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  "flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative",
+                  isActive ? "" : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <Icon className={cn("h-6 w-6", isActive && "fill-primary")} />
-                <span className="text-xs mt-1">{item.label}</span>
+                <Icon 
+                  className="h-6 w-6" 
+                  style={isActive ? {
+                    stroke: 'url(#mobileNavGradient)',
+                    fill: 'none'
+                  } : undefined}
+                />
+                <span 
+                  className={cn(
+                    "text-xs mt-1",
+                    isActive && "bg-gradient-to-r from-[hsl(203,89%,53%)] to-[hsl(270,70%,60%)] text-transparent bg-clip-text font-semibold"
+                  )}
+                >
+                  {item.label}
+                </span>
+                {isActive && (
+                  <svg width="0" height="0" style={{ position: 'absolute' }}>
+                    <defs>
+                      <linearGradient id="mobileNavGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style={{ stopColor: 'hsl(203, 89%, 53%)', stopOpacity: 1 }} />
+                        <stop offset="100%" style={{ stopColor: 'hsl(270, 70%, 60%)', stopOpacity: 1 }} />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                )}
               </Link>
             );
           })}

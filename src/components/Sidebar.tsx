@@ -49,19 +49,35 @@ export const Sidebar = () => {
             <button
               key={item.label}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-5 px-3 py-3 rounded-full transition-colors ${
+              className={`w-full flex items-center gap-5 px-3 py-3 rounded-full transition-all duration-300 ${
                 location.pathname === item.path
-                  ? "font-bold"
+                  ? "font-bold bg-gradient-to-r from-[hsl(203,89%,53%)]/10 to-[hsl(270,70%,60%)]/10"
                   : "hover:bg-accent"
               }`}
             >
-              <item.icon className="w-6 h-6" />
+              <item.icon 
+                className="w-6 h-6" 
+                style={location.pathname === item.path ? {
+                  stroke: 'url(#navGradient)',
+                  fill: 'none'
+                } : undefined}
+              />
               <span className="text-xl">{item.label}</span>
+              {location.pathname === item.path && (
+                <svg width="0" height="0" style={{ position: 'absolute' }}>
+                  <defs>
+                    <linearGradient id="navGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{ stopColor: 'hsl(203, 89%, 53%)', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: 'hsl(270, 70%, 60%)', stopOpacity: 1 }} />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              )}
             </button>
           ))}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-5 px-3 py-3 rounded-full transition-colors hover:bg-accent text-destructive"
+            className="w-full flex items-center gap-5 px-3 py-3 rounded-full transition-colors hover:bg-destructive/10 text-destructive"
           >
             <LogOut className="w-6 h-6" />
             <span className="text-xl">יציאה</span>
@@ -76,10 +92,12 @@ export const Sidebar = () => {
             <Button
               onClick={handleRequestVerification}
               variant="outline"
-              className="w-full h-10 gap-2 border-primary/20 hover:bg-primary/10"
+              className="w-full h-10 gap-2 border-2 border-transparent bg-gradient-to-r from-[hsl(203,89%,53%)]/10 to-[hsl(270,70%,60%)]/10 hover:from-[hsl(203,89%,53%)]/20 hover:to-[hsl(270,70%,60%)]/20 transition-all duration-300"
             >
-              <ShieldCheck className="w-4 h-4" />
-              בקש תג מאומת
+              <ShieldCheck className="w-4 h-4 text-primary" />
+              <span className="bg-gradient-to-r from-[hsl(203,89%,53%)] to-[hsl(270,70%,60%)] text-transparent bg-clip-text font-semibold">
+                בקש תג מאומת
+              </span>
             </Button>
           ) : null}
         </div>

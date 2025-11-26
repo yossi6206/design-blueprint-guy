@@ -54,17 +54,19 @@ export default function Search() {
   }, [navigate]);
 
   useEffect(() => {
-    if (query) {
-      searchContent();
+    const q = searchParams.get("q") || "";
+    setQuery(q);
+    if (q) {
+      searchContent(q);
     }
-  }, [query]);
+  }, [searchParams]);
 
-  const searchContent = async () => {
+  const searchContent = async (searchQuery: string) => {
     // Search users
     const { data: usersData } = await supabase
       .from("profiles")
       .select("*")
-      .or(`user_name.ilike.%${query}%,user_handle.ilike.%${query}%`)
+      .or(`user_name.ilike.%${searchQuery}%,user_handle.ilike.%${searchQuery}%`)
       .limit(20);
 
     setUsers(usersData || []);
@@ -73,7 +75,7 @@ export default function Search() {
     const { data: postsData } = await supabase
       .from("posts")
       .select("*")
-      .ilike("content", `%${query}%`)
+      .ilike("content", `%${searchQuery}%`)
       .order("created_at", { ascending: false })
       .limit(50);
 

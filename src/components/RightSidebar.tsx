@@ -2,7 +2,7 @@ import { Search, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SuggestedUsers from "./SuggestedUsers";
 
 interface TrendingHashtag {
@@ -14,6 +14,8 @@ interface TrendingHashtag {
 
 export const RightSidebar = () => {
   const [trendingHashtags, setTrendingHashtags] = useState<TrendingHashtag[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchTrendingHashtags();
@@ -36,17 +38,29 @@ export const RightSidebar = () => {
     }
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}&tab=users`);
+      setSearchQuery("");
+    }
+  };
+
   return (
     <div className="w-[350px] h-screen sticky top-0 px-6 py-2 overflow-y-auto scrollbar-hide">
       <div className="mb-4">
-        <div className="relative">
-          <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="חיפוש"
-            className="w-full pr-14 pl-4 py-3 bg-muted rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+        <form onSubmit={handleSearch}>
+          <div className="relative">
+            <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="חיפוש משתמשים"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pr-14 pl-4 py-3 bg-muted rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        </form>
       </div>
 
       <div className="mb-4">

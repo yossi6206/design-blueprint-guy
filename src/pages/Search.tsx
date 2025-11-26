@@ -40,6 +40,7 @@ export default function Search() {
   const [users, setUsers] = useState<Profile[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string>();
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "all");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -55,7 +56,9 @@ export default function Search() {
 
   useEffect(() => {
     const q = searchParams.get("q") || "";
+    const tab = searchParams.get("tab") || "all";
     setQuery(q);
+    setActiveTab(tab);
     if (q.trim()) {
       searchContent(q);
     } else {
@@ -148,7 +151,7 @@ export default function Search() {
             </form>
           </div>
 
-          <Tabs defaultValue="all" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent h-auto p-0">
               <TabsTrigger value="all" className="flex-1 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary text-sm md:text-base py-3">
                 הכל
